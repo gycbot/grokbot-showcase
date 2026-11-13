@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#22181A">
+<title>盒里的一句 · 周予安与梁清和</title>
+<meta name="description" content="一枚可以刻上名字和日期的信物，四段可以替换的短句。">
+<link rel="preload" href="assets/fonts/NotoSerifSC-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css">
+<script>document.documentElement.className += " js";</script>
+<script src="assets/vendor/gsap.min.js" defer></script>
+<script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+<script src="assets/vendor/three.min.js" defer></script>
+<script src="config.js" defer></script>
+<script src="assets/js/scene.js" defer></script>
+</head>
+<body data-tone="0">
+<a class="skip" href="#ch-1">跳到正文</a>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="glow" aria-hidden="true"></div>
+<div class="shade" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="top">
+  <p class="top-names"><span data-bind="nameA">周予安</span><i aria-hidden="true">·</i><span data-bind="nameB">梁清和</span></p>
+  <p class="top-year" data-bind="years">2018 — 2026</p>
+</header>
+
+<main class="story" id="story">
+
+  <section class="chapter hero" id="top" data-tone="0" aria-labelledby="heroTitle">
+    <div class="copy">
+      <p class="eyebrow" data-bind="eyebrow">A KEEPSAKE IN FOUR CHAPTERS</p>
+      <h1 class="hero-title" id="heroTitle" data-bind="title">盒里的一句</h1>
+      <p class="hero-line" data-bind="heroLine">有些话不写在纸上。</p>
+      <a class="cue" href="#ch-1" aria-label="往下看">
+        <span>打开</span><i aria-hidden="true"></i>
+      </a>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch-1" data-tone="1" data-chapter="0" aria-labelledby="t-0">
+    <div class="copy">
+      <p class="cno"><span class="cno-no" data-bind="no0">01</span><span class="cno-label" data-bind="label0">盒盖</span></p>
+      <h2 data-bind="title0" id="t-0">两个名字，一场雨</h2>
+      <p class="body" data-bind="body0">盒盖上刻着两个名字，中间隔一个很小的点。下面的年份从 2018 开始，没写结束。边角有一道细痕，是那年搬家时磕的。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch-2" data-tone="2" data-chapter="1" aria-labelledby="t-1">
+    <div class="copy">
+      <p class="cno"><span class="cno-no" data-bind="no1">02</span><span class="cno-label" data-bind="label1">打开</span></p>
+      <h2 data-bind="title1" id="t-1">里面比外面窄</h2>
+      <p class="body" data-bind="body1">内衬是磨砂的，字很小，要凑近看。打开盒子，光会先落在那一行上，再照到别处。</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch-3" data-tone="3" data-chapter="2" aria-labelledby="t-2">
+    <div class="copy">
+      <p class="cno"><span class="cno-no" data-bind="no2">03</span><span class="cno-label" data-bind="label2">一句话</span></p>
+      <h2 data-bind="title2" id="t-2">把伞偏向你</h2>
+      <p class="body" data-bind="body2">盒子里只有一句，没有落款，也没有日期。看得懂的人自然知道是谁写的。看不懂的人，会以为是一句普通的提醒。</p>
+      <p class="inside-quote"><span aria-hidden="true">“</span><span data-bind="inside">把伞偏向你那一侧。</span><span aria-hidden="true">”</span></p>
+    </div>
+  </section>
+
+  <section class="chapter last" id="ch-4" data-tone="4" data-chapter="3" aria-labelledby="t-3">
+    <div class="copy">
+      <p class="cno"><span class="cno-no" data-bind="no3">04</span><span class="cno-label" data-bind="label3">合上</span></p>
+      <h2 data-bind="title3" id="t-3">合上也是一句话</h2>
+      <p class="body" data-bind="body3">盒子合上，声音很轻。像把一句话放回原处。</p>
+
+      <figure class="memento">
+        <img data-bind="photo" src="photos/01.jpg" alt="雨夜的候车亭与一把红伞" width="1152" height="1440">
+        <figcaption data-bind="photoCaption">2018.06.17 · 候车亭</figcaption>
+      </figure>
+
+      <p class="closing" data-bind="closing">下次下雨，再往你那边偏一点。</p>
+      <div class="actions">
+        <a class="btn" href="#top">从头再看</a>
+        <span class="offline">双击 index.html 打开 · 无需联网</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="chapter-nav" aria-label="章节">
+  <div class="nav-line" aria-hidden="true"><i id="navProgress"></i></div>
+  <ol>
+    <li><button type="button" data-go="0" aria-label="第 1 章：盒盖"><span>01</span><em>盒盖</em></button></li>
+    <li><button type="button" data-go="1" aria-label="第 2 章：打开"><span>02</span><em>打开</em></button></li>
+    <li><button type="button" data-go="2" aria-label="第 3 章：一句话"><span>03</span><em>一句话</em></button></li>
+    <li><button type="button" data-go="3" aria-label="第 4 章：合上"><span>04</span><em>合上</em></button></li>
+  </ol>
+</nav>
+
+<div class="fallback" id="fallback" hidden>
+  <p>这台设备的浏览器没有启动 WebGL。信物的三维部分已换成静态说明，文字与照片仍可完整阅读。</p>
+</div>
+
+<noscript>
+  <div class="ns">
+    <h2>盒里的一句</h2>
+    <p>周予安 · 梁清和 · 2018 — 2026</p>
+    <p>有些话不写在纸上。盒盖上刻着两个名字，里面只有一句：把伞偏向你那一侧。</p>
+    <p>本页需要开启 JavaScript 才能看到三维信物。开启后，用浏览器直接打开本地的 index.html 即可，不需要联网。</p>
+    <img src="photos/01.jpg" alt="雨夜的候车亭与一把红伞" width="300" height="375">
+  </div>
+</noscript>
+
+</body>
+</html>

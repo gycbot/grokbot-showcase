@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3EBE0">
+<title>把伞偏向你 · 周予安与梁清和</title>
+<meta name="description" content="一份可以换成你们自己的名字、日期和照片的纪念页。">
+<link rel="preload" href="assets/fonts/SourceSerif4-Semibold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/NotoSerifSC-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css">
+<script>document.documentElement.className += " js";</script>
+<script src="assets/vendor/gsap.min.js" defer></script>
+<script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+<script src="config.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#chapters">跳到照片章节</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="top-progress" aria-hidden="true"><i id="topProgress"></i></div>
+
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="回到开头">
+    <span data-bind="shortA">予安</span><span class="brand-x" aria-hidden="true">·</span><span data-bind="shortB">清和</span>
+  </a>
+  <button class="index-btn" id="indexBtn" aria-expanded="false" aria-controls="indexDrawer">
+    <span>目录</span>
+    <span class="index-count" id="indexCount">08</span>
+  </button>
+</header>
+
+<!-- 目录抽屉 -->
+<div class="drawer" id="indexDrawer" role="dialog" aria-modal="true" aria-label="章节目录" hidden>
+  <div class="drawer-head">
+    <p class="drawer-title">这一页有 <span id="drawerCount">8</span> 个日期</p>
+    <button class="drawer-close" id="drawerClose" aria-label="关闭目录"><span aria-hidden="true">×</span></button>
+  </div>
+  <ol class="drawer-list" id="drawerList"></ol>
+  <div class="drawer-foot">
+    <p>照片、名字、日期都在 <code>config.js</code> 里。</p>
+  </div>
+</div>
+
+<main id="main">
+
+  <!-- 01 开场 -->
+  <section class="hero" id="top">
+    <p class="eyebrow">
+      <span class="eyebrow-dot" aria-hidden="true"></span>
+      一份纪念 · <span data-bind="years">2018 — 2026</span>
+    </p>
+
+    <div class="hero-type">
+      <h1 class="name name-a" aria-label="周予安"><span data-bind="nameA">周予安</span></h1>
+      <span class="amp" aria-hidden="true">与</span>
+      <h1 class="name name-b" aria-label="梁清和"><span data-bind="nameB">梁清和</span></h1>
+    </div>
+
+    <p class="hero-hook" data-bind="hook">把伞偏向你那一侧，已经八年。</p>
+    <p class="hero-sub" data-bind="hookSub">不是誓言。是每次下雨都会做的事。</p>
+
+    <svg class="umbrella" viewBox="0 0 250 230" fill="none" aria-hidden="true">
+      <path class="u-canopy" d="M9 86C36 20 214 20 241 86C222 73 203 73 184 86C165 73 146 73 127 86C108 73 89 73 70 86C51 73 32 73 9 86Z"/>
+      <path class="u-rib" d="M125 24V86M125 24L64 86M125 24L186 86M125 24L92 86M125 24L158 86"/>
+      <path class="u-shaft" d="M125 26V196C125 210 113 216 102 212C91 208 88 197 93 189"/>
+    </svg>
+
+    <div class="hero-foot">
+      <p class="hero-place">
+        <span class="label">相识</span>
+        <span data-bind="metPlace">夜雨里的末班车候车亭</span>
+      </p>
+      <a class="scroll-cue" href="#origin" aria-label="往下读">
+        <span>往下读</span><i aria-hidden="true"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- 02 日期 -->
+  <section class="origin" id="origin">
+    <p class="kicker"><span>01</span> 相识</p>
+    <div class="date-big" id="dateBig" aria-label="2018年6月17日">
+      <span class="dg">2</span><span class="dg">0</span><span class="dg">1</span><span class="dg">8</span>
+      <span class="date-dot" aria-hidden="true"></span>
+      <span class="dg">0</span><span class="dg">6</span>
+      <span class="date-dot" aria-hidden="true"></span>
+      <span class="dg">1</span><span class="dg">7</span>
+    </div>
+    <div class="origin-row">
+      <p class="origin-place" data-bind="metPlace">夜雨里的末班车候车亭</p>
+      <p class="origin-note" data-bind="metNote">末班车晚了十七分钟。</p>
+    </div>
+  </section>
+
+  <!-- 03 折信（桌面钉住展开） -->
+  <section class="fold" id="fold" aria-label="信的一折">
+    <div class="fold-stage">
+      <div class="wing wing-l" aria-hidden="true"><span>2018</span></div>
+      <div class="fold-inner">
+        <p class="fold-kicker">一封折过三次的信</p>
+        <p class="fold-line">那天之后，<br><em>日子</em>有了另一种算法。</p>
+        <p class="fold-foot">按年份数，也按一起淋过的雨数。</p>
+      </div>
+      <div class="wing wing-r" aria-hidden="true"><span>2026</span></div>
+    </div>
+    <p class="fold-hint" aria-hidden="true">向下展开</p>
+  </section>
+
+  <!-- 04 照片章节 -->
+  <section class="chapters" id="chapters" aria-label="照片章节">
+    <div class="chapters-head">
+      <p class="kicker"><span>02</span> 一些日期</p>
+      <p class="chapters-note">照片由插画绘制，人物没有脸。<br>换成你们的照片时，建议竖图 4:5。</p>
+    </div>
+    <div class="chapter-list" id="chapterList"></div>
+    <svg class="thread" id="thread" aria-hidden="true"></svg>
+  </section>
+
+  <!-- 05 情书 -->
+  <section class="letter" id="letter" aria-labelledby="letterTitle">
+    <p class="kicker"><span>03</span> 一封短信</p>
+    <h2 class="letter-title" id="letterTitle">写给 <span data-bind="shortB">清和</span></h2>
+    <div class="letter-body" id="letterBody"></div>
+    <div class="letter-sign">
+      <div class="seal" aria-hidden="true"><span data-bind="seal">安</span></div>
+      <p><span data-bind="signature">予安</span><br><time data-bind="letterDate">2026.06.17</time></p>
+    </div>
+  </section>
+
+  <!-- 06 收束 -->
+  <section class="coda" id="coda">
+    <p class="coda-line" data-bind="closing">这一页没有结尾。
+下次下雨，再往你那边偏一点。</p>
+    <div class="coda-actions">
+      <button class="btn" id="printBtn" type="button">打印这一页</button>
+      <a class="btn btn-ghost" href="#top">回到开头</a>
+    </div>
+    <p class="coda-meta">自托管字体 / 无 CDN / 双击 index.html 即可打开</p>
+  </section>
+
+</main>
+
+<nav class="rail" id="rail" aria-label="章节进度"></nav>
+
+<!-- 无脚本时仍能读完的一版 -->
+<noscript>
+  <div class="ns">
+    <h2>把伞偏向你</h2>
+    <p>周予安 与 梁清和 · 相识 2018 年 6 月 17 日 · 夜雨里的末班车候车亭</p>
+    <p>把伞偏向你那一侧，已经八年。</p>
+    <p>清和：写这页的时候，窗外没下雨。伞还是放在门边，靠你那一侧。这些年我们搬过两次家，丢过一把钥匙，养死过一盆薄荷。记性都不算好，倒是都记得对方怕冷。以后要是又忘了什么，就回来看看这一页：二〇一八年六月十七日，末班车，雨，一把偏了方向的伞。 —— 予安，2026.06.17</p>
+    <p>这一页需要开启 JavaScript 才能看到滚动动画。开启后，用浏览器直接打开本地的 index.html 即可，不需要联网。</p>
+    <ul>
+      <li><img src="photos/01.jpg" alt="雨夜候车亭" width="288" height="360"><br>2018.06.17 候车亭：末班车晚了十七分钟。你把伞往我这边斜了一下，没解释。</li>
+      <li><img src="photos/02.jpg" alt="二手书店" width="288" height="360"><br>2018.09.02 书店：你在二手书店那排架子后面，递过来一本折过角的诗集。</li>
+      <li><img src="photos/03.jpg" alt="冬天的厨房" width="288" height="360"><br>2019.01.26 厨房：一盏灯，两双筷子。面煮好了才发现没买葱。</li>
+      <li><img src="photos/04.jpg" alt="江桥" width="288" height="360"><br>2021.04.11 桥：骑到桥中间，风把话吹散。你又说了一遍，我还是没听清。</li>
+      <li><img src="photos/05.jpg" alt="窗台的橘子和杯子" width="288" height="360"><br>2023.10.03 窗台：窗台上三个橘子，两只杯子。谁都没摆，它们就在那儿。</li>
+      <li><img src="photos/06.jpg" alt="雨里的红伞" width="288" height="360"><br>2025.06.17 雨里：雨大的时候还是那把伞。你左肩湿了，说没事。</li>
+      <li><img src="photos/07.jpg" alt="雨停后的站台" width="288" height="360"><br>2026.06.17 站台：第八年，同一个站台。雨停了，车还没来。</li>
+      <li><img src="photos/08.jpg" alt="未署期的信" width="288" height="360"><br>信：这一页没写日期。留给以后随便哪一天。</li>
+    </ul>
+  </div>
+</noscript>
+
+</body>
+</html>

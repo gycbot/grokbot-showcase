@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1A18">
+<title>八年的站与站 · 周予安与梁清和</title>
+<meta name="description" content="把相识以来的日子排成一张可点、可走的关系图。">
+<link rel="preload" href="assets/fonts/NotoSansSC-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css">
+<script>document.documentElement.className += " js";</script>
+<script src="assets/vendor/gsap.min.js" defer></script>
+<script src="config.js" defer></script>
+<script src="assets/js/graph.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#panel">跳到当前站点</a>
+
+<div class="app">
+  <header class="masthead">
+    <p class="kicker">
+      <span class="kicker-line" aria-hidden="true"></span>
+      <span>RELATION MAP · <b data-bind="count">08</b> STATIONS</span>
+    </p>
+    <h1 class="title">
+      <span class="title-en" aria-hidden="true">Eight Years,<br>Eight Stations</span>
+      <span class="title-zh" data-bind="title">八年的站与站</span>
+    </h1>
+    <p class="intro" data-bind="intro">把日子按站名排一遍。点一个站，看看那天。</p>
+    <div class="mast-foot">
+      <p class="people"><span data-bind="nameA">周予安</span><i aria-hidden="true">×</i><span data-bind="nameB">梁清和</span></p>
+      <ul class="legend" aria-label="图例">
+        <li><span class="lg-line" aria-hidden="true"></span>时间线</li>
+        <li><span class="lg-dash" aria-hidden="true"></span>支线：雨 / 家</li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="graph-wrap">
+    <canvas id="graph" role="img" aria-label="由八个站点组成的关系图。可用下方站序按钮逐站查看。"></canvas>
+    <p class="graph-hint" aria-hidden="true"><span class="hint-dot"></span>拖动 · <span class="hint-wheel">滚轮 / </span>双指缩放 · 点站</p>
+    <div class="controls" role="group" aria-label="图谱控制">
+      <button type="button" id="zoomOut" aria-label="缩小">−</button>
+      <button type="button" id="zoomIn" aria-label="放大">＋</button>
+      <button type="button" id="fitBtn" aria-label="查看全图">全图</button>
+      <button type="button" id="tourBtn" class="tour" aria-pressed="false" aria-label="沿线自动走一遍">走一遍</button>
+    </div>
+  </div>
+
+  <nav class="rail" aria-label="站点顺序">
+    <ol id="railList"></ol>
+  </nav>
+
+  <aside class="panel" id="panel" aria-live="polite">
+    <div class="panel-head">
+      <span class="panel-index" id="panelIndex">01</span>
+      <span class="panel-of">/ <span id="panelTotal">08</span></span>
+      <span class="panel-tag" id="panelTag">雨</span>
+    </div>
+    <figure class="panel-photo">
+      <img id="panelImg" src="photos/01.jpg" alt="" width="1152" height="1440">
+      <figcaption id="panelNote">21:40 / 雨</figcaption>
+    </figure>
+    <div class="panel-body">
+      <p class="panel-date"><time id="panelDate">2018.06.17</time></p>
+      <h2 class="panel-place" id="panelPlace">候车亭</h2>
+      <p class="panel-caption" id="panelCaption">末班车晚了十七分钟。你把伞往我这边斜了一下，没解释。</p>
+      <div class="panel-nav">
+        <button type="button" id="prevBtn" aria-label="上一站">← 上一站</button>
+        <button type="button" id="nextBtn" aria-label="下一站">下一站 →</button>
+      </div>
+      <p class="panel-quote" data-bind="quote">把伞偏向你那一侧，已经八年。</p>
+    </div>
+  </aside>
+</div>
+
+<noscript>
+  <div class="ns">
+    <h2>八年的站与站</h2>
+    <p>周予安 × 梁清和 · 2018—2026 · 8 站</p>
+    <p>把日子按站名排一遍。下面按顺序列出每一站；开启 JavaScript 后可以拖动、缩放和点站查看。</p>
+    <ol>
+      <li>2018.06.17 候车亭：末班车晚了十七分钟。你把伞往我这边斜了一下，没解释。<br><img src="photos/01.jpg" alt="雨夜候车亭" width="240" height="300"></li>
+      <li>2018.09.02 书店：你在二手书店那排架子后面，递过来一本折过角的诗集。<br><img src="photos/02.jpg" alt="二手书店" width="240" height="300"></li>
+      <li>2019.01.26 厨房：一盏灯，两双筷子。面煮好了才发现没买葱。<br><img src="photos/03.jpg" alt="厨房" width="240" height="300"></li>
+      <li>2021.04.11 桥：骑到桥中间，风把话吹散。你又说了一遍，我还是没听清。<br><img src="photos/04.jpg" alt="江桥" width="240" height="300"></li>
+      <li>2023.10.03 窗台：窗台上三个橘子，两只杯子。谁都没摆，它们就在那儿。<br><img src="photos/05.jpg" alt="窗台" width="240" height="300"></li>
+      <li>2025.06.17 雨里：雨大的时候还是那把伞。你左肩湿了，说没事。<br><img src="photos/06.jpg" alt="雨里的伞" width="240" height="300"></li>
+      <li>2026.06.17 站台：第八年，同一个站台。雨停了，车还没来。<br><img src="photos/07.jpg" alt="站台" width="240" height="300"></li>
+      <li>未署期 信：这一页没写日期。留给以后随便哪一天。<br><img src="photos/08.jpg" alt="信" width="240" height="300"></li>
+    </ol>
+  </div>
+</noscript>
+
+</body>
+</html>
