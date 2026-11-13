@@ -481,11 +481,13 @@
       var frame = $(".frame", media);
       var rx = gsap.quickTo(frame, "rotationX", { duration: .8, ease: "power3.out" });
       var ry = gsap.quickTo(frame, "rotationY", { duration: .8, ease: "power3.out" });
+      var clampTilt = gsap.utils.clamp(-1, 1);
       media.addEventListener("pointermove", function (e) {
         var r = media.getBoundingClientRect();
         var px = (e.clientX - r.left) / r.width - .5;
         var py = (e.clientY - r.top) / r.height - .5;
-        ry(px * 5); rx(-py * 5);
+        ry(clampTilt(px * 2) * 2.6);
+        rx(-clampTilt(py * 2) * 2.6);
       });
       media.addEventListener("pointerleave", function () { rx(0); ry(0); });
     });
