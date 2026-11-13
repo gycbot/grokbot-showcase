@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字落在哪，画面走到哪 · video-talkcraft 与 Grok Bot 技能</title>
+<meta name="description" content="Grok Bot 装上口播视频技能后，把稿子对齐到字级时间戳，按语义拍写分镜，再交给 Remotion 渲。本页用一条可播的词级刻度带说明这套流程。">
+<meta property="og:title" content="字落在哪，画面走到哪 · video-talkcraft">
+<meta property="og:description" content="一条口播片的时间轴，应该由人声决定，不是由模板决定。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230e0d0b'/%3E%3Crect x='7' y='7' width='18' height='4' fill='%23e0492e'/%3E%3Crect x='7' y='14' width='12' height='3' fill='%23f1ece1'/%3E%3Crect x='7' y='20' width='15' height='3' fill='%23f1ece1'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0e0d0b; --surface:#15130f; --surface-2:#1b1813;
+  --ink:#f1ece1; --muted:#a49b8b; --dim:#6f6759;
+  --accent:#e0492e; --line:rgba(241,236,225,.14); --line-soft:rgba(241,236,225,.07);
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --sans:"Noto Sans CJK SC","Noto Sans SC","Source Han Sans SC",sans-serif;
+  --mono:"Geist Mono","Noto Sans Mono","JetBrains Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+[id]{scroll-margin-top:84px}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img,svg{display:block;max-width:100%}
+::selection{background:var(--accent);color:#0e0d0b}
+.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--bg);padding:12px 16px;z-index:99}
+.skip:focus{left:16px;top:16px}
+.wrap{width:min(1320px,calc(100% - 80px));margin:0 auto}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:"";width:8px;height:8px;background:var(--accent);flex:none}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:40;background:rgba(14,13,11,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:12px;font-size:14px;Letter-spacing:.02em}
+.brand b{font-weight:600}
+.brand span{color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+.nav-links{display:flex;gap:24px;font-size:14px;color:var(--muted)}
+.nav-links a{position:relative;padding:8px 0;transition:color .3s var(--ease)}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+
+/* hero */
+.hero{padding:80px 0 64px;display:grid;grid-template-columns:1.12fr .88fr;gap:64px;align-items:end}
+.hero h1{font-size:clamp(36px,4.8vw,72px);line-height:1.08;letter-spacing:-.025em;font-weight:600;text-wrap:balance;margin:24px 0 24px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p.lede{max-width:520px;color:var(--muted);font-size:18px;line-height:1.75;text-wrap:pretty}
+.hero-meta{margin-top:40px;display:flex;gap:40px;flex-wrap:wrap}
+.hero-meta div{display:flex;flex-direction:column;gap:4px}
+.hero-meta b{font-size:20px;font-weight:600}
+.hero-meta small{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+
+/* cue card */
+.cue{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:24px;position:relative;overflow:hidden}
+.cue-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+.cue-rec{display:flex;align-items:center;gap:8px;color:var(--accent)}
+.cue-rec i{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s var(--ease) infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+.cue-line{font-size:28px;line-height:1.7;margin:28px 0 20px;letter-spacing:.01em;min-height:96px}
+.cue-line span{color:var(--dim);transition:color .18s linear,transform .18s var(--ease);display:inline-block}
+.cue-line span.on{color:var(--ink);transform:translateY(-2px)}
+.cue-line span.now{color:var(--accent)}
+.cue-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line-soft);padding-top:16px;font-family:var(--mono);font-size:12px;color:var(--dim)}
+.cue-foot b{color:var(--ink);font-weight:500}
+.cue-bar{height:2px;background:var(--line);position:relative;margin-top:14px;overflow:hidden}
+.cue-bar i{position:absolute;inset:0;background:var(--accent);transform-origin:left;transform:scaleX(0)}
+.play{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-size:13px;transition:border-color .3s var(--ease),background .3s var(--ease)}
+.play:hover{border-color:var(--ink);background:rgba(241,236,225,.04)}
+.play svg{width:10px;height:10px;fill:currentColor}
+.play:focus-visible,.nav a:focus-visible,.layer:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* shotbook */
+.book{border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+.book-top{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line-soft);font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+.book-top .live{display:flex;align-items:center;gap:10px}
+.book-body{display:grid;grid-template-columns:236px 1fr 264px;min-height:420px}
+.wordcol{border-right:1px solid var(--line-soft);padding:24px 0 16px;display:flex;flex-direction:column}
+.wordcol h3,.paramcol h3{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;font-weight:400;padding:0 24px 14px}
+.words{position:relative;flex:1;max-height:330px;overflow:auto;scrollbar-width:thin}
+.word{display:flex;align-items:baseline;gap:12px;padding:5px 24px;font-size:15px;color:var(--dim);transition:color .3s var(--ease),background .3s var(--ease);position:relative}
+.word i{font-family:var(--mono);font-size:10px;font-style:normal;color:var(--dim);width:44px;flex:none}
+.word.on{color:var(--ink);background:rgba(224,73,46,.07)}
+.word.on i{color:var(--accent)}
+.word.on::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--accent)}
+.stagewrap{padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.stage{position:relative;aspect-ratio:16/9;background:#0a0908;border:1px solid var(--line-soft);border-radius:8px;overflow:hidden}
+.grid-bg{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M0 0H48M0 0V48' stroke='%23f1ece1' stroke-opacity='.07' stroke-width='1'/%3E%3C/svg%3E");background-size:48px 48px}
+.cam{position:absolute;inset:0;transform-origin:50% 55%;will-change:transform}
+.scene-title{position:absolute;left:8%;top:22%;max-width:66%;font-size:clamp(20px,2.5vw,38px);line-height:1.2;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+.scene-title small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--accent);margin-bottom:10px;font-weight:400}
+.evidence{position:absolute;right:6%;bottom:12%;width:34%;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:10px}
+.evidence .ln{height:5px;background:rgba(241,236,225,.32);margin-bottom:6px;border-radius:1px}
+.evidence .ln.short{width:62%}
+.evidence .ln.accent{background:var(--accent);width:40%}
+.caption{position:absolute;left:8%;bottom:9%;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em}
+.stage-tag{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em}
+.stage-tag b{color:var(--ink);font-weight:500}
+.paramcol{border-left:1px solid var(--line-soft);padding-top:24px;display:flex;flex-direction:column}
+.param{padding:12px 24px;border-top:1px solid var(--line-soft);display:flex;justify-content:space-between;gap:12px;font-size:13px}
+.param:first-of-type{border-top:0}
+.param span{color:var(--dim);flex:none}
+.param b{font-weight:500;text-align:right;transition:opacity .25s linear}
+.param b.flip{opacity:0}
+
+/* tagline */
+.tag{padding:120px 0}
+.tag p{font-size:clamp(30px,4.4vw,60px);line-height:1.28;font-weight:500;letter-spacing:-.02em;max-width:960px;text-wrap:balance}
+.tag .w{color:rgba(241,236,225,.24);transition:none}
+.tag .w.lit{color:var(--ink)}
+
+/* layers */
+.section{padding:80px 0;border-top:1px solid var(--line-soft)}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:48px}
+.section-head h2{font-size:clamp(26px,3vw,40px);line-height:1.2;font-weight:600;letter-spacing:-.02em;max-width:620px;text-wrap:balance;margin-top:16px}
+.section-head p{max-width:380px;color:var(--muted);font-size:14px;line-height:1.8}
+.layers{border-top:1px solid var(--line)}
+.layer{display:grid;grid-template-columns:64px 1.1fr 1.6fr 120px;gap:24px;align-items:center;padding:22px 8px;border-bottom:1px solid var(--line);transition:background .4s var(--ease),padding-left .4s var(--ease);position:relative}
+.layer:hover{background:rgba(241,236,225,.025);padding-left:20px}
+.layer .n{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.layer h3{font-size:18px;font-weight:500}
+.layer h3 em{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);display:block;margin-top:2px;text-transform:uppercase}
+.layer p{color:var(--muted);font-size:14px;line-height:1.7}
+.layer .meter{height:1px;background:var(--line);position:relative;overflow:hidden}
+.layer .meter i{position:absolute;inset:0;background:var(--accent);transform-origin:left;transform:scaleX(var(--v,0));transition:transform .8s var(--ease)}
+.layer:hover .meter i{transform:scaleX(1)}
+
+/* dependency */
+.dep{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.dep-num{font-family:var(--mono);font-size:clamp(56px,8vw,128px);line-height:.92;letter-spacing:-.04em;font-weight:400}
+.dep-num em{font-style:normal;color:var(--accent)}
+.dep-copy h2{font-size:clamp(24px,2.6vw,36px);line-height:1.25;font-weight:600;letter-spacing:-.02em;margin-bottom:20px;text-wrap:balance}
+.dep-copy p{color:var(--muted);font-size:15px;line-height:1.85;margin-bottom:16px;max-width:480px}
+.dep-copy .fine{font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.8;letter-spacing:.02em}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.step{padding:28px 24px 28px 0;border-right:1px solid var(--line);position:relative}
+.step:last-child{border-right:0}
+.step+.step{padding-left:24px}
+.step .n{font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:28px}
+.step h3{font-size:17px;font-weight:500;margin-bottom:10px}
+.step p{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* license */
+.license{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:8px}
+.license>div{background:var(--surface);padding:32px}
+.license h3{font-size:14px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:20px;font-weight:400}
+.license p{font-size:14px;line-height:1.85;color:var(--muted);margin-bottom:12px}
+.license p b{color:var(--ink);font-weight:500}
+.license a{color:var(--ink);border-bottom:1px solid var(--accent);padding-bottom:1px}
+.license a:hover{color:var(--accent)}
+.gaps{display:flex;flex-direction:column;gap:0}
+.gap{display:flex;gap:12px;font-size:13px;line-height:1.7;color:var(--muted);padding:10px 0;border-top:1px solid var(--line-soft)}
+.gap:first-child{border-top:0;padding-top:0}
+.gap i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--accent);padding-top:3px;flex:none}
+
+/* footer */
+.foot{border-top:1px solid var(--line);padding:40px 0 56px;display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+.foot nav{display:flex;gap:24px;flex-wrap:wrap}
+.foot a:hover{color:var(--ink)}
+.foot .sig{font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+
+@media(max-width:1024px){
+  .hero{grid-template-columns:1fr;gap:40px;align-items:start;padding-top:56px}
+  .book-body{grid-template-columns:200px 1fr}
+  .paramcol{display:none}
+  .dep{grid-template-columns:1fr;gap:32px}
+  .layer{grid-template-columns:48px 1fr 1.6fr;gap:16px}
+  .layer .meter{display:none}
+}
+@media(max-width:720px){
+  .wrap{width:calc(100% - 40px)}
+  .nav-links a:not(.nav-keep){display:none}
+  .nav-links{gap:16px}
+  .hero{padding:40px 0 40px}
+  .hero h1{margin:16px 0 18px}
+  .hero p.lede{font-size:16px}
+  .hero-meta{margin-top:28px;gap:24px}
+  .cue{padding:20px}
+  .cue-line{font-size:20px;min-height:74px;margin:20px 0 16px;letter-spacing:0}
+  .book-body{grid-template-columns:1fr}
+  .wordcol{border-right:0;border-bottom:1px solid var(--line-soft);padding:16px 0 8px}
+  .words{display:flex;overflow-x:auto;max-height:none;padding:0 16px;gap:4px}
+  .word{flex:none;padding:8px 10px;flex-direction:column;gap:2px;align-items:flex-start}
+  .word i{width:auto}
+  .word.on::before{left:6px;right:6px;top:auto;bottom:0;width:auto;height:2px}
+  .stagewrap{padding:16px}
+  .paramcol{display:none}
+  .tag{padding:72px 0}
+  .section{padding:56px 0}
+  .section-head{flex-direction:column;align-items:start;gap:16px;margin-bottom:32px}
+  .layer{grid-template-columns:36px 1fr;gap:12px;padding:18px 4px}
+  .layer p{grid-column:2}
+  .dep-num{font-size:64px}
+  .steps{grid-template-columns:1fr 1fr}
+  .step{border-bottom:1px solid var(--line);padding:24px 16px 24px 0}
+  .step+.step{padding-left:0}
+  .step:nth-child(2n){border-right:0;padding-left:16px}
+  .license{grid-template-columns:1fr}
+  .license>div{padding:24px}
+  .foot{flex-direction:column;gap:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="../index.html"><b>Grok Bot 能力页</b><span>05 / 16</span></a>
+    <nav class="nav-links" aria-label="页内导航">
+      <a class="nav-keep" href="#shotbook">分镜台</a>
+      <a href="#layers">七层</a>
+      <a href="#use">上手</a>
+      <a href="../notes/05-video-talkcraft.md">笔记</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap hero">
+    <div>
+      <div class="eyebrow">技能 · 口播片管线</div>
+      <h1>声音落到哪个字，<br>画面就走到<em>哪一帧</em>。</h1>
+      <p class="lede">Grok Bot 可以装上一套口播视频技能：先把稿子对齐到字级时间戳，再按语义拍写分镜，最后用代码渲成片。节奏来自人声，不来自模板。</p>
+      <div class="hero-meta">
+        <div><b>字级对齐</b><small>word level</small></div>
+        <div><b>语义拍切镜</b><small>beat cut</small></div>
+        <div><b>一条相机曲线</b><small>slow push</small></div>
+      </div>
+    </div>
+
+    <aside class="cue" aria-label="词级刻度示例">
+      <div class="cue-head">
+        <span>cue / line 04</span>
+        <span class="cue-rec"><i></i>sync</span>
+      </div>
+      <div class="cue-line" id="cueLine">
+        <span>画</span><span>面</span><span>不</span><span>是</span><span>配</span><span>图</span><span>，</span><span>是</span><span>这</span><span>句</span><span>话</span><span>的</span><span>动</span><span>作</span>
+      </div>
+      <div class="cue-foot">
+        <span>00:<b id="cueTime">00.00</b></span>
+        <button class="play" id="cuePlay" aria-pressed="false">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0 0l10 5-10 5z"/></svg>
+          <span id="cuePlayLabel">走一遍</span>
+        </button>
+      </div>
+      <div class="cue-bar"><i id="cueBar"></i></div>
+    </aside>
+  </section>
+
+  <section class="wrap" id="shotbook">
+    <div class="book">
+      <div class="book-top">
+        <span>SHOTBOOK / 片段 02</span>
+        <span class="live"><span id="bookState">待机</span> · <span id="bookTc">00:03.42</span></span>
+      </div>
+      <div class="book-body">
+        <div class="wordcol">
+          <h3>词级刻度</h3>
+          <div class="words" id="wordList" aria-hidden="true"></div>
+        </div>
+        <div class="stagewrap">
+          <div class="stage">
+            <div class="grid-bg"></div>
+            <div class="cam" id="cam">
+              <div class="scene-title" id="sceneTitle"><small id="sceneKicker">镜头 01 · 起</small><span id="sceneText">先让声音<br>站住。</span></div>
+              <div class="evidence" id="evidence">
+                <div class="ln accent"></div>
+                <div class="ln"></div>
+                <div class="ln short"></div>
+              </div>
+              <div class="caption" id="caption">16:9 · 1920×1080 · 30fps</div>
+            </div>
+          </div>
+          <div class="stage-tag">
+            <span><b id="shotName">镜头 01</b> / 起</span>
+            <span id="shotEase">camera · power2.out</span>
+          </div>
+        </div>
+        <div class="paramcol">
+          <h3>镜头参数</h3>
+          <div class="param"><span>相机</span><b data-k="cam">缓推 1.0 → 1.04</b></div>
+          <div class="param"><span>主体</span><b data-k="sub">标题 / 单行</b></div>
+          <div class="param"><span>进场</span><b data-k="in">遮罩上移 24px</b></div>
+          <div class="param"><span>退场</span><b data-k="out">让位 · 降透明</b></div>
+          <div class="param"><span>转场</span><b data-k="cut">运动承接</b></div>
+          <div class="param"><span>音效</span><b data-k="sfx">轻 whoosh</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap tag" aria-label="本节观点">
+    <p id="tagline"><span class="w">节奏</span><span class="w">不在</span><span class="w">模板</span><span class="w">里。</span><br><span class="w">在你</span><span class="w">念出</span><span class="w">那个字</span><span class="w">的</span><span class="w">时刻。</span></p>
+  </section>
+
+  <section class="section" id="layers">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">反 PPT 的七层</div>
+          <h2>不是加动效，<br>是让每一层都有事做。</h2>
+        </div>
+        <p>这套方法把镜头拆成七层：相机、主体、环境、字体、证据、转场、声音。每层只做一件事，合起来才不会像翻页。</p>
+      </div>
+      <div class="layers">
+        <div class="layer" tabindex="0"><span class="n">01</span><h3>相机<em>camera</em></h3><p>一条极缓的推或拉，贯穿整场。不换机位，不抽帧。</p><div class="meter"><i style="--v:.42"></i></div></div>
+        <div class="layer" tabindex="0"><span class="n">02</span><h3>主体<em>subject</em></h3><p>一个节拍只有一个主角。它进场、被看见、然后让位。</p><div class="meter"><i style="--v:.66"></i></div></div>
+        <div class="layer" tabindex="0"><span class="n">03</span><h3>环境<em>environment</em></h3><p>网格、纸纹、暗角只负责托住主体，不抢注意力。</p><div class="meter"><i style="--v:.28"></i></div></div>
+        <div class="layer" tabindex="0"><span class="n">04</span><h3>字体<em>type</em></h3><p>两档字重、一个强调色。字阶落表，不随手写像素。</p><div class="meter"><i style="--v:.74"></i></div></div>
+        <div class="layer" tabindex="0"><span class="n">05</span><h3>证据<em>evidence</em></h3><p>截图、数据、原话。出现时镜头停一下，让人读完。</p><div class="meter"><i style="--v:.52"></i></div></div>
+        <div class="layer" tabindex="0"><span class="n">06</span><h3>转场<em>transition</em></h3><p>用运动承接，不用硬切。上一镜的方向由下一镜接住。</p><div class="meter"><i style="--v:.6"></i></div></div>
+        <div class="layer" tabindex="0"><span class="n">07</span><h3>声音<em>sound</em></h3><p>音效落在动作点上，播完再切。字幕句尾就是时间锚。</p><div class="meter"><i style="--v:.36"></i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap dep">
+      <div class="dep-num">6 → <em>1</em></div>
+      <div class="dep-copy">
+        <h2>依赖只留一份，是纪律不是洁癖。</h2>
+        <p>仓库里记了一笔账：六个口播工程各装一套 node_modules，合起来 3.9GB；改成全部软链到 runtime 下同一份之后，只维护一个版本。</p>
+        <p>我们做这四页也一样：GSAP 只放共享 vendor 一份，不在每个页面目录里再装一遍。磁盘和版本都不该被复制品占着。</p>
+        <p class="fine">来源：video-talkcraft README「统一依赖」一节，2026-11-13 读取。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="use">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">怎么落到一次制作</div>
+          <h2>四步，先把时间轴钉死。</h2>
+        </div>
+        <p>不需要先会写 Remotion。第一步永远是把稿子和声音对上，后面的分镜才有意义。</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="n">STEP 01</div><h3>读稿</h3><p>一句一个信息点，钩子放第一句。数字先核实，写不清的删掉。</p></div>
+        <div class="step"><div class="n">STEP 02</div><h3>对齐</h3><p>把每个字的时间写进 timing。句尾即锚点，后面所有节拍都挂在这里。</p></div>
+        <div class="step"><div class="n">STEP 03</div><h3>写分镜</h3><p>按语义拍填五列：主角、进场、退场、相机、声音。不按句填。</p></div>
+        <div class="step"><div class="n">STEP 04</div><h3>渲与验</h3><p>先出关键帧，再渲全片。静止段、音效轨、锚点帧各验一遍。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">许可与边界</div>
+          <h2>能学什么，不能拿什么。</h2>
+        </div>
+        <p>这一页只吸收方法，不复制仓库里的配方卡源码、音效和演示素材。</p>
+      </div>
+      <div class="license">
+        <div>
+          <h3>License</h3>
+          <p><b>PolyForm Noncommercial 1.0.0。</b>个人、教育、研究用途免费；工具本身的商业使用须先获得作者授权。用它做出的视频归创作者。</p>
+          <p>本任务不商用，也不分发其代码。若之后要商用，应换自研管线或取得授权。</p>
+          <p><a href="https://github.com/Vincentwei1021/video-talkcraft" target="_blank" rel="noopener">github.com/Vincentwei1021/video-talkcraft</a></p>
+        </div>
+        <div>
+          <h3>没写进页面的</h3>
+          <div class="gaps">
+            <div class="gap"><i>GAP</i><span>「排行榜第 5 名」没有找到可核对的榜单页，不当作事实使用。</span></div>
+            <div class="gap"><i>GAP</i><span>配方卡数量口径不一：README 写 108，仓库简介写 109。页面只写「100 多张」。</span></div>
+            <div class="gap"><i>GAP</i><span>字级偏差毫秒数是项目自测，未做第三方复测，页面不引用具体数值。</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <div>
+    <div class="sig">GROK BOT 能力展示 · 05 / 16</div>
+    <div style="margin-top:8px">页面为能力说明，不代表 xAI 或 Grok 官方。</div>
+  </div>
+  <nav aria-label="相关页面">
+    <a href="../index.html">全部 16 项</a>
+    <a href="../notes/05-video-talkcraft.md">学习笔记</a>
+    <a href="https://github.com/Vincentwei1021/video-talkcraft" target="_blank" rel="noopener">来源仓库</a>
+  </nav>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGsap = !!(window.gsap && window.ScrollTrigger);
+  if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+
+  /* hero intro */
+  if (hasGsap && !reduce) {
+    var intro = gsap.timeline({defaults:{duration:.8, ease:'power3.out'}});
+    intro.from('.hero > div > *', {y:6, autoAlpha:0, filter:'blur(2px)', stagger:.06})
+         .from('.cue', {y:12, autoAlpha:0}, '-=0.55');
+  }
+
+  /* cue line */
+  var cueWords = Array.prototype.slice.call(document.querySelectorAll('#cueLine span'));
+  var cueTime = document.getElementById('cueTime');
+  var cueBar = document.getElementById('cueBar');
+  var cuePlay = document.getElementById('cuePlay');
+  var cueLabel = document.getElementById('cuePlayLabel');
+  var cueIdx = -1, cueTimer = null;
+
+  function cuePaint(i){
+    cueWords.forEach(function(w,k){
+      w.classList.toggle('on', k <= i);
+      w.classList.toggle('now', k === i);
+    });
+    var t = (i + 1) * 0.27;
+    cueTime.textContent = t.toFixed(2);
+    cueBar.style.transform = 'scaleX(' + ((i + 1) / cueWords.length) + ')';
+  }
+  function cueStop(){
+    clearInterval(cueTimer); cueTimer = null;
+    cuePlay.setAttribute('aria-pressed','false');
+    cueLabel.textContent = '再走一遍';
+    cueWords.forEach(function(w){ w.classList.remove('now'); });
+  }
+  function cueRun(){
+    clearInterval(cueTimer);
+    cueIdx = -1; cuePaint(0);
+    cuePlay.setAttribute('aria-pressed','true');
+    cueLabel.textContent = '暂停';
+    cueTimer = setInterval(function(){
+      cueIdx++;
+      if (cueIdx >= cueWords.length) { cueStop(); return; }
+      cuePaint(cueIdx);
+    }, 270);
+  }
+  cuePlay.addEventListener('click', function(){
+    if (cueTimer) { cueStop(); } else { cueRun(); }
+  });
+  if (!reduce) setTimeout(cueRun, 700);
+
+  /* shotbook */
+  var shots = [
+    {k:'01', name:'起', kicker:'镜头 01 · 起', text:'先让声音<br>站住。', cam:'缓推 1.0 → 1.04', sub:'标题 / 单行', in:'遮罩上移 24px', out:'让位 · 降透明', cut:'运动承接', sfx:'轻 whoosh', scale:1.02, x:0, y:0, ease:'power2.out'},
+    {k:'02', name:'证据', kicker:'镜头 02 · 证据', text:'然后把证据<br>放到桌上。', cam:'停 · 让读', sub:'截图 / 单张', in:'卡片上浮 16px', out:'左移出画', cut:'同向承接', sfx:'纸面轻响', scale:1.0, x:-8, y:2, ease:'power2.inOut'},
+    {k:'03', name:'收', kicker:'镜头 03 · 收', text:'最后把话<br>收回来。', cam:'缓拉 1.04 → 1.0', sub:'一句话 / 居中', in:'字距收紧', out:'淡出', cut:'回到人声', sfx:'留白', scale:1.04, x:4, y:-2, ease:'power2.out'}
+  ];
+  var words = [
+    ['先',0.00],['让',0.31],['声',0.58],['音',0.82],['站',1.24],['住',1.51],
+    ['然',1.96],['后',2.18],['把',2.44],['证',2.71],['据',2.98],['放',3.26],['到',3.48],['桌',3.72],['上',3.98]
+  ];
+  var wordList = document.getElementById('wordList');
+  words.forEach(function(w,i){
+    var el = document.createElement('div');
+    el.className = 'word';
+    el.innerHTML = '<i>' + w[1].toFixed(2) + '</i><span>' + w[0] + '</span>';
+    wordList.appendChild(el);
+  });
+  var wordEls = Array.prototype.slice.call(wordList.children);
+  var cam = document.getElementById('cam');
+  var titleEl = document.getElementById('sceneText');
+  var kickerEl = document.getElementById('sceneKicker');
+  var shotName = document.getElementById('shotName');
+  var shotEase = document.getElementById('shotEase');
+  var bookState = document.getElementById('bookState');
+  var bookTc = document.getElementById('bookTc');
+  var params = document.querySelectorAll('.param b');
+  var timer = null, step = 0;
+
+  function setShot(n){
+    var s = shots[n];
+    kickerEl.textContent = s.kicker;
+    titleEl.innerHTML = s.text;
+    shotName.textContent = '镜头 ' + s.k;
+    shotEase.textContent = 'camera · ' + s.ease;
+    params.forEach(function(p){
+      var key = p.getAttribute('data-k');
+      p.classList.add('flip');
+      setTimeout(function(){ p.textContent = s[key]; p.classList.remove('flip'); }, 140);
+    });
+    if (hasGsap && !reduce) {
+      gsap.to(cam, {scale:s.scale, x:s.x, y:s.y, duration:1.2, ease:s.ease});
+    } else {
+      cam.style.transform = 'translate(' + s.x + 'px,' + s.y + 'px) scale(' + s.scale + ')';
+    }
+  }
+  function bookReset(){
+    clearInterval(timer); timer = null;
+    step = 0; bookState.textContent = '待机';
+    wordEls.forEach(function(w){ w.classList.remove('on'); });
+    setShot(0);
+    bookTc.textContent = '00:03.42';
+    cam.style.transform = 'scale(1.02)';
+  }
+  function bookRun(){
+    clearInterval(timer); step = 0;
+    bookState.textContent = '播放';
+    setShot(0);
+    timer = setInterval(function(){
+      if (step > 0 && step % 5 === 0 && step / 5 < 3) setShot(step / 5);
+      if (step >= words.length) { clearInterval(timer); timer = null; bookState.textContent = '停在末帧'; return; }
+      wordEls.forEach(function(w,k){ w.classList.toggle('on', k === step); });
+      bookTc.textContent = '00:' + (words[step][1] + 0.2).toFixed(2);
+      step++;
+    }, 260);
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') bookReset();
+  });
+
+  /* click on stage replays */
+  document.querySelector('.stage').addEventListener('click', function(){ if (!timer) bookRun(); });
+
+  /* tagline word reveal */
+  var tagWords = Array.prototype.slice.call(document.querySelectorAll('#tagline .w'));
+  if (hasGsap && !reduce) {
+    gsap.to(tagWords, {
+      color:'#f1ece1', stagger:.08, ease:'none',
+      scrollTrigger:{trigger:'#tagline', start:'top 78%', end:'bottom 62%', scrub:.6}
+    });
+  } else {
+    tagWords.forEach(function(w){ w.classList.add('lit'); });
+  }
+
+  /* section reveals */
+  if (hasGsap && !reduce) {
+    gsap.utils.toArray('.section-head, .layer, .step, .license, .dep > *').forEach(function(el){
+      gsap.from(el, {y:18, autoAlpha:0, duration:.7, ease:'power3.out',
+        scrollTrigger:{trigger:el, start:'top 88%', once:true}});
+    });
+  }
+
+  /* start book once in view */
+  if (hasGsap) {
+    ScrollTrigger.create({
+      trigger:'#shotbook', start:'top 68%', once:true,
+      onEnter:function(){ if (!reduce) setTimeout(bookRun, 300); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

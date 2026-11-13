@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>委派：把活分出去，把标准留下｜Grok Bot 能力展示 11</title>
+<meta name="description" content="Grok Bot 把 16 项拆给四条并行 dsh 会话，自己留住 brief、口味与验收。以 Aceternity 的光束、移动边框与逐词入场为技法参考。">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2317150F'/%3E%3Ctext x='16' y='22' font-family='serif' font-size='18' fill='%23F2EEE5' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../vendor/series/base.css">
+<style>
+  .p11 .hero{padding-top:clamp(46px,5.5vw,72px);padding-bottom:clamp(40px,5vw,64px)}
+  .p11 h1{font-size:clamp(46px,5.6vw,82px)}
+  .p11 .lede{max-width:540px}
+  .tg span{display:inline-block;will-change:opacity,filter}
+  .brief{margin-top:clamp(28px,4vw,40px);max-width:430px;padding:1px;position:relative;overflow:hidden;background:var(--line)}
+  .brief::before{content:"";position:absolute;left:-60%;top:-60%;width:220%;height:220%;
+    background:conic-gradient(from 0deg,transparent 0deg 250deg,rgba(197,67,43,.9) 292deg,rgba(197,67,43,.1) 320deg,transparent 340deg);
+    animation:spin 8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .brief-in{position:relative;z-index:1;background:var(--paper);padding:15px 18px;display:grid;grid-template-columns:1fr auto;gap:4px 18px;align-items:baseline}
+  .brief-in .mono{grid-column:1/-1;font-size:9.5px;color:var(--muted);letter-spacing:.14em}
+  .brief-in b{font-family:var(--serif);font-size:20px;font-weight:600}
+  .brief-in span{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.06em;text-align:right}
+
+  .router{position:relative;background:var(--bone);border:1px solid var(--line);padding:clamp(18px,2.4vw,26px);min-height:560px;overflow:hidden}
+  .lamp{position:absolute;top:-10px;left:calc(clamp(18px,2.4vw,26px) + 28px);width:260px;height:300px;transform:translateX(-50%);
+    background:var(--accent);opacity:.14;filter:blur(38px);
+    clip-path:polygon(47% 0,64% 100%,36% 100%);pointer-events:none}
+  .lamp-line{position:absolute;top:0;left:50%;width:1px;height:58px;background:var(--accent);opacity:.7;transform:translateX(-50%)}
+  .bot-row{position:relative;display:flex;align-items:center;gap:14px;z-index:2}
+  .bot-node{width:56px;height:56px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-size:26px;flex:0 0 auto;box-shadow:0 18px 30px -20px rgba(23,21,15,.8)}
+  .bot-row b{display:block;font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.3}
+  .bot-row span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--muted)}
+  .spine{position:absolute;left:calc(clamp(18px,2.4vw,26px) + 27px);top:118px;bottom:20px;width:1px;background:var(--line-soft);overflow:hidden}
+  .spine i{display:block;width:100%;height:100%;background:var(--accent);transform:scaleY(0);transform-origin:top center}
+  .lanes{position:relative;margin-top:22px;padding-left:66px;display:grid;gap:10px;z-index:2}
+  .lane{position:relative;background:var(--paper);border:1px solid var(--line);padding:13px 15px 12px;transition:border-color .35s var(--e),transform .35s var(--e)}
+  .lane::before{content:"";position:absolute;left:-38px;top:26px;width:38px;height:1px;background:var(--line);transform:scaleX(1);transform-origin:left center}
+  .lane:hover{border-color:rgba(23,21,15,.42);transform:translateX(3px)}
+  .lane .l-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .lane .l-head b{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;font-weight:400;color:var(--accent)}
+  .lane .l-head span{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--muted)}
+  .lane h3{font-family:var(--serif);font-size:17px;font-weight:600;margin-top:2px;line-height:1.35}
+  .lane .chips{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+  .lane .chips i{display:block;width:22px;height:4px;background:var(--line);font-style:normal}
+  .lane.active{outline:1px solid rgba(197,67,43,.32);outline-offset:-1px}
+  .lane.active .chips i{background:var(--accent)}
+  .router-foot{position:relative;z-index:2;margin-top:16px;padding-left:66px;display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--muted)}
+
+  .ledger{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);background:var(--line);gap:1px}
+  .ledger > div{padding:clamp(24px,3.4vw,40px);background:var(--paper)}
+  .ledger .keep{background:var(--ink);color:var(--paper)}
+  .ledger h3{font-family:var(--mono);font-size:10px;letter-spacing:.14em;font-weight:400;margin-bottom:16px;opacity:.65}
+  .ledger ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .ledger li{display:flex;gap:12px;font-size:14px;line-height:1.7;border-bottom:1px solid var(--line-soft);padding-bottom:10px}
+  .ledger .keep li{border-color:rgba(242,238,229,.16)}
+  .ledger li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);flex:0 0 auto;margin-top:9px}
+  .ledger .keep li::before{background:var(--paper);opacity:.55}
+  .ledger p{margin-top:18px;font-size:12.5px;line-height:1.85;opacity:.7}
+
+  .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+  .rule{background:var(--paper);padding:clamp(22px,2.6vw,32px)}
+  .rule .n{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--accent);margin-bottom:22px}
+  .rule h3{font-family:var(--serif);font-size:21px;font-weight:600;line-height:1.4;margin-bottom:9px}
+  .rule p{font-size:13.5px;line-height:1.9;color:#3E3A31}
+
+  .split{display:grid;grid-template-columns:.7fr 1fr;gap:clamp(32px,6vw,88px);align-items:start}
+  .split .left{position:sticky;top:96px}
+  .split h2{font-family:var(--serif);font-size:clamp(28px,3.2vw,44px);font-weight:600;line-height:1.3;margin:14px 0 18px}
+  .split .left p{font-size:14px;line-height:1.95;color:#3E3A31;max-width:360px}
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;border-top:1px solid var(--line);padding-top:18px}
+  .mini b{display:block;font-family:var(--serif);font-size:26px;font-weight:600;line-height:1.1}
+  .mini span{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--muted)}
+
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr}
+    .router{margin-top:8px;min-height:0}
+    .split{grid-template-columns:1fr}
+    .split .left{position:static}
+    .rules{grid-template-columns:1fr}
+    .ledger{grid-template-columns:1fr}
+  }
+  @media (max-width:640px){
+    .p11 .hero{padding-top:34px}
+    .lamp{left:43px;width:86px;height:230px;opacity:.16}
+    .p11 h1{font-size:clamp(38px,10.4vw,52px)}
+    .brief{max-width:none}
+    .router{padding:16px}
+    .spine{left:43px;top:96px;bottom:16px}
+    .lanes{padding-left:56px;gap:9px}
+    .lane{padding:12px 13px}
+    .lane::before{left:-30px;width:30px}
+    .lane h3{font-size:16px}
+    .router-foot{padding-left:56px;font-size:8.5px}
+    .ledger li{font-size:13.5px}
+    .stats{gap:20px}
+  }
+</style>
+</head>
+<body class="p11">
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><b>GROK BOT</b><span>能力展示 / 16 项</span></div>
+    <nav class="folio" aria-label="页脚导航">
+      <a href="../index.html">全部页面</a>
+      <span>11 / 16</span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow" data-hero><i></i><span class="kicker">委派 / DELEGATION · 11</span></div>
+        <h1 data-hero>把活分出去，<br>把<em>标准</em>留下。</h1>
+        <p class="lede tg" aria-label="十六项不是十六条排队。Grok Bot 先锁 brief，再把活拆给四条并行的 dsh 会话；自己留住口味、验收和发布权。">
+          <span>十六项</span><span>不是</span><span>十六条</span><span>排队。</span><span>Grok&nbsp;Bot&nbsp;</span><span>先锁&nbsp;</span><span>brief，</span><span>再把活</span><span>拆给</span><span>四条</span><span>并行的&nbsp;</span><span>dsh&nbsp;</span><span>会话；</span><span>自己</span><span>留住</span><span>口味、</span><span>验收</span><span>和</span><span>发布权。</span>
+        </p>
+        <div class="hero-foot" data-hero>
+          <a class="link-arrow" href="#ledger">看委派账本
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6"/></svg>
+          </a>
+          <span class="note">技法参考 / Aceternity<br>检索 / 2026.11.13</span>
+        </div>
+        <div class="brief" data-hero>
+          <div class="brief-in">
+            <span class="mono">BRIEF / LOCKED</span>
+            <b>16 项 · 4 条并行</b>
+            <span>编号不改 · 原文只读</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="router" data-hero aria-label="四条并行会话的路由示意">
+        <div class="lamp" aria-hidden="true"></div>
+        <div class="lamp-line" aria-hidden="true"></div>
+        <div class="bot-row">
+          <div class="bot-node" aria-hidden="true">G</div>
+          <div><b>Grok Bot / 锁 brief</b><span>不把制作留在自己手里</span></div>
+        </div>
+        <div class="spine" aria-hidden="true"><i></i></div>
+        <div class="lanes">
+          <div class="lane"><div class="l-head"><b>LANE 01 / 01–04</b><span>已派出</span></div><h3>设计技能与动效</h3><div class="chips" aria-hidden="true">01 · 02 · 03 · 04</div></div>
+          <div class="lane"><div class="l-head"><b>LANE 02 / 05–08</b><span>已派出</span></div><h3>剪辑工具与参考站</h3><div class="chips" aria-hidden="true">01 · 02 · 03 · 04</div></div>
+          <div class="lane active"><div class="l-head"><b>LANE 03 / 09–12</b><span>本批 · 运行中</span></div><h3>灵感库与组件库</h3><div class="chips" aria-hidden="true">01 · 02 · 03 · 04</div></div>
+          <div class="lane"><div class="l-head"><b>LANE 04 / 13–16</b><span>已派出</span></div><h3>布局参考与站点</h3><div class="chips" aria-hidden="true">01 · 02 · 03 · 04</div></div>
+        </div>
+        <div class="router-foot"><span>共用一份 vendor</span><span>各自新开 dsh 会话</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline">
+    <div class="wrap">
+      <p aria-label="分出去的是工时。留下来的，是判断。">
+        <span class="w">分出去的</span><span class="w">是</span><span class="w">工时。</span><br>
+        <span class="w">留下来的，</span><span class="w">是</span><span class="w hot">判断。</span>
+      </p>
+      <p class="cap">四条会话可以同时写页面，但不能同时改 brief。边界清楚，并行才成立。</p>
+    </div>
+  </section>
+
+  <section class="sec" id="ledger">
+    <div class="wrap">
+      <div class="sec-head" data-reveal>
+        <div class="sec-num"><b>01</b> / 委派账本</div>
+        <h2>哪些留在手里，哪些交出去，先写清楚。</h2>
+      </div>
+      <div class="ledger" data-reveal>
+        <div class="keep">
+          <h3>留在 GROK BOT</h3>
+          <ul>
+            <li>需求原话与 brief 锁定</li>
+            <li>口味：主色、字号、留白、禁用词</li>
+            <li>验收：两条截图、控制台、来源核实</li>
+            <li>发布权与最终汇报</li>
+          </ul>
+          <p>这些不外包。分出去的是执行时间，不是判断标准。</p>
+        </div>
+        <div>
+          <h3>分给 DSH 会话</h3>
+          <ul>
+            <li>对标检索与来源核实</li>
+            <li>笔记、页面、截图、自检</li>
+            <li>按技能包写代码与文案</li>
+            <li>缺口清单与过程日志</li>
+          </ul>
+          <p>每条会话只碰自己的 4 项，只补自己的索引行，不删别人的链接。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head" data-reveal>
+        <div class="sec-num"><b>02</b> / 并行的前提</div>
+        <h2>三条不写在需求里的硬规矩。</h2>
+      </div>
+      <div class="rules" data-reveal>
+        <div class="rule"><div class="n">RULE 01</div><h3>同一份清单</h3><p>16 项原文只读一遍，编号不改，名字不换。名字含糊的先检索，不靠猜。</p></div>
+        <div class="rule"><div class="n">RULE 02</div><h3>同一套索引</h3><p>四条会话都往同一页加链接。先读再改，只补自己那四行，不覆盖别人。</p></div>
+        <div class="rule"><div class="n">RULE 03</div><h3>同一套验收</h3><p>1440×900 与 390×844 截图，控制台无 error，来源可点开。缺一项就不算完。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap split">
+      <div class="left" data-reveal>
+        <div class="kicker">03 / 一次分派</div>
+        <h2>四条回齐，索引只多四行。</h2>
+        <p>并行的难点不在开四条会话，在四条会话收尾时还能拼成一套东西。共用 vendor、共用索引、共用验收，才拼得起来。</p>
+        <div class="mini">
+          <div><b>4</b><span>条并行会话</span></div>
+          <div><b>16</b><span>项 / 每项一页</span></div>
+          <div><b>1</b><span>份共享索引</span></div>
+          <div><b>0</b><span>次互相续接</span></div>
+        </div>
+      </div>
+
+      <div class="chat" data-reveal>
+        <div class="chat-top"><span><i class="dot"></i>GROK BOT / 分派</span><span>示例 · 非官方界面</span></div>
+        <div class="chat-body">
+          <div class="msg user">16 项，今晚都要有页面。跟成片那条线并行，别碰它。</div>
+          <div class="msg bot">拆四条，每条四项。先锁 brief，再各自开新会话。成片会话不续接，工作区也不共用。</div>
+          <div class="msg sys">4 条已派出 · 共用一套 vendor</div>
+          <div class="progress" aria-hidden="true"><div class="bar"><i></i></div></div>
+          <div class="artifact">
+            <div class="a-top"><b>plan / 16-items-4-lanes</b><span class="mono">并行 · 不互写</span></div>
+            <ul>
+              <li>01–04 设计技能与动效</li>
+              <li>05–08 剪辑工具与参考站</li>
+              <li>09–12 灵感库与组件库（本批）</li>
+              <li>13–16 布局参考与站点</li>
+            </ul>
+          </div>
+          <div class="msg sys">00:40</div>
+          <div class="msg bot">四条回齐 12 页，4 页缺来源，都写了 evidence_gap。索引已合并，没有删掉别组链接。</div>
+          <div class="msg user">缺来源的别发。</div>
+          <div class="msg bot">已停在草稿。发布权在你这里，四条会话都没有对外发。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h4>这一页</h4>
+        <p>11 / 16 · 委派 DELEGATION<br>技法参考：Aceternity 的光束、移动边框与逐词入场。</p>
+      </div>
+      <div>
+        <h4>来源</h4>
+        <p><a href="https://ui.aceternity.com/" target="_blank" rel="noopener noreferrer">ui.aceternity.com</a><br><a href="https://ui.aceternity.com/pricing" target="_blank" rel="noopener noreferrer">定价与授权说明</a><br>检索 2026.11.13 · Asia/Shanghai</p>
+      </div>
+      <div>
+        <h4>说明</h4>
+        <p>本页是 Grok Bot 使用侧的能力展示，不代表 xAI 或 Grok 官方。未使用参考站的商标与付费素材。</p>
+      </div>
+      <div class="fine"><span>GROK BOT / 16 项能力展示</span><span>NO. 11 · DELEGATION</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap/gsap.min.js"></script>
+<script src="../vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="../vendor/series/base.js"></script>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!window.gsap || reduce) return;
+
+  // Aceternity-style text generate: word by word out of blur
+  gsap.from('.tg span', {
+    opacity: 0, filter: 'blur(4px)', y: 4,
+    duration: .7, ease: 'power2.out', stagger: .028, clearProps: 'filter'
+  });
+
+  var mm = gsap.matchMedia();
+  mm.add('(min-width: 641px)', function(){
+    gsap.from('.spine i', {
+      scaleY: 0, duration: 1.1, ease: 'power2.inOut',
+      scrollTrigger: { trigger: '.router', start: 'top 74%', once: true }
+    });
+    gsap.utils.toArray('.lane').forEach(function(lane, i){
+      gsap.from(lane, {
+        x: -14, opacity: 0, duration: .7, ease: 'power3.out', delay: .18 + i * .09,
+        scrollTrigger: { trigger: '.router', start: 'top 76%', once: true }
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

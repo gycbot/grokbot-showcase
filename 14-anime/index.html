@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一帧一动作 · Grok Bot 能力展示</title>
+<meta name="description" content="Grok Bot 把静态版式拆成时间轴：先定关键帧，再让线条、文字和模块按顺序到位。第 14 页，Anime.js 的时间轴方法。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23f3f0e7'/><rect x='16' y='16' width='10' height='32' fill='%23131211'/><rect x='32' y='26' width='18' height='6' fill='%23ff4b2b'/><rect x='32' y='38' width='12' height='4' fill='%23131211'/></svg>">
+<style>
+  :root{
+    --paper:#f3f0e7;
+    --paper-2:#e9e5da;
+    --ink:#141311;
+    --muted:#756f63;
+    --faint:#a29a8b;
+    --line:#d2ccbe;
+    --accent:#ff4b2b;
+    --serif:"Noto Serif CJK SC","Songti SC","Source Han Serif SC",serif;
+    --sans:"Noto Sans CJK SC","PingFang SC","Source Han Sans SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--paper);color:var(--ink);scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:12px 16px;z-index:99}
+  .skip:focus{left:12px;top:12px}
+  .wrap{width:min(1280px,100% - 96px);margin-inline:auto}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .rule{height:1px;background:var(--line)}
+
+  header.site{padding:26px 0 0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{width:18px;height:18px;border:1px solid var(--ink);position:relative;flex:none}
+  .brand .mark::after{content:"";position:absolute;inset:4px;background:var(--accent)}
+  .brand b{font-size:13px;font-weight:600;letter-spacing:.16em}
+  .topnav{display:flex;gap:26px;align-items:center}
+  .topnav a{font-size:12px;letter-spacing:.06em;color:var(--muted);transition:color .3s var(--ease)}
+  .topnav a:hover,.topnav a[aria-current]{color:var(--ink)}
+  .counter{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+  .counter b{color:var(--accent);font-weight:500}
+
+  .hero{padding:58px 0 44px;display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:64px;align-items:end}
+  .eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--accent)}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(44px,6vw,88px);line-height:1.03;letter-spacing:-.025em;max-width:850px}
+  h1 .soft{color:var(--faint);font-weight:400}
+  h1 .accent{color:var(--accent)}
+  .lede{margin-top:28px;max-width:560px;font-size:16px;line-height:1.95;color:#4f4a41}
+  .lede strong{font-weight:600;color:var(--ink)}
+  .hero-side{align-self:stretch;border-top:2px solid var(--ink);padding-top:16px;display:flex;flex-direction:column;justify-content:space-between;gap:26px}
+  .hero-side .row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:11px}
+  .hero-side .row span:first-child{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+  .hero-side .row b{font-weight:500;font-size:12px}
+  .hero-side p{font-size:11px;line-height:1.8;color:var(--muted)}
+
+  .ruler{padding:4px 0 2px}
+  .ruler-line{position:relative;height:1px;background:var(--line);display:flex;justify-content:space-between;margin-bottom:7px}
+  .ruler-line i{width:1px;height:7px;background:#b7af9f;display:block;margin-top:-3px}
+  .ruler-line i:last-child{background:var(--accent)}
+  .ruler-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:.04em}
+  .stage-wrap{padding:26px 0 0;border-top:1px solid var(--line)}
+  .stage-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:14px}
+  .stage-head .left{display:flex;align-items:center;gap:10px}
+  .rec{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .stage{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .frame{position:relative;aspect-ratio:16/10;background:var(--paper-2);border:1px solid var(--line);overflow:hidden;isolation:isolate}
+  .frame .id{position:absolute;left:12px;top:10px;z-index:4;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#8a8376}
+  .frame .note{position:absolute;left:12px;bottom:10px;z-index:4;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:#8a8376}
+  .frame.f1{background:#171614;border-color:#171614;color:var(--paper)}
+  .frame.f1 .id,.frame.f1 .note{color:#9b9385}
+  .frame .dot{position:absolute;left:18%;top:50%;width:52px;height:52px;border-radius:50%;background:var(--accent);will-change:transform}
+  .frame .bar{position:absolute;left:0;bottom:0;width:100%;height:6px;background:var(--accent);transform-origin:left;transform:scaleX(0);will-change:transform}
+  .frame .base{position:absolute;left:18%;top:50%;width:150px;height:1px;background:#4b473f}
+
+  .frame.f2{background:#e6e1d5}
+  .f2 svg{position:absolute;inset:0;width:100%;height:100%}
+  .f2 path{fill:none;stroke:var(--ink);stroke-width:1.4;vector-effect:non-scaling-stroke}
+  .f2 .tile{position:absolute;width:34px;height:34px;background:var(--ink);opacity:0;will-change:transform,opacity}
+  .f2 .tile:nth-of-type(1){left:20%;top:26%}
+  .f2 .tile:nth-of-type(2){left:37%;top:42%;background:var(--accent)}
+  .f2 .tile:nth-of-type(3){left:54%;top:22%;background:#8f8779}
+  .f2 .tile:nth-of-type(4){left:64%;top:52%;background:var(--ink)}
+
+  .frame.f3{background:#171614;border-color:#171614;color:var(--paper)}
+  .f3 .lines{position:absolute;left:14%;top:32%;display:flex;flex-direction:column;gap:9px;width:62%}
+  .f3 .lines span{display:block;height:7px;background:#5e584e}
+  .f3 .lines span:nth-child(1){width:100%;background:#ebe5d6}
+  .f3 .lines span:nth-child(2){width:76%}
+  .f3 .lines span:nth-child(3){width:54%;background:var(--accent)}
+  .f3 .chip{position:absolute;right:12%;bottom:18%;border:1px solid #6f675a;padding:5px 8px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#c7bfae;opacity:0;will-change:transform,opacity}
+
+  .scrub{display:flex;align-items:center;gap:16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;margin-top:14px}
+  .scrub button{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;border:1px solid var(--line);transition:background .25s var(--ease),color .25s var(--ease)}
+  .scrub button:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .scrub button .tri{width:0;height:0;border-left:6px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent}
+  .scrub input[type=range]{flex:1;appearance:none;-webkit-appearance:none;height:2px;background:#c9c2b4;outline:none}
+  .scrub input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:11px;height:11px;background:var(--accent);border-radius:50%;cursor:pointer}
+  .scrub input[type=range]::-moz-range-thumb{width:11px;height:11px;background:var(--accent);border:0;border-radius:50%;cursor:pointer}
+  .scrub .clock{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);min-width:76px;text-align:right}
+
+  .below{display:grid;grid-template-columns:1.15fr .85fr;gap:64px;padding:56px 0 30px}
+  h2{font-family:var(--serif);font-size:clamp(28px,3.2vw,42px);line-height:1.2;font-weight:600;letter-spacing:-.01em}
+  .copy p{font-size:14px;line-height:1.95;color:#5a544a;margin-top:18px;max-width:54ch}
+  .copy p strong{color:var(--ink);font-weight:600}
+  .manifest{border-top:1px solid var(--line)}
+  .mrow{display:grid;grid-template-columns:64px 1fr auto;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);align-items:baseline}
+  .mrow .t{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.06em}
+  .mrow .a{font-size:13px}
+  .mrow .s{font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:.08em}
+
+  .code-sec{border-top:1px solid var(--line);padding:46px 0 56px;display:grid;grid-template-columns:.8fr 1.2fr;gap:64px;align-items:start}
+  .code-copy p{font-size:13px;line-height:1.9;color:var(--muted);margin-top:14px;max-width:38ch}
+  .code{background:#171614;color:#e9e3d6;padding:22px 24px;overflow:auto;border:1px solid #171614}
+  .code .bar{display:flex;gap:5px;margin-bottom:16px}
+  .code .bar i{width:6px;height:6px;border-radius:50%;background:#4e4a43;display:block}
+  .code .bar i:first-child{background:var(--accent)}
+  pre{font-family:var(--mono);font-size:11px;line-height:1.85;white-space:pre;color:#d7d0c1}
+  pre .k{color:#ff8d75}
+  pre .s{color:#b9c98a}
+  pre .c{color:#7b7468}
+  pre .n{color:#e7c07b}
+
+  .notes{border-top:1px solid var(--line);padding:44px 0 52px;display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  .note{padding-right:30px;border-right:1px solid var(--line);padding-left:30px}
+  .note:first-child{padding-left:0}
+  .note:last-child{border-right:0}
+  .note .n{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.12em}
+  .note h3{font-size:15px;font-weight:600;margin:12px 0 7px}
+  .note p{font-size:12px;line-height:1.85;color:var(--muted);max-width:32ch}
+
+  footer.site{border-top:1px solid var(--line);padding:28px 0 40px}
+  .foot{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+  .foot p{font-size:11px;line-height:1.9;color:var(--faint);max-width:54ch}
+  .foot .meta{text-align:right;font-family:var(--mono);font-size:10px;line-height:1.9;color:var(--faint);letter-spacing:.05em;white-space:nowrap}
+
+  @media (max-width:1040px){
+    .wrap{width:calc(100% - 56px)}
+    .hero{grid-template-columns:1fr;gap:34px}
+    .hero-side{max-width:420px}
+    .below,.code-sec{grid-template-columns:1fr;gap:34px}
+    .notes{grid-template-columns:1fr}
+    .note{border-right:0;border-bottom:1px solid var(--line);padding:22px 0}
+    .note:first-child{padding-top:0}
+    .note:last-child{border-bottom:0}
+  }
+  @media (max-width:680px){
+    .wrap{width:calc(100% - 36px)}
+    .topnav{display:none}
+    .hero{padding:42px 0 30px}
+    h1{font-size:clamp(38px,10.5vw,54px)}
+    .lede{font-size:15px;margin-top:20px}
+    .stage{grid-template-columns:1fr;gap:10px}
+    .frame{aspect-ratio:16/9}
+    .scrub{gap:10px;flex-wrap:wrap}
+    .scrub input[type=range]{order:3;flex-basis:100%}
+    .scrub .clock{margin-left:auto}
+    .below{padding:38px 0 18px}
+    .code-sec{padding:34px 0 40px}
+    .code{padding:18px;margin-inline:-4px}
+    pre{font-size:10px}
+    .foot{flex-direction:column}
+    .foot .meta{text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="site">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><b>GROK BOT / 动作间</b></div>
+    <nav class="topnav" aria-label="页面导航">
+      <a href="#stage" aria-current="page">时间轴</a>
+      <a href="#how">动作清单</a>
+      <a href="../index.html">总索引</a>
+    </nav>
+    <div class="counter">REEL <b>14</b> / 16</div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap hero" aria-labelledby="h1">
+    <div>
+      <div class="eyebrow mono">Motion · 时间轴 / 来源：Anime.js</div>
+      <h1 id="h1">静态是草稿，<br><span class="soft">动作才是</span><br><span class="accent">说明。</span></h1>
+      <p class="lede">Grok Bot 会把一个版式拆成 <strong>0.0 到 3.4 秒</strong> 的动作：先定关键帧，再让线条、文字、模块按顺序到位。不是给每个元素各加一个 delay。</p>
+    </div>
+    <aside class="hero-side" aria-label="本页参数">
+      <div>
+        <div class="row"><span>来源</span><b>anime.js 4.5.0</b></div>
+        <div class="row"><span>许可</span><b>MIT</b></div>
+        <div class="row"><span>时长</span><b>3.4 s</b></div>
+        <div class="row"><span>主属性</span><b>transform / opacity</b></div>
+        <div class="row"><span>页面</span><b>14 / 16</b></div>
+      </div>
+      <div class="ruler" aria-hidden="true">
+        <div class="ruler-line"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="ruler-labels"><span>0.0</span><span>0.9</span><span>1.7</span><span>2.3</span><span>3.4</span></div>
+      </div>
+      <p>这条时间轴是页面里真实运行的那一条。拖动进度，或按播放，画面会按同一套顺序走。</p>
+    </aside>
+  </section>
+
+  <section class="wrap stage-wrap" id="stage" aria-labelledby="stage-h">
+    <div class="stage-head">
+      <div class="left"><span class="rec" aria-hidden="true"></span><h2 id="stage-h" style="font-size:13px;font-family:var(--mono);letter-spacing:.1em;font-weight:500">SEQUENCE 01 / 落位</h2></div>
+      <span class="mono">16:10 · 3 FRAMES · LOCAL</span>
+    </div>
+
+    <div class="stage" id="stageEl">
+      <div class="frame f1">
+        <span class="id">F1 / 00:00</span>
+        <div class="base" aria-hidden="true"></div>
+        <div class="dot" aria-hidden="true"></div>
+        <div class="bar" aria-hidden="true"></div>
+        <span class="note">MOVE · 0.9s</span>
+      </div>
+      <div class="frame f2">
+        <span class="id">F2 / 00.5</span>
+        <svg viewBox="0 0 400 250" preserveAspectRatio="none" aria-hidden="true">
+          <path id="drawPath" pathLength="1" d="M36 196 C 104 196, 104 82, 172 82 S 252 172, 316 172 S 352 108, 368 108"/>
+        </svg>
+        <div class="tile" aria-hidden="true"></div>
+        <div class="tile" aria-hidden="true"></div>
+        <div class="tile" aria-hidden="true"></div>
+        <div class="tile" aria-hidden="true"></div>
+        <span class="note">DRAW + STAGGER</span>
+      </div>
+      <div class="frame f3">
+        <span class="id">F3 / 02.3</span>
+        <div class="lines" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="chip">READY / 03.4s</div>
+        <span class="note">REVEAL · 1.1s</span>
+      </div>
+    </div>
+
+    <div class="scrub">
+      <button id="toggle" aria-label="播放或暂停时间轴"><span class="tri" aria-hidden="true"></span><span id="toggleLabel">播放</span></button>
+      <button id="restart" aria-label="从 0 秒重播">重播</button>
+      <input id="seek" type="range" min="0" max="1000" value="0" aria-label="时间轴进度">
+      <span class="clock" id="clock">0.0 / 3.4 s</span>
+    </div>
+  </section>
+
+  <section class="wrap below" id="how" aria-labelledby="how-h">
+    <div class="copy">
+      <div class="eyebrow mono">How it moves</div>
+      <h2 id="how-h">一条时间轴，<br>三种动作。</h2>
+      <p>Anime.js 4 的 <strong>createTimeline()</strong> 把多条动画排在同一条时间线上。位置参数可以是绝对毫秒，也可以是“上一条开始后 0.2 秒”。这样改节奏时只动一个数，不用去翻十几处 delay。</p>
+      <p>页面里的三段分别是：<strong>位移</strong>（红点从左到右）、<strong>描边</strong>（SVG 路径按长度长出来）、<strong>错峰入场</strong>（四个方块按 70ms 间隔落下）。它们共用同一条 seek，所以拖动进度时不会各走各的。</p>
+      <p>Grok Bot 在制作页面前会先出关键帧：0.0 秒是什么、2.3 秒是什么。构图和字号确认了，才把动作写成代码。这个顺序比“先写一堆动画再看效果”省时间。</p>
+    </div>
+    <div class="manifest" aria-label="动作清单">
+      <div class="mrow"><span class="t">0.0 s</span><span class="a">标题与红点落位</span><span class="s">MOVE</span></div>
+      <div class="mrow"><span class="t">0.5 s</span><span class="a">SVG 路径开始描边</span><span class="s">DRAW</span></div>
+      <div class="mrow"><span class="t">0.7 s</span><span class="a">四个方块错峰进入</span><span class="s">STAGGER 70</span></div>
+      <div class="mrow"><span class="t">2.3 s</span><span class="a">第三帧文字与标签出现</span><span class="s">REVEAL</span></div>
+      <div class="mrow"><span class="t">3.4 s</span><span class="a">停住，不循环抢注意力</span><span class="s">REST</span></div>
+    </div>
+  </section>
+
+  <section class="wrap code-sec" aria-labelledby="code-h">
+    <div class="code-copy">
+      <div class="eyebrow mono">Source / 可读的写法</div>
+      <h2 id="code-h" style="font-size:clamp(24px,2.4vw,32px)">先写顺序，<br>再写缓动。</h2>
+      <p>这段是页面里真实使用的结构，省略了装饰元素。所有入场都只动 <strong>transform</strong> 和 <strong>opacity</strong>；线用 <strong>createDrawable()</strong>，不手算 dashoffset。</p>
+      <p>如果系统开了“减少动态效果”，页面直接给终态，不播这条时间轴。</p>
+    </div>
+    <div class="code">
+      <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
+<pre><span class="c">// anime.js 4.5 · MIT</span>
+<span class="k">const</span> tl = <span class="n">createTimeline</span>({
+  defaults: { ease: <span class="s">'outExpo'</span> }
+});
+
+tl.<span class="n">add</span>(<span class="s">'.f1 .dot'</span>, {
+    x: [<span class="n">0</span>, <span class="n">150</span>], scale: [<span class="n">.6</span>, <span class="n">1</span>],
+    duration: <span class="n">900</span>
+  }, <span class="n">0</span>)
+  .<span class="n">add</span>(<span class="n">createDrawable</span>(<span class="s">'#drawPath'</span>), {
+    draw: [<span class="s">'0 0'</span>, <span class="s">'0 1'</span>],
+    duration: <span class="n">1100</span>
+  }, <span class="n">500</span>)
+  .<span class="n">add</span>(<span class="s">'.f2 .tile'</span>, {
+    y: [<span class="n">10</span>, <span class="n">0</span>], opacity: [<span class="n">0</span>, <span class="n">1</span>]
+  }, <span class="n">stagger</span>(<span class="n">70</span>, { start: <span class="n">700</span> }));
+
+<span class="c">// 拖动进度：同一条时间轴 seek</span>
+seek.<span class="n">oninput</span> = e =&gt;
+  tl.<span class="n">seek</span>(e.target.value * <span class="n">3.4</span>);</pre>
+    </div>
+  </section>
+
+  <section class="wrap notes" aria-label="制作边界">
+    <div class="note">
+      <div class="n">01 / 先定终态</div>
+      <h3>最后一帧要是对的</h3>
+      <p>先确认 3.4 秒停住的画面成立，再反推中间怎么走。终态不成立，动作越多越乱。</p>
+    </div>
+    <div class="note">
+      <div class="n">02 / 只动便宜的</div>
+      <h3>transform 和 opacity</h3>
+      <p>位置用位移，进度用 scaleX。不去动 top、left、width，滚动和手机构图都更稳。</p>
+    </div>
+    <div class="note">
+      <div class="n">03 / 留出静默</div>
+      <h3>3.4 秒后停住</h3>
+      <p>不循环、不呼吸、不抢注意力。需要重看时按“重播”，而不是让页面一直动。</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <p>本页是 Grok Bot 能力展示的第 14 页，学习对象为 Anime.js 的时间轴与 SVG 描边方法。库文件在共享 <span class="mono">vendor/anime.iife.min.js</span>，许可 MIT。研究记录见 <span class="mono">notes/14-anime.md</span>。</p>
+    <div class="meta">2026-11-13 · ASIA/SHANGHAI<br>GROK BOT / MOTION ROOM<br>NO PUBLISH</div>
+  </div>
+</footer>
+
+<script src="../vendor/anime.iife.min.js"></script>
+<script>
+(function(){
+  var A = window.anime;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var seek = document.getElementById('seek');
+  var clock = document.getElementById('clock');
+  var toggle = document.getElementById('toggle');
+  var toggleLabel = document.getElementById('toggleLabel');
+  var restart = document.getElementById('restart');
+  var TOTAL = 3400;
+
+  function setClock(ms){
+    clock.textContent = (ms/1000).toFixed(1) + ' / 3.4 s';
+  }
+
+  if (!A) { setClock(0); return; }
+  var createTimeline = A.createTimeline, createDrawable = A.createDrawable,
+      animate = A.animate, stagger = A.stagger;
+
+  if (reduce) {
+    // 直接给终态：红点在右、线全画、方块与标签可见
+    document.querySelectorAll('.f1 .dot, .f2 .tile, .f3 .chip, .f3 .curtain').forEach(function(el){ el.style.opacity = 1; });
+    var dot = document.querySelector('.f1 .dot'); if (dot) dot.style.transform = 'translateX(150px)';
+    document.querySelectorAll('.f2 .tile').forEach(function(el){ el.style.opacity = 1; });
+    setClock(TOTAL);
+    seek.value = 1000;
+    toggle.disabled = true;
+    return;
+  }
+
+  var tl = createTimeline({ autoplay: false, defaults: { ease: 'outExpo' } });
+  tl.add('.f1 .dot', { x: [0, 150], y: [0, -8], scale: [.7, 1], duration: 900 }, 0)
+    .add('.f1 .bar', { scaleX: [0, 1], duration: 900, ease: 'inOutQuad' }, 0)
+    .add(createDrawable('#drawPath'), { draw: ['0 0', '0 1'], duration: 1200, ease: 'inOutQuad' }, 500)
+    .add('.f2 .tile', { y: [12, 0], opacity: [0, 1], duration: 650 }, stagger(70, { start: 700 }))
+    .add('.f3 .lines span', { y: [8, 0], opacity: [1, 1], duration: 550 }, stagger(60, { start: 2300 }))
+    .add('.f3 .chip', { y: [8, 0], opacity: [1, 1], duration: 500 }, 2900);
+
+  // 标题入场，和主时间轴分开，页面加载只播一次
+  animate('.hero h1, .hero .lede, .hero-side', {
+    y: [12, 0], opacity: [0, 1], duration: 800, delay: stagger(70), ease: 'outExpo'
+  });
+  animate('.eyebrow', { opacity: [0, 1], duration: 600, delay: 80, ease: 'outExpo' });
+
+  function sync(){
+    var t = typeof tl.currentTime === 'number' ? tl.currentTime : 0;
+    setClock(t);
+    seek.value = Math.round(Math.min(1, t / TOTAL) * 1000);
+    var done = t >= TOTAL - 30;
+    toggleLabel.textContent = done ? '重播' : '暂停';
+  }
+
+  tl.onUpdate = sync;
+  tl.onComplete = function(){ sync(); toggleLabel.textContent = '重播'; };
+
+  function play(){
+    if (tl.currentTime >= TOTAL - 30) { tl.restart(); }
+    else { tl.play(); }
+    toggleLabel.textContent = '暂停';
+  }
+  function pause(){ tl.pause(); toggleLabel.textContent = '播放'; }
+
+  toggle.addEventListener('click', function(){
+    if (tl.currentTime >= TOTAL - 30) { tl.restart(); toggleLabel.textContent = '暂停'; return; }
+    if (tl.paused) play(); else pause();
+  });
+  restart.addEventListener('click', function(){ tl.restart(); toggleLabel.textContent = '暂停'; });
+  seek.addEventListener('input', function(){
+    tl.pause();
+    tl.seek(Number(seek.value) / 1000 * TOTAL);
+    toggleLabel.textContent = '播放';
+    setClock(Number(seek.value) / 1000 * TOTAL);
+  });
+
+  // 页面加载后自动走一遍；舞台就在首屏下方，不需要等滚动
+  var started = false;
+  function start(){
+    if (started) return;
+    started = true;
+    tl.play();
+    toggleLabel.textContent = '暂停';
+  }
+  setTimeout(start, 600);
+  setClock(0);
+})();
+</script>
+</body>
+</html>

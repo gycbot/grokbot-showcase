@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>技能：把一页参考拆成能用的手艺｜Grok Bot 能力展示 09</title>
+<meta name="description" content="Grok Bot 把一页网页参考拆成结构、方法与可复用技能。以 motionsites 的 3D 首屏与玻璃材质为技法参考，做一页中文能力展示。">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2317150F'/%3E%3Ctext x='16' y='22' font-family='serif' font-size='18' fill='%23F2EEE5' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../vendor/series/base.css">
+<style>
+  .p09 .hero{padding-bottom:clamp(40px,5vw,64px)}
+  .hero-visual{position:relative}
+  .stage{position:relative;aspect-ratio:1/1.06;max-width:640px;margin-left:auto;perspective:1400px}
+  .ink-block{
+    position:absolute;right:0;bottom:0;width:86%;height:47%;background:var(--ink);
+    color:var(--paper);padding:26px 28px;overflow:hidden;
+    transform:translateZ(0);z-index:1;
+  }
+  .ink-block .big{font-family:var(--serif);font-size:clamp(96px,11vw,150px);line-height:.9;font-weight:600;opacity:.9;letter-spacing:-.04em}
+  .ink-block .tiny{position:absolute;right:26px;bottom:22px;font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;opacity:.55;text-align:right;line-height:1.9}
+  .stack{position:absolute;inset:2% 7% 24% 5%;transform-style:preserve-3d;z-index:2}
+  .layer{
+    position:absolute;inset:0;background:var(--bone);border:1px solid rgba(23,21,15,.28);
+    padding:clamp(16px,2.2vw,26px);display:flex;flex-direction:column;justify-content:space-between;
+    box-shadow:0 22px 50px -34px rgba(23,21,15,.55);
+    will-change:transform;
+  }
+  .layer .l-top{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted)}
+  .layer .glyph{font-family:var(--serif);font-size:clamp(62px,7.4vw,104px);line-height:1;font-weight:600;margin:auto 0;color:var(--ink)}
+  .layer .l-bot{display:flex;justify-content:space-between;align-items:end;gap:12px;border-top:1px solid var(--line);padding-top:10px}
+  .layer .l-bot b{font-family:var(--serif);font-size:18px;font-weight:600}
+  .layer .l-bot span{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted);text-align:right}
+  .l1{transform:translate3d(-12px,16px,0) rotate(-2.6deg)}
+  .l2{transform:translate3d(2px,0,18px) rotate(.8deg)}
+  .l3{transform:translate3d(15px,-17px,38px) rotate(3.4deg)}
+  .glass{
+    position:absolute;right:4%;bottom:7%;width:74%;z-index:3;
+    background:rgba(251,248,241,.86);border:1px solid rgba(255,255,255,.52);
+    -webkit-backdrop-filter:blur(18px) saturate(1.04);backdrop-filter:blur(18px) saturate(1.04);
+    transform:translateZ(0);padding:16px 18px 15px;color:var(--ink);
+    box-shadow:0 18px 40px -28px rgba(0,0,0,.6);
+  }
+  .glass-top{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(23,21,15,.22);padding-bottom:9px;margin-bottom:10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em}
+  .glass dl{display:grid;grid-template-columns:76px 1fr;gap:4px 10px;margin:0}
+  .glass dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:rgba(23,21,15,.6);padding-top:2px}
+  .glass dd{margin:0;font-size:12px;line-height:1.65}
+
+  .steps{border-top:1px solid var(--line)}
+  .step{display:grid;grid-template-columns:88px 1fr 220px;gap:30px;padding:30px 0;border-bottom:1px solid var(--line);align-items:start}
+  .step .n{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--accent);padding-top:6px}
+  .step h3{font-family:var(--serif);font-size:clamp(22px,2.3vw,30px);font-weight:600;line-height:1.4;margin-bottom:8px}
+  .step p{font-size:14px;line-height:1.9;color:#3E3A31;max-width:640px}
+  .step .meta{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);line-height:2;text-align:right;padding-top:6px}
+  .spec-strip{display:flex;gap:0;border:1px solid var(--line);margin-top:34px;flex-wrap:wrap}
+  .spec-strip div{flex:1 1 160px;padding:16px 18px;border-right:1px solid var(--line)}
+  .spec-strip div:last-child{border-right:0}
+  .spec-strip b{display:block;font-family:var(--serif);font-size:24px;font-weight:600;line-height:1.2}
+  .spec-strip span{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted)}
+
+  .split{display:grid;grid-template-columns:.72fr 1fr;gap:clamp(32px,6vw,90px);align-items:start}
+  .split .left{position:sticky;top:96px}
+  .split h2{font-family:var(--serif);font-size:clamp(28px,3.2vw,44px);font-weight:600;line-height:1.3;margin-bottom:18px}
+  .split .left p{font-size:14px;line-height:1.95;color:#3E3A31;max-width:360px}
+  .split .left .note{margin-top:22px}
+  .result-line{display:flex;gap:14px;align-items:baseline;margin-top:20px;font-size:13px;color:var(--muted)}
+  .result-line b{font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600}
+
+  @media (max-width:980px){
+    .stage{margin:0 auto}
+    .split{grid-template-columns:1fr}
+    .split .left{position:static}
+    .step{grid-template-columns:52px 1fr;gap:18px}
+    .step .meta{grid-column:2;text-align:left;margin-top:8px}
+  }
+  @media (max-width:640px){
+    .stage{aspect-ratio:auto;padding-bottom:0;display:flex;flex-direction:column}
+    .stack{position:relative;inset:auto;display:grid;gap:10px;transform:none!important;perspective:none;order:1}
+    .ink-block{order:2}
+    .glass{order:3}
+    .layer{position:relative;inset:auto;transform:none!important;min-height:150px;padding:18px}
+    .layer .glyph{font-size:56px;margin:8px 0}
+    .ink-block{position:relative;width:100%;height:auto;min-height:150px;margin-top:12px;padding:22px}
+    .ink-block .big{font-size:92px}
+    .glass{position:relative;right:auto;bottom:auto;width:100%;margin-top:12px;background:rgba(251,248,241,.9)}
+    .hero-visual{margin-top:6px}
+    .spec-strip div{flex:1 1 50%;border-bottom:1px solid var(--line)}
+    .spec-strip div:nth-child(2){border-right:0}
+    .glass dl{grid-template-columns:70px 1fr}
+  }
+</style>
+</head>
+<body class="p09">
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><b>GROK BOT</b><span>能力展示 / 16 项</span></div>
+    <nav class="folio" aria-label="页脚导航">
+      <a href="../index.html">全部页面</a>
+      <span>09 / 16</span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow" data-hero><i></i><span class="kicker">技能 / SKILLS · 09</span></div>
+        <h1 data-hero>它把看过的<br>一页，拆成<br><em>能用的手艺</em>。</h1>
+        <p class="lede" data-hero>Grok Bot 读参考，不会停在“好看”。它把构图、节奏、材质拆成步骤，写进技能；下一次换主题，还按同一套标准做。</p>
+        <div class="hero-foot" data-hero>
+          <a class="link-arrow" href="#breakdown">看它怎么拆
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6"/></svg>
+          </a>
+          <span class="note">技法参考 / motionsites.ai<br>检索 / 2026.11.13</span>
+        </div>
+      </div>
+
+      <div class="hero-visual" data-hero>
+        <div class="stage">
+          <div class="ink-block" aria-hidden="true">
+            <div class="big">09</div>
+            <div class="tiny">ONE PAGE<br>THREE LAYERS<br>ONE REUSABLE SKILL</div>
+          </div>
+          <div class="stack" id="stack">
+            <article class="layer l1">
+              <div class="l-top"><span>LAYER 01</span><span>看</span></div>
+              <div class="glyph">看</div>
+              <div class="l-bot"><b>先量结构</b><span>层数 / 字距<br>滚动距离</span></div>
+            </article>
+            <article class="layer l2">
+              <div class="l-top"><span>LAYER 02</span><span>拆</span></div>
+              <div class="glyph">拆</div>
+              <div class="l-bot"><b>再抽方法</b><span>材质 / 节奏<br>降级规则</span></div>
+            </article>
+            <article class="layer l3">
+              <div class="l-top"><span>LAYER 03</span><span>用</span></div>
+              <div class="glyph">用</div>
+              <div class="l-bot"><b>写成技能</b><span>触发 / 参数<br>验收条件</span></div>
+            </article>
+          </div>
+          <aside class="glass" aria-label="技能卡摘要">
+            <div class="glass-top"><span>SKILL / 3D-HERO-STACK</span><span>v1.2</span></div>
+            <dl>
+              <dt>触发</dt><dd>首屏要三层以上视差</dd>
+              <dt>参数</dt><dd>0.8 屏内展开，最多 8° 倾角</dd>
+              <dt>降级</dt><dd>≤640px 改平面卡片</dd>
+              <dt>验收</dt><dd>两条截图无横向溢出</dd>
+            </dl>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline">
+    <div class="wrap">
+      <p aria-label="看过，不算学会。拆开，才留得下。">
+        <span class="w">看过，</span><span class="w">不算</span><span class="w">学会。</span><br>
+        <span class="w">拆开，</span><span class="w">才</span><span class="w hot">留得下。</span>
+      </p>
+      <p class="cap">技能不是灵感库。它是一份下次还能照着做的说明书。</p>
+    </div>
+  </section>
+
+  <section class="sec" id="breakdown">
+    <div class="wrap">
+      <div class="sec-head" data-reveal>
+        <div class="sec-num"><b>01</b> / 拆解</div>
+        <h2>一页参考，要拆到能复述的程度。</h2>
+      </div>
+
+      <div class="steps">
+        <div class="step" data-reveal>
+          <div class="n">STEP 01</div>
+          <div>
+            <h3>看结构，不先夸感觉</h3>
+            <p>首屏几层、标题占多宽、滚动几屏、手机上砍掉什么。用截图和公开链接对照，逐项记下来。形容词放到最后，量过的数字放前面。</p>
+          </div>
+          <div class="meta">输入 / 截图 + 公开链接<br>输出 / 结构清单</div>
+        </div>
+        <div class="step" data-reveal>
+          <div class="n">STEP 02</div>
+          <div>
+            <h3>把形容词落成参数</h3>
+            <p>“液态玻璃”要落成三条：模糊半径、边界亮度、不支持时怎么退。说不清的词，先删掉。留下来的每条，都要能写进代码或验收单。</p>
+          </div>
+          <div class="meta">输入 / 结构清单<br>输出 / 可执行规则</div>
+        </div>
+        <div class="step" data-reveal>
+          <div class="n">STEP 03</div>
+          <div>
+            <h3>写成下次能调用的技能</h3>
+            <p>触发条件、关键参数、断点降级、验收标准，四段写全。换主题、换品牌色，步骤不动。技能存成文件，下一次直接调用，不靠记忆。</p>
+          </div>
+          <div class="meta">输入 / 可执行规则<br>输出 / .skills/&lt;name&gt;/SKILL.md</div>
+        </div>
+      </div>
+
+      <div class="spec-strip" data-reveal>
+        <div><b>3 层</b><span>卡层 / 字层 / 材质层</span></div>
+        <div><b>0.8 屏</b><span>滚动展开的区间</span></div>
+        <div><b>640px</b><span>3D 降级为平面的断点</span></div>
+        <div><b>2 张</b><span>1440×900 与 390×844 验收图</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap split">
+      <div class="left" data-reveal>
+        <div class="kicker">02 / 一次真实调用</div>
+        <h2 style="margin-top:14px">拆完，下一句就是“套到这一页”。</h2>
+        <p>技能不放在收藏夹里。它要能在下一个任务里被叫出来，直接落到页面上，再被截图和自检验一遍。</p>
+        <div class="note">对话为能力演示，按真实工作流改写。<br>不是产品界面截图。</div>
+        <div class="result-line"><b>12</b><span>条规则写进技能，下一次不用重想。</span></div>
+      </div>
+
+      <div class="chat" data-reveal>
+        <div class="chat-top"><span><i class="dot"></i>GROK BOT / 技能调用</span><span>示例 · 非官方界面</span></div>
+        <div class="chat-body">
+          <div class="msg user">把 motionsites 那种 3D 首屏拆一下，下次做页面直接用。</div>
+          <div class="msg bot">收到。先拆三层：字层、卡层、玻璃层。再记两条降级：窄屏去 3D，低性能去掉模糊。</div>
+          <div class="msg sys">正在写技能 · 已记录 12 条规则</div>
+          <div class="progress" aria-hidden="true"><div class="bar"><i></i></div></div>
+          <div class="artifact">
+            <div class="a-top"><b>skill / 3d-hero-stack</b><span class="mono">v1.2 · 已存档</span></div>
+            <ul>
+              <li>触发：首屏需要三层以上视差</li>
+              <li>参数：滚动 0.8 屏内完成展开，倾角不超过 8°</li>
+              <li>降级：≤640px 改为平面卡片，保留文字层级</li>
+              <li>验收：1440×900 与 390×844 均无横向溢出</li>
+            </ul>
+          </div>
+          <div class="msg user">套到第 9 页。</div>
+          <div class="msg bot">已套用。桌面保留层叠，390 宽切成平面。两条截图都过了，玻璃层在窄屏改成了实色底。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h4>这一页</h4>
+        <p>09 / 16 · 技能 SKILLS<br>技法参考：motionsites 公开首页的 3D 字层、滚动展开与玻璃卡片。</p>
+      </div>
+      <div>
+        <h4>来源</h4>
+        <p><a href="https://motionsites.ai/" target="_blank" rel="noopener noreferrer">motionsites.ai</a><br>检索 2026.11.13 · Asia/Shanghai</p>
+      </div>
+      <div>
+        <h4>说明</h4>
+        <p>本页是 Grok Bot 使用侧的能力展示，不代表 xAI 或 Grok 官方。未使用参考站的商标与付费素材。</p>
+      </div>
+      <div class="fine"><span>GROK BOT / 16 项能力展示</span><span>NO. 09 · SKILLS</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap/gsap.min.js"></script>
+<script src="../vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="../vendor/series/base.js"></script>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!window.gsap || reduce) return;
+  var mm = gsap.matchMedia();
+  mm.add('(min-width: 641px)', function(){
+    gsap.set('.l1', {x:-12, y:16, rotation:-2.6});
+    gsap.set('.l2', {x:2, y:0, rotation:.8});
+    gsap.set('.l3', {x:15, y:-17, rotation:3.4});
+    var tl = gsap.timeline({
+      scrollTrigger:{trigger:'.hero', start:'top top', end:'bottom top', scrub:1}
+    });
+    tl.to('.l1', {x:-78, y:64, rotation:-8, duration:1}, 0)
+      .to('.l2', {x:2, y:8, rotation:1.2, duration:1}, 0)
+      .to('.l3', {x:80, y:-52, rotation:7, duration:1}, 0);
+
+    var stage = document.querySelector('.stage');
+    var stack = document.querySelector('.stack');
+    var rx = gsap.quickTo(stack, 'rotationX', {duration:.9, ease:'power3'});
+    var ry = gsap.quickTo(stack, 'rotationY', {duration:.9, ease:'power3'});
+    stage.addEventListener('pointermove', function(e){
+      var r = stage.getBoundingClientRect();
+      ry(((e.clientX - r.left) / r.width - .5) * 10);
+      rx((.5 - (e.clientY - r.top) / r.height) * 8);
+    });
+    stage.addEventListener('pointerleave', function(){ rx(0); ry(0); });
+    return function(){ stage.replaceWith(stage.cloneNode(true)); };
+  });
+})();
+</script>
+</body>
+</html>

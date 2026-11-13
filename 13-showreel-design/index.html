@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>技能放映室 · Grok Bot 能力展示</title>
+<meta name="description" content="Grok Bot 把技能文件当片单：按任务筛选、按顺序装载，再把结果落成页面。第 13 页，Showreel Design 的索引方法。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%230c0c0d'/><rect x='14' y='18' width='36' height='4' fill='%23e2552f'/><rect x='14' y='30' width='24' height='4' fill='%23f2efe8'/><rect x='14' y='42' width='30' height='4' fill='%236f6a62'/></svg>">
+<style>
+  :root{
+    --ink:#0c0c0d;
+    --panel:#141415;
+    --panel-2:#1b1b1d;
+    --paper:#f2efe8;
+    --muted:#918b80;
+    --faint:#5e5a53;
+    --line:#2a2a2c;
+    --accent:#e2552f;
+    --serif:"Noto Serif CJK SC","Songti SC","Source Han Serif SC",serif;
+    --sans:"Noto Sans CJK SC","PingFang SC","Source Han Sans SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--ink);color:var(--paper);scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  ::selection{background:var(--accent);color:var(--ink)}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--paper);color:var(--ink);padding:12px 16px;z-index:99}
+  .skip:focus{left:12px;top:12px}
+
+  .wrap{width:min(1320px,100% - 96px);margin-inline:auto}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .rule{height:1px;background:var(--line);width:100%}
+
+  header.site{padding:26px 0 0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{width:18px;height:18px;border:1px solid var(--paper);position:relative;flex:none}
+  .brand .mark::after{content:"";position:absolute;inset:4px;background:var(--accent)}
+  .brand b{font-weight:600;font-size:13px;letter-spacing:.16em}
+  .topnav{display:flex;gap:26px;align-items:center}
+  .topnav a{font-size:12px;letter-spacing:.06em;color:var(--muted);transition:color .3s var(--ease)}
+  .topnav a:hover,.topnav a[aria-current]{color:var(--paper)}
+  .counter{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+  .counter b{color:var(--accent);font-weight:500}
+
+  .hero{padding:64px 0 42px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:64px;align-items:end}
+  .eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--accent)}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(44px,5.6vw,84px);line-height:1.04;letter-spacing:-.02em;max-width:900px}
+  h1 .thin{color:var(--muted);font-weight:400}
+  h1 .accent{color:var(--accent)}
+  .lede{margin-top:30px;max-width:560px;font-size:16px;line-height:1.9;color:#c9c3b8}
+  .lede strong{color:var(--paper);font-weight:500}
+  .hero-meta{margin-top:36px;display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--line)}
+  .hero-meta div{padding:14px 26px 0 0;margin-right:26px;border-right:1px solid var(--line)}
+  .hero-meta div:last-child{border-right:0;margin-right:0;padding-right:0}
+  .hero-meta span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;margin-bottom:5px}
+  .hero-meta b{font-weight:500;font-size:13px;letter-spacing:.02em}
+
+  .reel{border:1px solid var(--line);background:var(--panel);padding:20px 20px 18px;align-self:stretch;display:flex;flex-direction:column;justify-content:space-between;min-height:300px}
+  .reel-head{display:flex;justify-content:space-between;align-items:baseline}
+  .reel-head span:last-child{color:var(--accent)}
+  .ticks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:22px 0 18px}
+  .tick{height:58px;border:1px solid var(--line);position:relative;background:var(--panel-2);overflow:hidden}
+  .tick i{position:absolute;left:6px;bottom:6px;font-family:var(--mono);font-size:9px;color:var(--faint);font-style:normal}
+  .tick.on{border-color:#4a332a;background:#211713}
+  .tick.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent)}
+  .tick.on i{color:var(--accent)}
+  .reel-foot{font-size:11px;line-height:1.7;color:var(--faint)}
+  .reel-foot b{color:var(--muted);font-weight:500}
+
+  .filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:22px 0 26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:18px}
+  .filters .label{margin-right:10px}
+  .chip{border:1px solid var(--line);padding:8px 14px;font-size:12px;letter-spacing:.03em;color:var(--muted);transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease)}
+  .chip sup{font-family:var(--mono);font-size:9px;margin-left:6px;color:var(--faint)}
+  .chip:hover{border-color:#4a4a4d;color:var(--paper)}
+  .chip[aria-pressed="true"]{background:var(--paper);border-color:var(--paper);color:var(--ink)}
+  .chip[aria-pressed="true"] sup{color:#6d675e}
+  .filters .count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.1em}
+
+  .wall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 26px;padding:34px 0 84px}
+  .card{position:relative;border-top:1px solid var(--line);padding-top:14px}
+  .poster{position:relative;aspect-ratio:16/9;background:var(--panel-2);border:1px solid var(--line);overflow:hidden;isolation:isolate}
+  .poster .cap{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--faint);z-index:3}
+  .poster .tag{position:absolute;top:8px;right:10px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);border:1px solid var(--line);padding:3px 6px;background:rgba(12,12,13,.6);z-index:3}
+  .scene{position:absolute;inset:0}
+  .card h3{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.3;margin-top:16px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .card h3 em{font-family:var(--mono);font-style:normal;font-size:10px;color:var(--faint);font-weight:400;letter-spacing:.08em}
+  .path{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:6px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .desc{font-size:13px;line-height:1.8;color:#b7b1a6;margin-top:10px;max-width:34ch}
+  .state{display:flex;align-items:center;gap:7px;margin-top:12px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .state i{width:5px;height:5px;border-radius:50%;background:#7d8a6a;display:inline-block}
+  .card:hover .poster,.card:focus-within .poster{border-color:#434346}
+  .card:hover .scene [data-anim],.card:focus-within .scene [data-anim]{animation-play-state:running}
+
+  /* scene 01: de-ai */
+  .s-lines{padding:22px 24px;display:flex;flex-direction:column;gap:9px;justify-content:center;height:100%}
+  .s-lines span{height:6px;background:#4c4a4c;display:block;width:var(--w,80%)}
+  .s-lines span:nth-child(2){background:#6c665d}
+  .s-lines span:nth-child(3){background:#2d2c2e}
+  .s-lines .strike{position:relative;background:#5d4038}
+  .s-lines .strike::after{content:"";position:absolute;left:-4%;right:8%;top:50%;height:1px;background:var(--accent);transform:scaleX(0);transform-origin:left;animation:scratch 2.4s var(--ease) infinite}
+  .s-lines .caret{width:2px;height:12px;background:var(--accent);margin-top:2px;animation:blink 1s steps(1) infinite}
+  @keyframes scratch{0%,20%{transform:scaleX(0)}45%,80%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  /* scene 02: motion frames */
+  .s-frames{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:18px;height:100%;align-items:center}
+  .s-frames .f{border:1px solid #4a4a4d;height:100%;position:relative;background:#1e1e20}
+  .s-frames .f::after{content:"";position:absolute;width:12px;height:12px;background:var(--accent);left:10%;top:38%;animation:hop 2.8s var(--ease) infinite}
+  .s-frames .f:nth-child(2)::after{animation-delay:.18s;background:var(--paper)}
+  .s-frames .f:nth-child(3)::after{animation-delay:.36s;background:#8c8478}
+  @keyframes hop{0%,12%{transform:translate(0,0)}45%,70%{transform:translate(120%,0)}100%{transform:translate(0,0)}}
+
+  /* scene 03: scroll pin */
+  .s-scroll{padding:20px;height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px}
+  .s-scroll .rail{height:1px;background:#3b3a3d;position:relative}
+  .s-scroll .rail::before{content:"";position:absolute;left:0;top:-3px;width:7px;height:7px;background:var(--accent);animation:travel 3s var(--ease) infinite}
+  .s-scroll .rail::after{content:"";position:absolute;left:44%;top:-9px;bottom:-9px;width:1px;background:#6c665d}
+  .s-scroll .blocks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .s-scroll .blocks i{height:26px;background:#2a2a2d;border:1px solid #454548;display:block}
+  .s-scroll .blocks i:nth-child(2){background:#2e2c2b;border-color:#4a3a32}
+  @keyframes travel{0%,10%{transform:translateX(0)}55%,80%{transform:translateX(210px)}100%{transform:translateX(0)}}
+
+  /* scene 04: copy */
+  .s-copy{padding:20px 24px;height:100%;display:flex;flex-direction:column;justify-content:center;gap:11px}
+  .s-copy .q{font-family:var(--serif);font-size:44px;line-height:.7;color:var(--accent);height:26px}
+  .s-copy i{display:block;height:6px;background:#3a383a;width:var(--w,76%)}
+  .s-copy i:nth-of-type(2){background:#4a4742}
+  .s-copy i:nth-of-type(3){background:#312f31}
+  .s-copy .swap{position:relative;height:6px;width:64%;background:#312f31;overflow:hidden}
+  .s-copy .swap::after{content:"";position:absolute;inset:0;background:var(--accent);transform:translateX(-101%);animation:swap 2.6s var(--ease) infinite}
+  @keyframes swap{0%,20%{transform:translateX(-101%)}55%,80%{transform:translateX(0)}100%{transform:translateX(101%)}}
+
+  /* scene 05: lens */
+  .s-lens{height:100%;position:relative;background:#171719;overflow:hidden}
+  .s-lens .cardA,.s-lens .cardB,.s-lens .cardC{position:absolute;border:1px solid #3a3a3d;background:#202022}
+  .s-lens .cardA{left:16%;top:18%;width:44%;height:48%}
+  .s-lens .cardB{left:38%;top:34%;width:44%;height:48%;background:#2a2725;border-color:#463c35}
+  .s-lens .cardC{left:27%;top:26%;width:44%;height:48%;background:#19191b}
+  .s-lens .glass{position:absolute;width:38%;aspect-ratio:1;border-radius:50%;left:48%;top:24%;border:1px solid rgba(242,239,232,.5);background:rgba(242,239,232,.06);backdrop-filter:blur(2px);animation:lens 3.4s var(--ease) infinite}
+  .s-lens .glass::after{content:"";position:absolute;left:18%;top:18%;width:30%;height:30%;border-radius:50%;border:1px solid rgba(226,85,47,.7)}
+  @keyframes lens{0%,10%{transform:translate(0,0)}50%,65%{transform:translate(-18%,8%)}100%{transform:translate(0,0)}}
+
+  /* scene 06: checklist */
+  .s-check{padding:20px 22px;height:100%;display:flex;flex-direction:column;justify-content:center;gap:10px}
+  .s-check .row{display:grid;grid-template-columns:12px 1fr 34px;gap:9px;align-items:center}
+  .s-check .box{width:11px;height:11px;border:1px solid #5b5750;position:relative}
+  .s-check .row:nth-child(1) .box::after,.s-check .row:nth-child(2) .box::after{content:"";position:absolute;left:2px;top:2px;right:2px;bottom:2px;background:var(--accent);transform:scale(0);animation:tick 3s var(--ease) infinite}
+  .s-check .row:nth-child(2) .box::after{animation-delay:.25s}
+  .s-check .bar{height:5px;background:#353437;display:block}
+  .s-check .row:nth-child(1) .bar{width:80%}.s-check .row:nth-child(2) .bar{width:64%}.s-check .row:nth-child(3) .bar{width:72%}
+  .s-check .num{font-family:var(--mono);font-size:8px;color:#6b665d;text-align:right}
+  @keyframes tick{0%,15%{transform:scale(0)}45%,85%{transform:scale(1)}100%{transform:scale(0)}}
+
+  .how{border-top:1px solid var(--line);padding:56px 0 60px}
+  .how-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:40px}
+  h2{font-family:var(--serif);font-size:clamp(28px,3vw,40px);line-height:1.2;font-weight:600;letter-spacing:-.01em}
+  .how-head p{font-size:14px;line-height:1.9;color:var(--muted);max-width:46ch;justify-self:end}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+  .step{padding:26px 28px 6px 0;border-right:1px solid var(--line)}
+  .step:last-child{border-right:0;padding-right:0}
+  .step .n{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.12em}
+  .step h3{font-size:16px;font-weight:600;margin:14px 0 8px}
+  .step p{font-size:13px;line-height:1.85;color:var(--muted);max-width:34ch}
+  .step code{font-family:var(--mono);font-size:11px;color:#c9c3b8;background:#1a1a1c;padding:2px 5px;border:1px solid var(--line)}
+
+  footer.site{border-top:1px solid var(--line);padding:30px 0 40px}
+  .foot{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+  .foot p{font-size:11px;line-height:1.9;color:var(--faint);max-width:52ch}
+  .foot .meta{text-align:right;font-family:var(--mono);font-size:10px;line-height:1.9;color:var(--faint);letter-spacing:.05em;white-space:nowrap}
+
+  @media (max-width:1040px){
+    .wrap{width:calc(100% - 56px)}
+    .hero{grid-template-columns:1fr;gap:36px}
+    .reel{min-height:auto}
+    .wall{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .how-head{grid-template-columns:1fr}
+    .how-head p{justify-self:start}
+  }
+  @media (max-width:680px){
+    .wrap{width:calc(100% - 36px)}
+    .topnav{display:none}
+    .hero{padding:44px 0 30px}
+    h1{font-size:clamp(38px,10.5vw,52px)}
+    .lede{font-size:15px;margin-top:22px}
+    .hero-meta div{padding-right:18px;margin-right:18px}
+    .wall{grid-template-columns:1fr;gap:30px;padding-bottom:60px}
+    .filters{gap:8px;padding:18px 0}
+    .filters .count{display:none}
+    .chip{padding:7px 11px;font-size:11px}
+    .steps{grid-template-columns:1fr}
+    .step{border-right:0;border-bottom:1px solid var(--line);padding:22px 0}
+    .step:last-child{border-bottom:0}
+    .foot{flex-direction:column}
+    .foot .meta{text-align:left}
+    .how{padding:42px 0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="site">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><b>GROK BOT / 能力放映室</b></div>
+    <nav class="topnav" aria-label="页面导航">
+      <a href="#skills" aria-current="page">技能卡</a>
+      <a href="#how">装载流程</a>
+      <a href="../index.html">总索引</a>
+    </nav>
+    <div class="counter">REEL <b>13</b> / 16</div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap hero" aria-labelledby="h1">
+    <div>
+      <div class="eyebrow mono">Skills · 技能库 / 来源：Showreel Design</div>
+      <h1 id="h1">把 16 份技能，<br><span class="thin">剪成一条</span><br><span class="accent">能用的片单。</span></h1>
+      <p class="lede">Grok Bot 不会把提示词堆成一座山。它先读 <strong>brief.json</strong>，再去 <strong>.skills/</strong> 里挑这一单真正要用的技能，按顺序装载，最后把结果落成页面。</p>
+      <div class="hero-meta">
+        <div><span>本批范围</span><b>13 / 16</b></div>
+        <div><span>装载技能</span><b>6 份</b></div>
+        <div><span>页面产出</span><b>1 页</b></div>
+        <div><span>外链发布</span><b>0 次</b></div>
+      </div>
+    </div>
+
+    <aside class="reel" aria-label="16 项资源进度">
+      <div class="reel-head"><span class="mono">Index 01–16</span><span class="mono">本批 13–16</span></div>
+      <div class="ticks" aria-hidden="true">
+        <div class="tick"><i>01</i></div><div class="tick"><i>02</i></div><div class="tick"><i>03</i></div><div class="tick"><i>04</i></div>
+        <div class="tick"><i>05</i></div><div class="tick"><i>06</i></div><div class="tick"><i>07</i></div><div class="tick"><i>08</i></div>
+        <div class="tick"><i>09</i></div><div class="tick"><i>10</i></div><div class="tick"><i>11</i></div><div class="tick"><i>12</i></div>
+        <div class="tick on"><i>13</i></div><div class="tick on"><i>14</i></div><div class="tick on"><i>15</i></div><div class="tick on"><i>16</i></div>
+      </div>
+      <div class="reel-foot"><b>13–16</b> 由本会话制作：Showreel Design、Anime、Recent、Thrine。其余条目由并行会话补齐，索引里保留占位。</div>
+    </aside>
+  </section>
+
+  <section class="wrap" id="skills" aria-labelledby="skills-h">
+    <h2 id="skills-h" style="position:absolute;left:-9999px">本单装载的技能</h2>
+    <div class="filters" role="group" aria-label="按用途筛选技能">
+      <span class="mono label">用途</span>
+      <button class="chip" data-filter="all" aria-pressed="true">全部<sup>6</sup></button>
+      <button class="chip" data-filter="write" aria-pressed="false">写作<sup>2</sup></button>
+      <button class="chip" data-filter="motion" aria-pressed="false">动效<sup>2</sup></button>
+      <button class="chip" data-filter="deliver" aria-pressed="false">交付<sup>2</sup></button>
+      <span class="count" id="visibleCount">06 / 06 已装载</span>
+    </div>
+
+    <div class="wall" id="wall">
+      <article class="card" data-cat="write" tabindex="0">
+        <div class="poster">
+          <span class="cap">SKILL 01</span><span class="tag">写作</span>
+          <div class="scene s-lines" data-anim>
+            <span style="--w:84%"></span><span style="--w:68%"></span><span class="strike" style="--w:74%"></span><span style="--w:52%"></span><span class="caret" aria-hidden="true"></span>
+          </div>
+        </div>
+        <h3>de-ai-zh <em>WRITE</em></h3>
+        <div class="path">.skills/de-ai-zh/SKILL.md</div>
+        <p class="desc">把口号式的大词挑出来，换成具体动作。先删，再改写，最后核对事实没有被改强。</p>
+        <div class="state"><i></i>已装载 · 用于本页文案</div>
+      </article>
+
+      <article class="card" data-cat="motion" tabindex="0">
+        <div class="poster">
+          <span class="cap">SKILL 02</span><span class="tag">动效</span>
+          <div class="scene s-frames" data-anim>
+            <div class="f"></div><div class="f"></div><div class="f"></div>
+          </div>
+        </div>
+        <h3>motion-house-style <em>MOTION</em></h3>
+        <div class="path">.skills/motion-house-style/SKILL.md</div>
+        <p class="desc">每 2–4 秒给一个新信息；静音可读、手机可读；不用粒子爆发、角标边框和弹跳缓动。</p>
+        <div class="state"><i></i>已装载 · 用于节奏</div>
+      </article>
+
+      <article class="card" data-cat="motion" tabindex="0">
+        <div class="poster">
+          <span class="cap">SKILL 03</span><span class="tag">动效</span>
+          <div class="scene s-scroll" data-anim>
+            <div class="rail"></div>
+            <div class="blocks"><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+        <h3>gsap-scrolltrigger <em>MOTION</em></h3>
+        <div class="path">.skills/gsap-scrolltrigger/SKILL.md</div>
+        <p class="desc">滚动进入时只播一次，不来回重播；揭示用 transform 和 opacity，别去动 top 和 width。</p>
+        <div class="state"><i></i>已装载 · 用于揭示</div>
+      </article>
+
+      <article class="card" data-cat="write" tabindex="0">
+        <div class="poster">
+          <span class="cap">SKILL 04</span><span class="tag">写作</span>
+          <div class="scene s-copy" data-anim>
+            <div class="q" aria-hidden="true">“</div>
+            <i style="--w:78%"></i><i style="--w:58%"></i><i style="--w:70%"></i>
+            <div class="swap"></div>
+          </div>
+        </div>
+        <h3>viral-copy-zh <em>WRITE</em></h3>
+        <div class="path">.skills/viral-copy-zh/SKILL.md</div>
+        <p class="desc">标题先找真实的张力，不编互动量。多写几条，再按平台规则删掉夸大和绝对化承诺。</p>
+        <div class="state"><i></i>已装载 · 用于标题</div>
+      </article>
+
+      <article class="card" data-cat="deliver" tabindex="0">
+        <div class="poster">
+          <span class="cap">SKILL 05</span><span class="tag">交付</span>
+          <div class="scene s-lens" data-anim>
+            <div class="cardA"></div><div class="cardB"></div><div class="cardC"></div><div class="glass"></div>
+          </div>
+        </div>
+        <h3>surface-web-craft-kit <em>CRAFT</em></h3>
+        <div class="path">.skills/surface-web-craft-kit/SKILL.md</div>
+        <p class="desc">一页只用一种主手艺：材质、排印、动效三选一。先保证手机不横向溢出，再谈“贵感”。</p>
+        <div class="state"><i></i>已装载 · 用于材质</div>
+      </article>
+
+      <article class="card" data-cat="deliver" tabindex="0">
+        <div class="poster">
+          <span class="cap">SKILL 06</span><span class="tag">交付</span>
+          <div class="scene s-check" data-anim>
+            <div class="row"><span class="box"></span><span class="bar"></span><span class="num">01</span></div>
+            <div class="row"><span class="box"></span><span class="bar"></span><span class="num">02</span></div>
+            <div class="row"><span class="box"></span><span class="bar"></span><span class="num">03</span></div>
+          </div>
+        </div>
+        <h3>dsh-executor <em>DELIVER</em></h3>
+        <div class="path">.skills/dsh-executor/SKILL.md</div>
+        <p class="desc">成品要能直接打开；截图、清单、自检一起交。没有渲染的东西不写成“已完成”。</p>
+        <div class="state"><i></i>已装载 · 用于交付</div>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap how" id="how" aria-labelledby="how-h">
+    <div class="how-head">
+      <h2 id="how-h">它不是“读一遍”，<br>是“挑一份来用”。</h2>
+      <p>Showreel.design 把 261 条片子按行业、风格、声音切开，让人先缩小范围再点开。技能库用同一套逻辑：先看这单要产出什么，再决定装载哪一份 SKILL.md。</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="n">STEP 01</div>
+        <h3>读 brief，不猜</h3>
+        <p>范围、平台、禁止项、验收锚点都在文件里。先读 <code>brief.json</code>，再读 <code>INSTRUCTIONS.md</code>，不从记忆里补。</p>
+      </div>
+      <div class="step">
+        <div class="n">STEP 02</div>
+        <h3>按用途选技能</h3>
+        <p>写作看 de-ai-zh 和 viral-copy-zh；动效看 motion-house-style 和 GSAP；交付看 dsh-executor。选中的才写进 <code>skills_used</code>。</p>
+      </div>
+      <div class="step">
+        <div class="n">STEP 03</div>
+        <h3>落成能打开的页</h3>
+        <p>不是交一段“参考了 xx”的说明。技能要变成版式、节奏、筛选和截图；页面在本地打开，控制台不留 error。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <p>本页是 Grok Bot 能力展示的第 13 页，学习对象为 Showreel.design 的索引与筛选结构。页面不使用其视频、海报或标识。研究记录见共享目录 <span class="mono">notes/13-showreel-design.md</span>。</p>
+    <div class="meta">2026-11-13 · ASIA/SHANGHAI<br>GROK BOT / SKILL REEL<br>NO PUBLISH</div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+  if (!reduce && window.gsap) {
+    gsap.set('.hero .eyebrow, .hero h1, .hero .lede, .hero-meta, .reel', {opacity:0, y:10, filter:'blur(2px)'});
+    var tl = gsap.timeline({defaults:{duration:.8, ease:'power3.out'}});
+    tl.to('.hero .eyebrow',{opacity:1,y:0,filter:'blur(0px)'},0)
+      .to('.hero h1',{opacity:1,y:0,filter:'blur(0px)'},.08)
+      .to('.hero .lede',{opacity:1,y:0,filter:'blur(0px)'},.2)
+      .to('.hero-meta',{opacity:1,y:0,filter:'blur(0px)'},.3)
+      .to('.reel',{opacity:1,y:0,filter:'blur(0px)'},.24);
+
+    gsap.utils.toArray('.card').forEach(function(card){
+      gsap.from(card, {
+        opacity:0, y:18, duration:.7, ease:'power3.out',
+        scrollTrigger:{trigger:card, start:'top 92%', once:true}
+      });
+    });
+    gsap.from('.step', {
+      opacity:0, y:14, duration:.65, stagger:.08, ease:'power3.out',
+      scrollTrigger:{trigger:'.steps', start:'top 88%', once:true}
+    });
+  }
+
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var count = document.getElementById('visibleCount');
+  function apply(filter){
+    var shown = 0;
+    cards.forEach(function(card){
+      var on = filter === 'all' || card.getAttribute('data-cat') === filter;
+      card.style.display = on ? '' : 'none';
+      if (on) shown++;
+    });
+    count.textContent = String(shown).padStart(2,'0') + ' / 06 已装载';
+    if (!reduce && window.gsap) {
+      gsap.fromTo(cards.filter(function(c){return c.style.display !== 'none';}),
+        {opacity:0, y:10}, {opacity:1, y:0, duration:.45, stagger:.04, ease:'power2.out', overwrite:true});
+    }
+  }
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      chips.forEach(function(c){c.setAttribute('aria-pressed','false')});
+      chip.setAttribute('aria-pressed','true');
+      apply(chip.getAttribute('data-filter'));
+    });
+  });
+})();
+</script>
+</body>
+</html>

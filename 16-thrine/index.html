@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四条会话，一张交付桌 · Grok Bot 能力展示</title>
+<meta name="description" content="Grok Bot 把 16 项资源拆成四批，交给四条并行会话；共享目录是同一张桌子。第 16 页，Thrine 的排印索引方法与委派流程。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%230f1417'/><rect x='14' y='16' width='3' height='32' fill='%23d8a15f'/><rect x='24' y='16' width='26' height='3' fill='%23e9e4d8'/><rect x='24' y='27' width='18' height='3' fill='%23929a9c'/><rect x='24' y='38' width='22' height='3' fill='%23929a9c'/></svg>">
+<style>
+  :root{
+    --bg:#0f1417;
+    --panel:#151c20;
+    --panel-2:#1b2328;
+    --text:#e9e4d8;
+    --muted:#9aa1a2;
+    --faint:#687073;
+    --line:#2a3237;
+    --accent:#d8a15f;
+    --accent-ink:#1a1208;
+    --serif:"Noto Serif CJK SC","Songti SC","Source Han Serif SC",serif;
+    --sans:"Noto Sans CJK SC","PingFang SC","Source Han Sans SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  body.light{
+    --bg:#f2eee4;
+    --panel:#e9e3d6;
+    --panel-2:#e1dacb;
+    --text:#161411;
+    --muted:#625d52;
+    --faint:#8f8778;
+    --line:#d0c8b8;
+    --accent:#a45f2b;
+    --accent-ink:#fff8ee;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--bg);color:var(--text);scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;background:var(--bg);color:var(--text);transition:background .45s var(--ease),color .45s var(--ease)}
+  ::selection{background:var(--accent);color:var(--accent-ink)}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--accent);color:var(--accent-ink);padding:12px 16px;z-index:99}
+  .skip:focus{left:12px;top:12px}
+  .wrap{width:min(1320px,100% - 96px);margin-inline:auto}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  header.site{padding:26px 0 0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:22px;padding-bottom:17px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{width:18px;height:18px;border:1px solid var(--text);position:relative;flex:none}
+  .brand .mark::after{content:"";position:absolute;left:4px;top:4px;width:2px;height:8px;background:var(--accent)}
+  .brand b{font-size:13px;font-weight:600;letter-spacing:.15em}
+  .topnav{display:flex;gap:24px;align-items:center}
+  .topnav a{font-size:12px;letter-spacing:.05em;color:var(--muted);transition:color .3s var(--ease)}
+  .topnav a:hover,.topnav a[aria-current]{color:var(--text)}
+  .top-right{display:flex;align-items:center;gap:16px}
+  .counter{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+  .counter b{color:var(--accent);font-weight:500}
+  .theme{font-family:var(--mono);font-size:9px;letter-spacing:.1em;border:1px solid var(--line);padding:5px 8px;color:var(--muted);transition:all .3s var(--ease)}
+  .theme:hover{border-color:var(--accent);color:var(--accent)}
+
+  .hero{padding:62px 0 46px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:70px;align-items:end}
+  .eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--accent)}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(46px,6vw,90px);line-height:1.03;letter-spacing:-.028em;max-width:860px}
+  h1 .brass{color:var(--accent)}
+  h1 .thin{color:var(--faint);font-weight:400}
+  .lede{margin-top:28px;max-width:580px;font-size:16px;line-height:1.95;color:var(--muted)}
+  .lede strong{color:var(--text);font-weight:600}
+  .diagram{border-top:1px solid var(--line);padding-top:16px}
+  .diagram svg{width:100%;height:auto;display:block}
+  .diagram .cap{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--faint)}
+
+  .board{display:grid;grid-template-columns:1.1fr .9fr;gap:64px;padding:10px 0 64px;align-items:start}
+  .roster{border-top:1px solid var(--text)}
+  .lane{display:grid;grid-template-columns:54px 1fr auto;gap:16px;align-items:center;width:100%;text-align:left;padding:22px 6px;border-bottom:1px solid var(--line);position:relative;transition:background .35s var(--ease),padding .35s var(--ease)}
+  .lane::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:transform .35s var(--ease)}
+  .lane:hover{background:var(--panel);padding-left:14px}
+  .lane[aria-pressed="true"]{background:var(--panel);padding-left:14px}
+  .lane[aria-pressed="true"]::before{transform:scaleY(1)}
+  .lnum{font-family:var(--serif);font-size:38px;line-height:1;color:var(--faint);transition:color .35s var(--ease)}
+  .lane[aria-pressed="true"] .lnum,.lane:hover .lnum{color:var(--accent)}
+  .lmain b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);font-weight:400}
+  .lmain em{display:block;font-style:normal;font-size:15px;line-height:1.45;margin-top:4px;color:var(--text)}
+  .lmain small{display:block;font-size:11px;color:var(--faint);margin-top:3px;line-height:1.6}
+  .lstatus{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--faint);text-align:right;white-space:nowrap}
+  .lstatus.on{color:var(--accent)}
+
+  .preview{border:1px solid var(--line);background:var(--panel);padding:24px 24px 22px;position:sticky;top:24px;min-height:430px;display:flex;flex-direction:column}
+  .p-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+  .p-head .b{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--accent)}
+  .p-head .s{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--muted)}
+  .p-num{font-family:var(--serif);font-size:clamp(72px,8vw,112px);line-height:.9;color:var(--accent);margin:18px 0 4px;letter-spacing:-.04em}
+  .preview h3{font-family:var(--serif);font-size:25px;font-weight:600;line-height:1.3}
+  .preview .desc{font-size:12px;line-height:1.85;color:var(--muted);margin-top:10px;max-width:40ch}
+  .p-items{list-style:none;margin-top:16px;border-top:1px solid var(--line)}
+  .p-items li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:11px;color:var(--text)}
+  .p-items li span:last-child{font-family:var(--mono);font-size:8px;color:var(--faint);letter-spacing:.08em;white-space:nowrap}
+  .p-path{margin-top:auto;padding-top:16px;font-family:var(--mono);font-size:9px;line-height:1.8;color:var(--faint);word-break:break-all}
+
+  .rules{border-top:1px solid var(--line);padding:46px 0 54px;display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  .rule{padding:0 28px;border-right:1px solid var(--line)}
+  .rule:first-child{padding-left:0}
+  .rule:last-child{border-right:0}
+  .rule .n{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.12em}
+  .rule h3{font-size:15px;font-weight:600;margin:12px 0 7px}
+  .rule p{font-size:12px;line-height:1.85;color:var(--muted);max-width:34ch}
+  .rule code{font-family:var(--mono);font-size:10px;background:var(--panel-2);padding:1px 4px}
+
+  .ledger-sec{border-top:1px solid var(--line);padding:44px 0 58px;display:grid;grid-template-columns:.8fr 1.2fr;gap:60px;align-items:start}
+  .ledger-copy h2{font-family:var(--serif);font-size:clamp(28px,3vw,40px);line-height:1.22;font-weight:600;letter-spacing:-.01em}
+  .ledger-copy p{font-size:13px;line-height:1.9;color:var(--muted);margin-top:14px;max-width:38ch}
+  .ledger{width:100%;border-collapse:collapse}
+  .ledger th{text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);font-weight:400;padding:0 0 10px;border-bottom:1px solid var(--line)}
+  .ledger td{padding:11px 0;border-bottom:1px solid var(--line);font-size:12px;vertical-align:top}
+  .ledger td:last-child{text-align:right;font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.06em;white-space:nowrap}
+  .ledger td:nth-child(2){color:var(--muted);font-family:var(--mono);font-size:9px}
+
+  footer.site{border-top:1px solid var(--line);padding:28px 0 38px}
+  .foot{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+  .foot p{font-size:11px;line-height:1.9;color:var(--faint);max-width:58ch}
+  .foot .meta{text-align:right;font-family:var(--mono);font-size:10px;line-height:1.9;color:var(--faint);letter-spacing:.05em;white-space:nowrap}
+
+  @media (max-width:1040px){
+    .wrap{width:calc(100% - 56px)}
+    .hero{grid-template-columns:1fr;gap:34px}
+    .diagram{max-width:460px}
+    .board{grid-template-columns:1fr;gap:30px}
+    .preview{position:static;min-height:0}
+    .ledger-sec{grid-template-columns:1fr;gap:28px}
+  }
+  @media (max-width:680px){
+    .wrap{width:calc(100% - 36px)}
+    .topnav{display:none}
+    .hero{padding:40px 0 30px}
+    h1{font-size:clamp(38px,10.8vw,54px)}
+    .lede{font-size:15px;margin-top:20px}
+    .lane{grid-template-columns:44px 1fr;gap:12px;padding:18px 4px}
+    .lstatus{grid-column:2;text-align:left;margin-top:2px}
+    .lnum{font-size:32px}
+    .board{padding-bottom:44px}
+    .preview{padding:20px}
+    .rules{grid-template-columns:1fr}
+    .rule{border-right:0;border-bottom:1px solid var(--line);padding:20px 0}
+    .rule:last-child{border-bottom:0}
+    .ledger-sec{padding:34px 0 44px}
+    .foot{flex-direction:column}
+    .foot .meta{text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="site">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><b>GROK BOT / 交付桌</b></div>
+    <nav class="topnav" aria-label="页面导航">
+      <a href="#board" aria-current="page">四条会话</a>
+      <a href="#rules">协作规矩</a>
+      <a href="../index.html">总索引</a>
+    </nav>
+    <div class="top-right">
+      <button class="theme" id="theme" aria-pressed="false">纸面</button>
+      <div class="counter">REEL <b>16</b> / 16</div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap hero" aria-labelledby="h1">
+    <div>
+      <div class="eyebrow mono">Delegation · 委派 / 来源：Thrine（未核实，技法参照 Httpster）</div>
+      <h1 id="h1"><span class="brass">四条会话，</span><br><span class="thin">一张</span>交付桌。</h1>
+      <p class="lede">Grok Bot 不把 16 项塞进一条对话。它把 4 项一批分给四条 dsh 会话，各自读 brief、做研究、写笔记、建页面；<strong>只有共享目录是同一张桌子。</strong></p>
+    </div>
+    <aside class="diagram" aria-label="四条会话汇入共享目录">
+      <svg viewBox="0 0 330 210" role="img" aria-label="四条会话分别写入一个共享目录">
+        <g stroke="var(--line)" stroke-width="1" fill="none">
+          <path d="M6 26 H74 V104 H196"/>
+          <path d="M6 72 H74 V104 H196"/>
+          <path d="M6 128 H74 V104 H196"/>
+          <path d="M6 174 H74 V104 H196"/>
+        </g>
+        <g fill="var(--accent)">
+          <rect x="4" y="23" width="3" height="6"/><rect x="4" y="69" width="3" height="6"/>
+          <rect x="4" y="125" width="3" height="6"/><rect x="4" y="171" width="3" height="6"/>
+        </g>
+        <rect x="196" y="70" width="120" height="68" fill="none" stroke="var(--accent)"/>
+        <text x="208" y="92" fill="var(--text)" font-family="ui-monospace, monospace" font-size="9" letter-spacing="1">SHARED / PAGES</text>
+        <text x="208" y="110" fill="var(--muted)" font-family="ui-monospace, monospace" font-size="8" letter-spacing="1">notes / pages</text>
+        <text x="208" y="126" fill="var(--accent)" font-family="ui-monospace, monospace" font-size="8" letter-spacing="1">ONE INDEX</text>
+        <g fill="var(--faint)" font-family="ui-monospace, monospace" font-size="7" letter-spacing="1">
+          <text x="82" y="20">SESSION 01</text><text x="82" y="66">SESSION 02</text>
+          <text x="82" y="122">SESSION 03</text><text x="82" y="168">SESSION 04</text>
+        </g>
+      </svg>
+      <div class="cap"><span>4 lanes / 4 items each</span><span>本会话 = 13—16</span></div>
+    </aside>
+  </section>
+
+  <section class="wrap board" id="board" aria-labelledby="board-h">
+    <div>
+      <h2 id="board-h" style="position:absolute;left:-9999px">四条并行会话</h2>
+      <div class="roster" id="roster">
+        <button class="lane" data-i="0" aria-pressed="false">
+          <span class="lnum">01</span>
+          <span class="lmain"><b>BATCH 01—04</b><em>技能与剪辑</em><small>landing-page-design / design-to-motion / HyperFrames / anything2explainer</small></span>
+          <span class="lstatus">并行会话</span>
+        </button>
+        <button class="lane" data-i="1" aria-pressed="false">
+          <span class="lnum">02</span>
+          <span class="lmain"><b>BATCH 05—08</b><em>剪辑与参考</em><small>video-talkcraft / Motion Harness / Framer Gallery / Awwwards</small></span>
+          <span class="lstatus">并行会话</span>
+        </button>
+        <button class="lane" data-i="2" aria-pressed="false">
+          <span class="lnum">03</span>
+          <span class="lmain"><b>BATCH 09—12</b><em>交互与组件</em><small>motionsites / React Bits / Aceternity / Uiverse</small></span>
+          <span class="lstatus">并行会话</span>
+        </button>
+        <button class="lane" data-i="3" aria-pressed="true">
+          <span class="lnum">04</span>
+          <span class="lmain"><b>BATCH 13—16</b><em>灵感索引与收束</em><small>Showreel Design / Anime / Recent / Thrine</small></span>
+          <span class="lstatus on">本会话 · 4/4</span>
+        </button>
+      </div>
+    </div>
+
+    <aside class="preview" id="preview" aria-live="polite" aria-label="当前批次详情">
+      <div class="p-head"><span class="b" id="pBatch">BATCH 13—16</span><span class="s" id="pStatus">本会话 · 已交付</span></div>
+      <div class="p-num" id="pNum">04</div>
+      <h3 id="pTitle">灵感索引与收束</h3>
+      <p class="desc" id="pDesc">本批四项都已核实、写笔记、建页、出桌面与手机截图；最后负责读现有索引，把 16 个条目对齐，不删别人的链接。</p>
+      <ul class="p-items" id="pItems">
+        <li><span>Showreel Design</span><span>DONE</span></li>
+        <li><span>Anime（anime.js）</span><span>DONE</span></li>
+        <li><span>Recent</span><span>DONE</span></li>
+        <li><span>Thrine</span><span>GAP → HTTPSTER</span></li>
+      </ul>
+      <div class="p-path" id="pPath">notes/13–16 · pages/13–16 · screenshots/8 · pages/index.html · REPORT.md</div>
+    </aside>
+  </section>
+
+  <section class="wrap rules" id="rules" aria-label="共享目录的三条规矩">
+    <div class="rule">
+      <div class="n">01 / READ FIRST</div>
+      <h3>先读，再写</h3>
+      <p>共享 <code>pages/index.html</code> 与 <code>REPORT.md</code> 是四条会话都会碰的文件。每次改之前先读当前内容，只补自己那四行。</p>
+    </div>
+    <div class="rule">
+      <div class="n">02 / STAY IN LANE</div>
+      <h3>不改别人的页</h3>
+      <p>每条会话只写自己的 <code>pages/NN-slug/</code>、<code>notes/NN-slug.md</code> 和截图。缺的条目保留“制作中”，不替别人补内容。</p>
+    </div>
+    <div class="rule">
+      <div class="n">03 / CLOSE THE INDEX</div>
+      <h3>最后收索引</h3>
+      <p>索引是交付的一部分。按实际文件生成链接，16 项逐一检查；没有的保留占位，已有的链过去，不抹掉任何一条。</p>
+    </div>
+  </section>
+
+  <section class="wrap ledger-sec" aria-labelledby="ledger-h">
+    <div class="ledger-copy">
+      <div class="eyebrow mono">Handoff / 本会话对账</div>
+      <h2 id="ledger-h">委派不是<br>把任务扔出去。</h2>
+      <p>每批要写清范围、交付路径、索引职责和禁止项。会话之间只通过文件协作，不通过聊天传话；所以“做完了”必须能在共享目录里被下一个会话读到。</p>
+      <p style="margin-top:12px;color:var(--faint)">Thrine 的原始站点未核实。本页的排印索引方法取自已核实的 Httpster；证据缺口写进 <span class="mono">notes/16-thrine.md</span>，不编造域名。</p>
+    </div>
+    <table class="ledger">
+      <thead><tr><th>产物</th><th>负责</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td>notes/13—16</td><td>本会话</td><td>4 / 4</td></tr>
+        <tr><td>pages/13—16</td><td>本会话</td><td>4 / 4</td></tr>
+        <tr><td>screenshots 桌面 + 手机</td><td>本会话</td><td>8 / 8</td></tr>
+        <tr><td>pages/index.html</td><td>本会话收束</td><td>16 项检查</td></tr>
+        <tr><td>REPORT.md</td><td>本会话追加</td><td>4 行</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <p>本页是 Grok Bot 能力展示的第 16 页，主题是并行委派与共享交付。Thrine 本体未核实，排印索引方法参照 <a href="https://httpster.net/" target="_blank" rel="noopener" style="border-bottom:1px solid var(--line)">Httpster</a>。研究记录见 <span class="mono">notes/16-thrine.md</span>。</p>
+    <div class="meta">2026-11-13 · ASIA/SHANGHAI<br>GROK BOT / HANDOFF TABLE<br>NO PUBLISH</div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var data = [
+    {
+      batch:'BATCH 01—04', num:'01', title:'技能与剪辑', status:'并行会话',
+      desc:'第一批从“技能”和“剪辑”两条线进入：把静态设计变成页面，把页面变成可导出的动作，再试剪辑与解释类视频的项目。',
+      items:[['Landing Page Design','PAGE'],['Design to Motion','MOTION'],['HyperFrames','VIDEO'],['anything2explainer','VIDEO']],
+      path:'以该会话 brief 与共享目录实际文件为准'
+    },
+    {
+      batch:'BATCH 05—08', num:'02', title:'剪辑与参考', status:'并行会话',
+      desc:'第二批继续剪辑线，同时打开三个网页参考入口：先看别人怎么组织作品，再决定自己的版式。',
+      items:[['video-talkcraft','VIDEO'],['Motion Harness','KIT'],['Framer Gallery','REF'],['Awwwards','REF']],
+      path:'以该会话 brief 与共享目录实际文件为准'
+    },
+    {
+      batch:'BATCH 09—12', num:'03', title:'交互与组件', status:'并行会话',
+      desc:'第三批集中在首屏、滚动和组件：3D 首屏、液态玻璃、动效组件、UI 片段。学的不是样式，是交互的触发方式。',
+      items:[['motionsites','REF'],['React Bits','UI'],['Aceternity','UI'],['Uiverse','UI']],
+      path:'以该会话 brief 与共享目录实际文件为准'
+    },
+    {
+      batch:'BATCH 13—16', num:'04', title:'灵感索引与收束', status:'本会话 · 已交付',
+      desc:'本批四项都已核实、写笔记、建页、出桌面与手机截图；最后负责读现有索引，把 16 个条目对齐，不删别人的链接。',
+      items:[['Showreel Design','DONE'],['Anime（anime.js）','DONE'],['Recent','DONE'],['Thrine','GAP → HTTPSTER']],
+      path:'notes/13–16 · pages/13–16 · screenshots/8 · pages/index.html · REPORT.md'
+    }
+  ];
+
+  var lanes = Array.prototype.slice.call(document.querySelectorAll('.lane'));
+  var pBatch = document.getElementById('pBatch');
+  var pStatus = document.getElementById('pStatus');
+  var pNum = document.getElementById('pNum');
+  var pTitle = document.getElementById('pTitle');
+  var pDesc = document.getElementById('pDesc');
+  var pItems = document.getElementById('pItems');
+  var pPath = document.getElementById('pPath');
+  var current = 3;
+
+  function render(i, animate){
+    var d = data[i];
+    pBatch.textContent = d.batch;
+    pStatus.textContent = d.status;
+    pNum.textContent = d.num;
+    pTitle.textContent = d.title;
+    pDesc.textContent = d.desc;
+    pPath.textContent = d.path;
+    pItems.innerHTML = '';
+    d.items.forEach(function(it){
+      var li = document.createElement('li');
+      var a = document.createElement('span'); a.textContent = it[0];
+      var b = document.createElement('span'); b.textContent = it[1];
+      li.appendChild(a); li.appendChild(b); pItems.appendChild(li);
+    });
+    lanes.forEach(function(l, idx){ l.setAttribute('aria-pressed', idx === i ? 'true' : 'false'); });
+    if (animate && !reduce && window.gsap) {
+      gsap.fromTo('#preview .p-num, #preview h3, #preview .desc, #preview .p-items',
+        {opacity:0, y:6}, {opacity:1, y:0, duration:.4, stagger:.04, ease:'power2.out', overwrite:true});
+    }
+  }
+
+  lanes.forEach(function(lane){
+    var i = Number(lane.getAttribute('data-i'));
+    lane.addEventListener('mouseenter', function(){ if (i !== current) { current = i; render(i, true); } });
+    lane.addEventListener('focus', function(){ if (i !== current) { current = i; render(i, true); } });
+    lane.addEventListener('click', function(){ current = i; render(i, true); });
+  });
+
+  var theme = document.getElementById('theme');
+  theme.addEventListener('click', function(){
+    var light = document.body.classList.toggle('light');
+    theme.setAttribute('aria-pressed', light ? 'true' : 'false');
+    theme.textContent = light ? '夜间' : '纸面';
+  });
+
+  if (!reduce && window.gsap) {
+    gsap.from('.hero h1, .hero .lede, .diagram', {opacity:0, y:10, duration:.8, stagger:.07, ease:'power3.out'});
+    gsap.from('.lane', {opacity:0, y:12, duration:.6, stagger:.06, ease:'power3.out'});
+    gsap.from('.preview', {opacity:0, y:14, duration:.7, delay:.15, ease:'power3.out'});
+    gsap.from('.rule', {opacity:0, y:10, duration:.55, stagger:.06, ease:'power3.out', scrollTrigger:{trigger:'.rules', start:'top 90%', once:true}});
+  }
+})();
+</script>
+</body>
+</html>

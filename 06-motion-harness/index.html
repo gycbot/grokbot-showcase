@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>让它写，也让它把工程交回来 · MotionHarness 与 Grok Bot 委派</title>
+<meta name="description" content="Grok Bot 可以把动效制作委派给子任务：Agent 写工程，你在 Studio 里改参数和关键帧，再导出或送进剪辑。本页用一组可调参数的动力学字效说明这条链路。">
+<meta property="og:title" content="让它写，也让它把工程交回来 · MotionHarness">
+<meta property="og:description" content="成片是终点，工程才是可以继续改的东西。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23151513'/%3E%3Crect x='6' y='6' width='20' height='20' fill='none' stroke='%23ff5a1f' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#151513; --surface:#1d1d1a; --surface-2:#242420; --ink:#e9e6df; --muted:#a8a49a;
+  --dim:#716e65; --accent:#ff5a1f; --accent-2:#e9e6df;
+  --line:rgba(233,230,223,.15); --line-soft:rgba(233,230,223,.07);
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --sans:"Noto Sans CJK SC","Noto Sans SC","Source Han Sans SC",sans-serif;
+  --mono:"Geist Mono","Noto Sans Mono","JetBrains Mono",monospace;
+  --latin:"Geist","Manrope",var(--sans);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.skip{position:absolute;left:-9999px;background:var(--ink);color:var(--bg);padding:12px 16px;z-index:99}
+.skip:focus{left:16px;top:16px}
+.wrap{width:min(1320px,calc(100% - 80px));margin:0 auto}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:"";width:8px;height:8px;background:var(--accent);flex:none}
+
+.nav{position:sticky;top:0;z-index:40;background:rgba(21,21,19,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:12px;font-size:14px}
+.brand b{font-weight:600}
+.brand span{color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+.nav-links{display:flex;gap:24px;font-size:14px;color:var(--muted)}
+.nav-links a{position:relative;padding:8px 0;transition:color .3s var(--ease)}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.nav-links a:hover{color:var(--ink)}.nav-links a:hover::after{transform:scaleX(1)}
+
+.hero{padding:64px 0 48px;display:grid;grid-template-columns:.86fr 1.14fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(34px,4.2vw,64px);line-height:1.1;letter-spacing:-.03em;font-weight:600;text-wrap:balance;margin:20px 0 22px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.br-wide{display:inline}
+.hero .lede{max-width:440px;color:var(--muted);font-size:17px;line-height:1.8;text-wrap:pretty}
+.hero .facts{display:flex;gap:32px;margin-top:32px;flex-wrap:wrap}
+.hero .facts div{display:flex;flex-direction:column;gap:2px}
+.hero .facts b{font-size:15px;font-weight:500}
+.hero .facts small{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+
+/* console */
+.console{border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.console-top{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line-soft);font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.dots{display:flex;gap:6px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--dim);display:block}
+.dots i:first-child{background:var(--accent)}
+.stage{position:relative;background:#101010;overflow:hidden}
+#cv{display:block;width:100%;height:auto;aspect-ratio:16/9}
+.stage-hud{position:absolute;inset:16px 20px auto 20px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:rgba(233,230,223,.48);pointer-events:none}
+.stage-hud b{color:var(--accent);font-weight:500}
+.stage-foot{position:absolute;left:20px;right:20px;bottom:14px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;color:rgba(233,230,223,.5);pointer-events:none}
+.beats{display:flex;gap:6px}
+.beats i{display:block;width:22px;height:2px;background:rgba(233,230,223,.2);transition:background .3s var(--ease)}
+.beats i.on{background:var(--accent)}
+
+.controls{border-top:1px solid var(--line-soft);padding:16px 20px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px 24px}
+.ctrl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.ctrl label b{color:var(--ink);font-weight:500;letter-spacing:0}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:var(--line);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);border:0;cursor:pointer}
+input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
+.ctrl-row{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--line-soft);margin-top:2px}
+.swatches{display:flex;gap:8px;align-items:center}
+.swatch{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);position:relative}
+.swatch[aria-pressed=true]::after{content:"";position:absolute;inset:-4px;border:1px solid var(--ink);border-radius:50%}
+.mode{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px}
+.mode button{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:5px 12px;border-radius:999px;color:var(--dim);transition:color .3s var(--ease),background .3s var(--ease)}
+.mode button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.transport{display:flex;gap:8px}
+.transport button{border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12px;transition:border-color .3s var(--ease),background .3s var(--ease)}
+.transport button:hover{border-color:var(--ink);background:rgba(233,230,223,.05)}
+.transport button:focus-visible,.mode button:focus-visible,.swatch:focus-visible,.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* keyframes */
+.keys{display:none;border-top:1px solid var(--line-soft);padding:12px 20px 16px;background:var(--surface-2)}
+.keys.show{display:block}
+.keys-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.keys svg{width:100%;height:64px;display:block}
+.keys .kf{fill:var(--accent)}
+.keys .curve{fill:none;stroke:var(--accent);stroke-width:1.5}
+.keys .base{stroke:rgba(233,230,223,.16);stroke-width:1}
+.keys .ph{fill:var(--ink)}
+
+.tag{padding:112px 0}
+.tag p{font-size:clamp(28px,4.2vw,56px);line-height:1.3;font-weight:500;letter-spacing:-.02em;max-width:900px;text-wrap:balance}
+.tag .w{color:rgba(233,230,223,.22)}
+.tag .w.lit{color:var(--ink)}
+.section{padding:80px 0;border-top:1px solid var(--line-soft)}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:44px}
+.section-head h2{font-size:clamp(26px,3vw,40px);line-height:1.2;font-weight:600;letter-spacing:-.02em;max-width:640px;margin-top:16px;text-wrap:balance}
+.section-head p{max-width:360px;color:var(--muted);font-size:14px;line-height:1.8}
+
+.rows{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:72px 1fr 1.25fr;gap:24px;padding:24px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.row .n{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.row h3{font-size:19px;font-weight:500}
+.row p{color:var(--muted);font-size:14px;line-height:1.75}
+
+.compare{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.compare>div{padding:28px}
+.compare>div+div{border-left:1px solid var(--line);background:var(--surface)}
+.compare h3{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:18px;font-weight:400;display:flex;justify-content:space-between}
+.compare h3 b{color:var(--accent);font-weight:500}
+.compare ul{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--muted)}
+.compare li{display:flex;gap:10px}
+.compare li::before{content:"";width:4px;height:4px;background:var(--dim);margin-top:9px;flex:none}
+.compare .pro li::before{background:var(--accent)}
+
+.chain{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.node{padding:24px 20px 28px;position:relative;border-right:1px solid var(--line)}
+.node:last-child{border-right:0}
+.node .tagline{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:20px}
+.node h3{font-size:17px;font-weight:500;margin-bottom:8px}
+.node p{font-size:13px;color:var(--muted);line-height:1.7}
+.node::after{content:"";position:absolute;right:-4px;top:44px;width:7px;height:7px;border-top:1px solid var(--ink);border-right:1px solid var(--ink);transform:rotate(45deg);background:var(--bg);z-index:1}
+.node:last-child::after{display:none}
+
+.markers{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
+.markers h2{font-size:clamp(24px,2.6vw,36px);line-height:1.25;font-weight:600;letter-spacing:-.02em;margin-bottom:18px;text-wrap:balance}
+.markers p{color:var(--muted);font-size:15px;line-height:1.85;max-width:420px}
+.mlist{border-top:1px solid var(--line)}
+.marker{display:grid;grid-template-columns:64px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.marker time{font-family:var(--mono);font-size:11px;color:var(--accent);padding-top:3px}
+.marker b{display:block;font-weight:500;font-size:14px;margin-bottom:2px}
+.marker span{font-size:13px;color:var(--muted)}
+
+.license{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding-top:8px}
+.license h3{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:16px;font-weight:400}
+.license p{font-size:14px;color:var(--muted);line-height:1.85;margin-bottom:10px}
+.license b{color:var(--ink);font-weight:500}
+.gap{display:flex;gap:10px;font-size:13px;color:var(--muted);line-height:1.7;padding:9px 0;border-top:1px solid var(--line-soft)}
+.gap:first-of-type{border-top:0}
+.gap i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--accent);padding-top:3px;flex:none}
+
+.foot{border-top:1px solid var(--line);padding:40px 0 56px;display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+.foot nav{display:flex;gap:24px;flex-wrap:wrap}
+.foot a:hover{color:var(--ink)}
+.foot .sig{font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+
+@media(max-width:1024px){
+  .hero{grid-template-columns:1fr;gap:40px}
+  .controls{grid-template-columns:1fr 1fr}
+  .row{grid-template-columns:48px 1fr}
+  .row p{grid-column:2}
+  .node{padding:20px 14px}
+  .markers{grid-template-columns:1fr;gap:28px}
+}
+@media(max-width:720px){
+  .wrap{width:calc(100% - 40px)}
+  .nav-links a:not(.nav-keep){display:none}
+  .hero{padding:36px 0 32px}
+  .br-wide{display:none}
+  .stage-foot{display:none}
+  .hero h1{margin:14px 0 16px}
+  .hero .lede{font-size:15px}
+  .hero .facts{gap:20px}
+  .controls{grid-template-columns:1fr 1fr;padding:14px;gap:14px}
+  .ctrl-row{flex-direction:column;align-items:flex-start;gap:12px}
+  .tag{padding:64px 0}
+  .section{padding:52px 0}
+  .section-head{flex-direction:column;align-items:start;gap:14px;margin-bottom:28px}
+  .compare{grid-template-columns:1fr}
+  .compare>div+div{border-left:0;border-top:1px solid var(--line)}
+  .chain{grid-template-columns:1fr 1fr}
+  .node{border-bottom:1px solid var(--line)}
+  .node:nth-child(2){border-right:0}
+  .node::after{display:none}
+  .row{grid-template-columns:40px 1fr;gap:12px;padding:18px 0}
+  .license{grid-template-columns:1fr;gap:24px}
+  .foot{flex-direction:column;gap:18px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="../index.html"><b>Grok Bot 能力页</b><span>06 / 16</span></a>
+    <nav class="nav-links" aria-label="页内导航">
+      <a class="nav-keep" href="#stage">调一遍</a>
+      <a href="#handoff">交接</a>
+      <a href="#limit">边界</a>
+      <a href="../notes/06-motion-harness.md">笔记</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap hero">
+    <div>
+      <div class="eyebrow">委派 · 可编辑的交付物</div>
+      <h1>让它写，<br>也让它把<em>工程</em><br class="br-wide">交回来。</h1>
+      <p class="lede">Grok Bot 做动效时，可以不只给你一段 mp4。它把任务派给子任务，写出一份带图层、参数、关键帧的工程；你在 Studio 里改，改完再导出或送进剪辑。</p>
+      <div class="facts">
+        <div><b>参数实时改</b><small>live params</small></div>
+        <div><b>关键帧留档</b><small>pro timeline</small></div>
+        <div><b>素材可回链</b><small>round trip</small></div>
+      </div>
+    </div>
+
+    <div class="console" id="stage">
+      <div class="console-top">
+        <span>MotionHarness / 工程 03</span>
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      </div>
+      <div class="stage">
+        <canvas id="cv" width="960" height="540" role="img" aria-label="动力学字效演示：写、调、交三个节拍"></canvas>
+        <div class="stage-hud"><span><b>PRO</b> · 3 beats</span><span id="hudTc">00.0 / 08.4</span></div>
+        <div class="stage-foot"><div class="beats" id="beatDots"><i class="on"></i><i></i><i></i></div><span>drag → params</span></div>
+      </div>
+      <div class="controls">
+        <div class="ctrl"><label for="speed">速度 <b id="vSpeed">1.0×</b></label><input id="speed" type="range" min="60" max="160" value="100" step="5"></div>
+        <div class="ctrl"><label for="weight">字重 <b id="vWeight">500</b></label><input id="weight" type="range" min="300" max="600" value="500" step="50"></div>
+        <div class="ctrl"><label for="track">字距 <b id="vTrack">0</b></label><input id="track" type="range" min="-4" max="14" value="0" step="1"></div>
+        <div class="ctrl"><label for="impulse">冲量 <b id="vImpulse">0.6</b></label><input id="impulse" type="range" min="0" max="100" value="60" step="5"></div>
+        <div class="ctrl-row">
+          <div class="swatches" role="group" aria-label="强调色">
+            <button class="swatch" data-color="#ff5a1f" style="background:#ff5a1f" aria-pressed="true" aria-label="橙色"></button>
+            <button class="swatch" data-color="#e9e6df" style="background:#e9e6df" aria-pressed="false" aria-label="骨白"></button>
+            <button class="swatch" data-color="#8aa39b" style="background:#8aa39b" aria-pressed="false" aria-label="灰绿"></button>
+            <span class="mono" style="font-size:10px;color:var(--dim);letter-spacing:.08em;margin-left:6px">ACCENT</span>
+          </div>
+          <div class="mode" role="group" aria-label="工程模式">
+            <button id="mStandard" aria-pressed="false">STANDARD</button>
+            <button id="mPro" aria-pressed="true">PRO</button>
+          </div>
+          <div class="transport">
+            <button id="play" aria-pressed="true">暂停</button>
+            <button id="replay">重播</button>
+          </div>
+        </div>
+      </div>
+      <div class="keys show" id="keys">
+        <div class="keys-head"><span>KEYFRAMES · TITLE.Y</span><span>0.0s — 8.4s</span></div>
+        <svg viewBox="0 0 600 64" preserveAspectRatio="none" aria-hidden="true">
+          <line class="base" x1="0" y1="52" x2="600" y2="52"></line>
+          <line class="base" x1="0" y1="12" x2="600" y2="12"></line>
+          <path class="curve" d="M0,52 C80,52 90,12 170,12 L230,12 C280,12 290,44 350,44 L410,44 C470,44 480,20 540,20 L600,20"></path>
+          <circle class="kf" cx="0" cy="52" r="3"></circle>
+          <circle class="kf" cx="170" cy="12" r="3"></circle>
+          <circle class="kf" cx="350" cy="44" r="3"></circle>
+          <circle class="kf" cx="540" cy="20" r="3"></circle>
+          <circle class="ph" id="playhead" cx="0" cy="20" r="3.5"></circle>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap tag" aria-label="本节观点">
+    <p id="tagline"><span class="w">参数</span><span class="w">留得住，</span><span class="w">改起来</span><span class="w">才</span><span class="w">不用</span><span class="w">重来。</span></p>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">为什么是工程</div>
+          <h2>成片是终点，<br>工程是下一次的起点。</h2>
+        </div>
+        <p>一段渲染好的视频，改一个字要重做全片；一份工程，改一个图层只重跑一个镜头。这也是委派这件事真正省时间的地方。</p>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="n">01</span><h3>图层还在</h3><p>标题、主角、背景、证据各自独立。要换哪一层，改哪一层。</p></div>
+        <div class="row"><span class="n">02</span><h3>参数有名</h3><p>位置、大小、颜色、字距是具名参数，不是散落在代码里的魔法数字。</p></div>
+        <div class="row"><span class="n">03</span><h3>曲线可读</h3><p>关键帧和时间线留在工程里，能看出动作在哪一秒加速、哪一秒停。</p></div>
+        <div class="row"><span class="n">04</span><h3>回链成立</h3><p>送进剪辑软件的素材和工程保持关联，更新工程会更新同一素材的引用。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">两档工程</div>
+          <h2>先用 Standard 把内容改对，<br>再进 Pro 调动效。</h2>
+        </div>
+        <p>产品把编辑界面分成两档。上方控制条里的 STANDARD / PRO 可以切换，Pro 会多出一条关键帧轨。</p>
+      </div>
+      <div class="compare">
+        <div>
+          <h3>STANDARD <span class="mono" style="color:var(--dim)">模板级</span></h3>
+          <ul>
+            <li>改文案、颜色、图片、基础位置</li>
+            <li>开放常用参数，不暴露时间线</li>
+            <li>适合把模板快速改成自己的内容</li>
+          </ul>
+        </div>
+        <div class="pro">
+          <h3>PRO <b>完整工程</b></h3>
+          <ul>
+            <li>关键帧、运动曲线、图层顺序</li>
+            <li>Standard 的改动会保留，Pro 里继续加动画</li>
+            <li>适合要交给剪辑、还要反复改的片子</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="handoff">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">交接链路</div>
+          <h2>四棒，每一棒都留下可改的东西。</h2>
+        </div>
+        <p>Grok Bot 负责前两棒：理解需求、把工程写出来；Studio 和剪辑软件负责后两棒，把判断留在人手里。</p>
+      </div>
+      <div class="chain">
+        <div class="node"><div class="tagline">01 / ASK</div><h3>说需求</h3><p>一句话描述画面、时长、气质。Agent 先读技能，再动手。</p></div>
+        <div class="node"><div class="tagline">02 / BUILD</div><h3>写工程</h3><p>Agent 生成工程文件并打开 Studio。图层和参数已经就位。</p></div>
+        <div class="node"><div class="tagline">03 / TUNE</div><h3>调关键帧</h3><p>在 Pro 时间线里拖点、改曲线。改完加标记，让 Agent 接着改。</p></div>
+        <div class="node"><div class="tagline">04 / SHIP</div><h3>导出或回剪</h3><p>导出视频 / 工程，或经桥接送进达芬奇，素材与工程保持关联。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap markers">
+      <div>
+        <div class="eyebrow">AI 标记</div>
+        <h2 style="margin-top:16px">用手指，而不是用形容词。</h2>
+        <p>在画面上圈一个位置，写一句具体的要求；Agent 读取标记和附件再改。比在聊天里说「左上角那个字再大一点」少来回几轮。</p>
+        <p style="margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--dim)">站点文案原话：在 Studio 添加标记，再请 Agent 读取。</p>
+      </div>
+      <div class="mlist">
+        <div class="marker"><time>00:01.2</time><div><b>标题再压低 12px</b><span>位置 / 让出上方留白</span></div></div>
+        <div class="marker"><time>00:03.8</time><div><b>这一拍不要回弹</b><span>曲线 / 改成减速收住</span></div></div>
+        <div class="marker"><time>00:06.1</time><div><b>把橙色换成骨白</b><span>颜色 / 只改强调层</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="limit">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">许可与边界</div>
+          <h2>只写能核到的，<br>不替产品许愿。</h2>
+        </div>
+        <p>官网是单页应用，功能文案来自公开页面与打包资源；没有官方文档可引的地方，不写成确定结论。</p>
+      </div>
+      <div class="license">
+        <div>
+          <h3>使用边界</h3>
+          <p><b>闭源商业产品。</b>官网未提供开源许可证或代码仓库；本页没有下载、反编译或再分发其程序。</p>
+          <p>名称与功能名只作指称；页面不使用它的 logo、图标或品牌造型，也不复制官网的 slogan 与界面截图。</p>
+          <p>达芬奇桥接当前限 macOS + DaVinci Resolve Studio，需要在偏好设置里允许本机外部脚本；透明视频导出还依赖 FFmpeg 7 以上。</p>
+        </div>
+        <div>
+          <h3>没写进页面的</h3>
+          <div class="gap"><i>GAP</i><span>「节省 token」在官网 meta、页面文案与脚本里都没找到，不写。</span></div>
+          <div class="gap"><i>GAP</i><span>「免费套件」没有价格页或免费声明可核，不写。</span></div>
+          <div class="gap"><i>GAP</i><span>没有核实开发团队与发布状态；不写「官方」「唯一」这类口径。</span></div>
+          <div class="gap"><i>GAP</i><span>官网功能文案来自打包后的前端资源，不是官方文档，按「站点文案」引用。</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <div>
+    <div class="sig">GROK BOT 能力展示 · 06 / 16</div>
+    <div style="margin-top:8px">页面为能力说明，不代表 xAI 或 Grok 官方。</div>
+  </div>
+  <nav aria-label="相关页面">
+    <a href="../index.html">全部 16 项</a>
+    <a href="../notes/06-motion-harness.md">学习笔记</a>
+    <a href="https://motionharness.top/" target="_blank" rel="noopener">来源站点</a>
+  </nav>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGsap = !!(window.gsap && window.ScrollTrigger);
+  if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+  if (hasGsap && !reduce) {
+    gsap.from('.hero > div > *', {y:6, autoAlpha:0, filter:'blur(2px)', duration:.8, stagger:.06, ease:'power3.out'});
+    gsap.from('.console', {y:12, autoAlpha:0, duration:.9, delay:.1, ease:'power3.out'});
+  }
+
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var hudTc = document.getElementById('hudTc');
+  var dots = Array.prototype.slice.call(document.querySelectorAll('#beatDots i'));
+  var playBtn = document.getElementById('play');
+  var replayBtn = document.getElementById('replay');
+  var playhead = document.getElementById('playhead');
+  var keys = document.getElementById('keys');
+  var mStandard = document.getElementById('mStandard');
+  var mPro = document.getElementById('mPro');
+
+  var state = {
+    speed:1, weight:500, track:0, impulse:.6, accent:'#ff5a1f',
+    playing:!reduce, t:0, mode:'pro'
+  };
+  var beats = [
+    {ch:'写', label:'把想法写成工程', sub:'01 / BUILD'},
+    {ch:'调', label:'在时间线上改一拍', sub:'02 / TUNE'},
+    {ch:'交', label:'把可改的东西交出去', sub:'03 / SHIP'}
+  ];
+  var BEAT = 2.8, TOTAL = BEAT * 3;
+
+  function fit(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = cv.clientWidth, h = cv.clientHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    state.w = w; state.h = h;
+    draw();
+  }
+  window.addEventListener('resize', fit);
+
+  function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
+
+  function draw(){
+    if (!state.w) return;
+    var w = state.w, h = state.h;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = '#101010'; ctx.fillRect(0,0,w,h);
+
+    /* static grid, drawn as lines (no gradient) */
+    ctx.strokeStyle = 'rgba(233,230,223,0.055)';
+    ctx.lineWidth = 1;
+    var step = w / 16;
+    for (var gx = step; gx < w; gx += step){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
+    for (var gy = step; gy < h; gy += step){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
+
+    var local = state.t % TOTAL;
+    var idx = Math.max(0, Math.min(2, Math.floor(local / BEAT)));
+    var p = (local - idx * BEAT) / BEAT;
+    var inP = easeOut(Math.min(1, p / 0.32));
+    var outP = p > 0.82 ? (p - 0.82) / 0.18 : 0;
+    var b = beats[idx];
+
+    var size = Math.min(w * 0.46, h * 0.56);
+    var track = state.track * (size / 220);
+    var rise = (1 - inP) * 46 * state.impulse - outP * 40 * state.impulse;
+    var alpha = Math.min(1, inP * 1.8) * (1 - outP);
+
+    ctx.save();
+    ctx.translate(w * 0.5, h * 0.54 + rise);
+    ctx.globalAlpha = alpha;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = state.weight + ' ' + size + 'px "Noto Sans CJK SC","Noto Sans SC",sans-serif';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = track + 'px';
+    ctx.fillStyle = '#e9e6df';
+    ctx.fillText(b.ch, 0, 0);
+    ctx.restore();
+
+    /* accent rule under the character */
+    var ruleW = size * (0.5 + 0.5 * inP);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = state.accent;
+    ctx.fillRect(w * 0.5 - ruleW / 2, h * 0.54 + rise + size * 0.53, ruleW, 2);
+    ctx.globalAlpha = 1;
+
+    /* labels */
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = 'rgba(233,230,223,0.62)';
+    ctx.font = '500 ' + Math.max(10, w * 0.0135) + 'px "Geist Mono","Noto Sans Mono",monospace';
+    var labelTop = h < 320 ? 0.28 : 0.17;
+    ctx.fillText(b.sub, w * 0.055, h * labelTop);
+    ctx.fillStyle = 'rgba(233,230,223,0.44)';
+    ctx.font = '400 ' + Math.max(10, w * 0.013) + 'px "Noto Sans CJK SC",sans-serif';
+    ctx.fillText(b.label, w * 0.055, h * (h < 320 ? 0.8 : 0.86));
+
+    /* progress line */
+    ctx.fillStyle = 'rgba(233,230,223,0.14)';
+    ctx.fillRect(w * 0.055, h * 0.92, w * 0.89, 1);
+    ctx.fillStyle = state.accent;
+    ctx.fillRect(w * 0.055, h * 0.92, w * 0.89 * (local / TOTAL), 1);
+
+    hudTc.textContent = local.toFixed(1).padStart(4,'0') + ' / 08.4';
+    dots.forEach(function(d,i){ d.classList.toggle('on', i === idx); });
+
+    var phX = 600 * (local / TOTAL);
+    playhead.setAttribute('cx', phX);
+    var curveY = 52 - Math.sin((local / TOTAL) * Math.PI * 3) * 18;
+    playhead.setAttribute('cy', Math.max(16, Math.min(52, curveY)));
+  }
+
+  var last = performance.now();
+  function loop(now){
+    if (state.playing && !reduce){
+      var dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
+      state.t = (state.t + dt * state.speed) % TOTAL;
+      draw();
+    }
+    last = now;
+    requestAnimationFrame(loop);
+  }
+
+  function setPlaying(v){
+    state.playing = v;
+    playBtn.textContent = v ? '暂停' : '播放';
+    playBtn.setAttribute('aria-pressed', v ? 'true' : 'false');
+    last = performance.now();
+  }
+  playBtn.addEventListener('click', function(){ setPlaying(!state.playing); });
+  replayBtn.addEventListener('click', function(){ state.t = 0; setPlaying(true); draw(); });
+
+  function bindRange(id, key, out, scale, fmt){
+    var el = document.getElementById(id);
+    var o = document.getElementById(out);
+    el.addEventListener('input', function(){
+      state[key] = parseFloat(el.value) * scale;
+      o.textContent = fmt(state[key]);
+      draw();
+    });
+  }
+  bindRange('speed','speed','vSpeed',0.01,function(v){return v.toFixed(2).replace(/0$/,'') + '×';});
+  bindRange('weight','weight','vWeight',1,function(v){return String(v);});
+  bindRange('track','track','vTrack',1,function(v){return v.toFixed(0);});
+  bindRange('impulse','impulse','vImpulse',0.01,function(v){return v.toFixed(2);});
+
+  Array.prototype.forEach.call(document.querySelectorAll('.swatch'), function(sw){
+    sw.addEventListener('click', function(){
+      document.querySelectorAll('.swatch').forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      sw.setAttribute('aria-pressed','true');
+      state.accent = sw.getAttribute('data-color');
+      draw();
+    });
+  });
+
+  function setMode(m){
+    state.mode = m;
+    mPro.setAttribute('aria-pressed', m === 'pro' ? 'true' : 'false');
+    mStandard.setAttribute('aria-pressed', m === 'standard' ? 'true' : 'false');
+    keys.classList.toggle('show', m === 'pro');
+  }
+  mPro.addEventListener('click', function(){ setMode('pro'); });
+  mStandard.addEventListener('click', function(){ setMode('standard'); });
+
+  fit();
+  if (reduce) { state.playing = false; playBtn.textContent = '播放'; draw(); }
+  requestAnimationFrame(loop);
+
+  /* tagline */
+  var tagWords = Array.prototype.slice.call(document.querySelectorAll('#tagline .w'));
+  if (hasGsap && !reduce){
+    gsap.to(tagWords, {color:'#e9e6df', stagger:.07, ease:'none',
+      scrollTrigger:{trigger:'#tagline', start:'top 80%', end:'bottom 64%', scrub:.6}});
+  } else {
+    tagWords.forEach(function(w){ w.classList.add('lit'); });
+  }
+
+  if (hasGsap && !reduce){
+    gsap.utils.toArray('.section-head, .row, .compare, .node, .marker, .license').forEach(function(el){
+      gsap.from(el, {y:16, autoAlpha:0, duration:.7, ease:'power3.out',
+        scrollTrigger:{trigger:el, start:'top 88%', once:true}});
+    });
+  }
+})();
+</script>
+</body>
+</html>

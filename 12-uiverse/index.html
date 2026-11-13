@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>记忆：它记得你不喜欢什么｜Grok Bot 能力展示 12</title>
+<meta name="description" content="Grok Bot 记住你的口味与改稿意见，下一次动手前先按记忆做判断。以 Uiverse 的社区 CSS 小组件与状态反馈为技法参考。">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2317150F'/%3E%3Ctext x='16' y='22' font-family='serif' font-size='18' fill='%23F2EEE5' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../vendor/series/base.css">
+<style>
+  .p12 .hero{padding-top:clamp(46px,5.5vw,72px);padding-bottom:clamp(40px,5vw,64px)}
+  .p12 h1{font-size:clamp(46px,5.6vw,82px)}
+  .p12 .lede{max-width:520px}
+  .console{background:var(--bone);border:1px solid var(--line);padding:clamp(16px,2.2vw,24px);position:relative}
+  .c-top{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+  .c-top b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;font-weight:400}
+  .c-top span{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--muted)}
+  .row{display:grid;grid-template-columns:78px 1fr;gap:14px;align-items:center;padding:8px 0}
+  .row > .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--muted)}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{
+    appearance:none;border:1px solid var(--line);background:transparent;padding:6px 11px;
+    font-family:var(--sans);font-size:12px;line-height:1;color:#3E3A31;cursor:pointer;
+    transition:background .25s var(--e),color .25s var(--e),border-color .25s var(--e),transform .18s var(--e);
+  }
+  .seg button:hover{border-color:rgba(23,21,15,.42)}
+  .seg button:active{transform:scale(.97)}
+  .seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+  .seg button[data-accent="vermilion"][aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+  .seg button[data-accent="olive"][aria-pressed="true"]{background:var(--moss);border-color:var(--moss)}
+  .remember{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+  .remember .r-lab{font-size:12.5px;color:#3E3A31}
+  .remember .r-lab span{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--muted)}
+  .switch{width:46px;height:26px;border:1px solid var(--line);background:var(--paper);position:relative;cursor:pointer;padding:0;flex:0 0 auto;transition:background .3s var(--e),border-color .3s var(--e)}
+  .switch .knob{position:absolute;left:3px;top:3px;width:18px;height:18px;background:var(--ink);transition:transform .34s var(--e),background .3s var(--e)}
+  .switch[aria-checked="true"]{background:var(--ink);border-color:var(--ink)}
+  .switch[aria-checked="true"] .knob{transform:translateX(18px);background:var(--paper)}
+
+  .pv{
+    margin-top:16px;background:var(--paper);border:1px solid var(--line);
+    padding:18px 18px 16px;--pv-accent:#C5432B;--pv-gap:24px;--pv-font:var(--serif);
+    transition:background .3s var(--e);
+  }
+  .pv-top{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:calc(var(--pv-gap) * .55)}
+  .pv h3{font-family:var(--pv-font);font-weight:600;font-size:clamp(20px,2.2vw,27px);line-height:1.35;letter-spacing:-.01em;margin-bottom:calc(var(--pv-gap) * .42)}
+  .pv h3 em{font-style:normal;color:var(--pv-accent)}
+  .pv p{font-size:12.5px;line-height:1.85;color:#4A463C;max-width:390px;margin-bottom:var(--pv-gap)}
+  .pv-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .pv-btn{border:0;background:var(--ink);color:var(--paper);padding:9px 14px;font-size:12px;cursor:pointer;transition:transform .15s var(--e),background .25s var(--e)}
+  .pv-btn:hover{background:var(--pv-accent)}
+  .pv-btn:active{transform:translateY(1px) scale(.985)}
+  .check{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:#4A463C;cursor:pointer}
+  .check input{position:absolute;opacity:0;width:0;height:0}
+  .check i{width:14px;height:14px;border:1px solid var(--line);background:var(--paper);position:relative;flex:0 0 auto}
+  .check input:checked + i{background:var(--pv-accent);border-color:var(--pv-accent)}
+  .check input:checked + i::after{content:"";position:absolute;left:3px;top:0px;width:5px;height:9px;border:solid var(--paper);border-width:0 1.5px 1.5px 0;transform:rotate(40deg)}
+  .check input:focus-visible + i{outline:2px solid var(--accent);outline-offset:3px}
+  .loader{display:none;gap:3px;align-items:flex-end;height:12px;width:26px}
+  .loader.on{display:inline-flex}
+  .loader i{display:block;width:4px;height:6px;background:var(--pv-accent);animation:load 1s ease-in-out infinite}
+  .loader i:nth-child(2){animation-delay:.12s}
+  .loader i:nth-child(3){animation-delay:.24s}
+  @keyframes load{0%,100%{height:5px;opacity:.45}50%{height:12px;opacity:1}}
+  .pv-status{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--muted);min-width:66px}
+  .c-log{border-top:1px solid var(--line);margin-top:14px;padding-top:10px;font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--muted);line-height:1.8}
+  .c-log b{color:var(--accent);font-weight:400}
+
+  .mem{border-top:1px solid var(--line)}
+  .mem-row{display:grid;grid-template-columns:150px 1fr 1fr;gap:clamp(18px,4vw,48px);padding:26px 0;border-bottom:1px solid var(--line);align-items:start}
+  .mem-row .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--accent);padding-top:4px}
+  .mem-row .said{font-family:var(--serif);font-size:clamp(19px,2vw,24px);font-weight:600;line-height:1.5}
+  .mem-row .said span{display:block;font-family:var(--sans);font-size:13px;font-weight:400;color:var(--muted);margin-top:6px;line-height:1.7}
+  .mem-row .done{font-size:13.5px;line-height:1.9;color:#3E3A31}
+  .mem-row .done b{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);font-weight:400;margin-bottom:6px}
+
+  .split{display:grid;grid-template-columns:.7fr 1fr;gap:clamp(32px,6vw,88px);align-items:start}
+  .split .left{position:sticky;top:96px}
+  .split h2{font-family:var(--serif);font-size:clamp(28px,3.2vw,44px);font-weight:600;line-height:1.3;margin:14px 0 18px}
+  .split .left p{font-size:14px;line-height:1.95;color:#3E3A31;max-width:360px}
+  .expire{margin-top:24px;border:1px solid var(--line);padding:16px 18px;background:var(--paper-2)}
+  .expire b{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);font-weight:400;display:block;margin-bottom:6px}
+  .expire p{font-size:12.5px;margin:0;color:#3E3A31}
+
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr}
+    .console{margin-top:6px}
+    .split{grid-template-columns:1fr}
+    .split .left{position:static}
+    .mem-row{grid-template-columns:110px 1fr}
+    .mem-row .done{grid-column:2}
+  }
+  @media (max-width:640px){
+    .p12 .hero{padding-top:34px}
+    .p12 h1{font-size:clamp(38px,10.4vw,52px)}
+    .console{padding:15px}
+    .row{grid-template-columns:64px 1fr;gap:10px}
+    .seg button{padding:6px 9px;font-size:11.5px}
+    .mem-row{grid-template-columns:1fr;gap:8px;padding:22px 0}
+    .mem-row .done{grid-column:auto}
+    .pv h3{font-size:21px}
+  }
+</style>
+</head>
+<body class="p12">
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><b>GROK BOT</b><span>能力展示 / 16 项</span></div>
+    <nav class="folio" aria-label="页脚导航">
+      <a href="../index.html">全部页面</a>
+      <span>12 / 16</span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow" data-hero><i></i><span class="kicker">记忆 / MEMORY · 12</span></div>
+        <h1 data-hero>它记得<br>你<em>不喜欢</em><br>什么。</h1>
+        <p class="lede" data-hero>你说过一次“不要霓虹紫”，下一次它就不会再把紫色端上来。记忆不是档案柜，是下一次动手前的那点判断。</p>
+        <div class="hero-foot" data-hero>
+          <a class="link-arrow" href="#memory">看它记什么
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6"/></svg>
+          </a>
+          <span class="note">技法参考 / Uiverse<br>检索 / 2026.11.13</span>
+        </div>
+      </div>
+
+      <div data-hero>
+        <div class="console" aria-label="口味台演示：选择主色、密度与标题字体">
+          <div class="c-top"><b>TASTE CONSOLE / 口味台</b><span>本页演示 · 可点</span></div>
+
+          <div class="row">
+            <span class="lab">主色</span>
+            <div class="seg" role="group" aria-label="主色">
+              <button type="button" data-accent="vermilion" aria-pressed="true">朱砂</button>
+              <button type="button" data-accent="ink" aria-pressed="false">墨黑</button>
+              <button type="button" data-accent="olive" aria-pressed="false">橄榄</button>
+            </div>
+          </div>
+          <div class="row">
+            <span class="lab">密度</span>
+            <div class="seg" role="group" aria-label="密度">
+              <button type="button" data-density="loose" aria-pressed="true">松</button>
+              <button type="button" data-density="mid" aria-pressed="false">中</button>
+              <button type="button" data-density="tight" aria-pressed="false">紧</button>
+            </div>
+          </div>
+          <div class="row">
+            <span class="lab">标题</span>
+            <div class="seg" role="group" aria-label="标题字体">
+              <button type="button" data-font="serif" aria-pressed="true">宋体</button>
+              <button type="button" data-font="sans" aria-pressed="false">黑体</button>
+            </div>
+          </div>
+
+          <div class="remember">
+            <div class="r-lab">记住这次修改<span>只写本机，不上传</span></div>
+            <button class="switch" id="remember" type="button" role="switch" aria-checked="true" aria-label="记住这次修改"><span class="knob"></span></button>
+          </div>
+
+          <div class="pv" id="preview">
+            <div class="pv-top"><span>PREVIEW / 下一版</span><span>1440 × 900</span></div>
+            <h3>把参考，变成<em>自己的页面</em>。</h3>
+            <p>留白够，主色只有一个。标题不抢正文的戏，按钮按下去有回应。</p>
+            <div class="pv-actions">
+              <button class="pv-btn" type="button">看下一版</button>
+              <label class="check"><input type="checkbox" checked><i aria-hidden="true"></i>记住来源日期</label>
+              <span class="loader" id="loader" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="pv-status" id="pv-status">已应用</span>
+            </div>
+          </div>
+
+          <div class="c-log" aria-live="polite" id="log">已记住 · 主色 <b>朱砂</b> / 密度 <b>松</b> / 标题 <b>宋体</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline">
+    <div class="wrap">
+      <p aria-label="记住的，不是一句话。是下一次的判断。">
+        <span class="w">记住的，</span><span class="w">不是</span><span class="w">一句话。</span><br>
+        <span class="w">是</span><span class="w">下一次的</span><span class="w hot">判断。</span>
+      </p>
+      <p class="cap">偏好会变。你改一次，旧的判断就让位，不拿三个月前的口味压今天的稿。</p>
+    </div>
+  </section>
+
+  <section class="sec" id="memory">
+    <div class="wrap">
+      <div class="sec-head" data-reveal>
+        <div class="sec-num"><b>01</b> / 记下的三件事</div>
+        <h2>不是记原话，是记“下次怎么做”。</h2>
+      </div>
+
+      <div class="mem" data-reveal>
+        <div class="mem-row">
+          <div class="tag">COLOR / 01</div>
+          <div class="said">“不要霓虹紫。”<span>一次改稿时说的，没给色号。</span></div>
+          <div class="done"><b>下次的判断</b>主色只留一个。朱砂或墨黑都能用，霓虹紫不进入色板；暗底也不靠紫撑气氛。</div>
+        </div>
+        <div class="mem-row">
+          <div class="tag">TYPE / 02</div>
+          <div class="said">“标题别太冲。”<span>说的是渐变和 900 字重。</span></div>
+          <div class="done"><b>下次的判断</b>标题用宋体 600，单色，字距收一点。大标题只占一处，正文不跟着放大。</div>
+        </div>
+        <div class="mem-row">
+          <div class="tag">SPACE / 03</div>
+          <div class="said">“这页太满了。”<span>说的是段间距和边距。</span></div>
+          <div class="done"><b>下次的判断</b>段间距加一档，按 8 的倍数走。手机边距不小于 20，横向不溢出。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap split">
+      <div class="left" data-reveal>
+        <div class="kicker">02 / 写进去，再用出来</div>
+        <h2>记忆写一次，下一版直接生效。</h2>
+        <p>不是把你的话存成一段文本，而是改成一条能执行的规则。下一次做页，先按规则做，再拿给你看。</p>
+        <div class="expire"><b>记忆会过期</b><p>口味变了，旧规则要让位。新意见覆盖旧意见，不拿旧偏好压新稿。</p></div>
+      </div>
+
+      <div class="chat" data-reveal>
+        <div class="chat-top"><span><i class="dot"></i>GROK BOT / 记忆</span><span>示例 · 非官方界面</span></div>
+        <div class="chat-body">
+          <div class="msg user">这页太满了，标题也别用那种很冲的渐变。</div>
+          <div class="msg bot">记下了：留白加一档，标题改单色。主色还是朱砂，不换。</div>
+          <div class="msg sys">写入记忆 · 3 条规则</div>
+          <div class="progress" aria-hidden="true"><div class="bar"><i></i></div></div>
+          <div class="artifact">
+            <div class="a-top"><b>memory / owner-taste</b><span class="mono">下次生效</span></div>
+            <ul>
+              <li>色板：单强调色，禁用霓虹紫与蓝紫渐变</li>
+              <li>标题：宋体 600，单色，不使用 900 字重</li>
+              <li>间距：段间距 48，移动端边距不小于 20</li>
+            </ul>
+          </div>
+          <div class="msg sys">下一次 · 新页面</div>
+          <div class="msg bot">新页默认段间距 48，标题单色，无渐变。两条截图已出，你看一下。</div>
+          <div class="msg user">这次可以。</div>
+          <div class="msg bot">记下了。这条规则留用，旧的那条删掉。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h4>这一页</h4>
+        <p>12 / 16 · 记忆 MEMORY<br>技法参考：Uiverse 的社区 CSS 小组件、开关与按压反馈。</p>
+      </div>
+      <div>
+        <h4>来源</h4>
+        <p><a href="https://uiverse.io/" target="_blank" rel="noopener noreferrer">uiverse.io</a><br><a href="https://github.com/uiverse-io/galaxy" target="_blank" rel="noopener noreferrer">github.com/uiverse-io/galaxy</a><br>检索 2026.11.13 · Asia/Shanghai</p>
+      </div>
+      <div>
+        <h4>说明</h4>
+        <p>本页是 Grok Bot 使用侧的能力展示，不代表 xAI 或 Grok 官方。口味台只把选择写进本机浏览器。</p>
+      </div>
+      <div class="fine"><span>GROK BOT / 16 项能力展示</span><span>NO. 12 · MEMORY</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap/gsap.min.js"></script>
+<script src="../vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="../vendor/series/base.js"></script>
+<script>
+(function(){
+  var accents = { vermilion:'#C5432B', ink:'#17150F', olive:'#3F4A3B' };
+  var accentNames = { vermilion:'朱砂', ink:'墨黑', olive:'橄榄' };
+  var gaps = { loose:'24px', mid:'17px', tight:'11px' };
+  var gapNames = { loose:'松', mid:'中', tight:'紧' };
+  var fonts = { serif:'var(--serif)', sans:'var(--sans)' };
+  var fontNames = { serif:'宋体', sans:'黑体' };
+
+  var state = { accent:'vermilion', density:'loose', font:'serif', remember:true };
+  var preview = document.getElementById('preview');
+  var log = document.getElementById('log');
+  var status = document.getElementById('pv-status');
+  var loader = document.getElementById('loader');
+  var rememberBtn = document.getElementById('remember');
+  var timer = null;
+
+  try {
+    var saved = localStorage.getItem('grokbot-taste');
+    if (saved) {
+      var o = JSON.parse(saved);
+      if (accents[o.accent]) state.accent = o.accent;
+      if (gaps[o.density]) state.density = o.density;
+      if (fonts[o.font]) state.font = o.font;
+      if (typeof o.remember === 'boolean') state.remember = o.remember;
+    }
+  } catch (e) {}
+
+  function paint() {
+    preview.style.setProperty('--pv-accent', accents[state.accent]);
+    preview.style.setProperty('--pv-gap', gaps[state.density]);
+    preview.style.setProperty('--pv-font', fonts[state.font]);
+    log.innerHTML = '已记住 · 主色 <b>' + accentNames[state.accent] + '</b> / 密度 <b>' + gapNames[state.density] + '</b> / 标题 <b>' + fontNames[state.font] + '</b>';
+    rememberBtn.setAttribute('aria-checked', state.remember ? 'true' : 'false');
+    document.querySelectorAll('[data-accent]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.accent === state.accent ? 'true' : 'false'); });
+    document.querySelectorAll('[data-density]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.density === state.density ? 'true' : 'false'); });
+    document.querySelectorAll('[data-font]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.font === state.font ? 'true' : 'false'); });
+  }
+
+  function persist() {
+    try {
+      if (state.remember) localStorage.setItem('grokbot-taste', JSON.stringify({ accent:state.accent, density:state.density, font:state.font, remember:true }));
+      else localStorage.removeItem('grokbot-taste');
+    } catch (e) {}
+  }
+
+  function pulse() {
+    if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.fromTo(preview, { scale: .996 }, { scale: 1, duration: .5, ease: 'power3.out' });
+    }
+    status.textContent = '写入中';
+    loader.classList.add('on');
+    clearTimeout(timer);
+    timer = setTimeout(function(){
+      status.textContent = '已应用';
+      loader.classList.remove('on');
+    }, 520);
+  }
+
+  document.querySelectorAll('[data-accent]').forEach(function(b){
+    b.addEventListener('click', function(){ state.accent = b.dataset.accent; paint(); persist(); pulse(); });
+  });
+  document.querySelectorAll('[data-density]').forEach(function(b){
+    b.addEventListener('click', function(){ state.density = b.dataset.density; paint(); persist(); pulse(); });
+  });
+  document.querySelectorAll('[data-font]').forEach(function(b){
+    b.addEventListener('click', function(){ state.font = b.dataset.font; paint(); persist(); pulse(); });
+  });
+  rememberBtn.addEventListener('click', function(){
+    state.remember = !state.remember;
+    paint(); persist();
+    status.textContent = state.remember ? '已开启记忆' : '仅本页';
+    clearTimeout(timer);
+    timer = setTimeout(function(){ status.textContent = '已应用'; }, 900);
+  });
+
+  paint();
+})();
+</script>
+</body>
+</html>

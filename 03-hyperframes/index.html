@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>委派：把一段活交出去，主线继续走 · Grok Bot 能力档案 03</title>
+<meta name="description" content="Grok Bot 的委派：拆清边界、给足上下文、回传可验收的产物，主线不等。">
+<meta property="og:title" content="委派：把一段活交出去，主线继续走 · Grok Bot 能力档案 03">
+<meta property="og:description" content="子代理有独立上下文；回传的是文件，不是一句「做好了」。">
+<meta property="og:type" content="article">
+<script>document.documentElement.className+=" js";</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230E100E'/%3E%3Cpath d='M7 9h18v2H7zm0 6h12v2H7zm0 6h18v2H7z' fill='%23EDEAE1'/%3E%3Crect x='21' y='13' width='4' height='4' fill='%23E2542C'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0E100E;
+    --panel:#151714;
+    --panel-2:#1B1E1A;
+    --ink:#EDEAE1;
+    --muted:#9A9C93;
+    --faint:#6E7168;
+    --line:#2A2D27;
+    --line-2:#3A3E36;
+    --accent:#E2542C;
+    --accent-soft:#2A1A14;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --sans:"Noto Sans CJK SC","PingFang SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--accent);color:#0E100E}
+  a{color:inherit}
+  .skip{position:absolute;left:-999px;top:0;background:var(--ink);color:var(--bg);padding:12px 16px;z-index:99}
+  .skip:focus{left:12px;top:12px}
+  .wrap{width:min(1200px,calc(100% - 96px));margin:0 auto}
+
+  .nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:60;width:min(1200px,calc(100% - 64px));display:flex;align-items:center;justify-content:space-between;gap:24px;padding:10px 12px 10px 18px;background:rgba(14,16,14,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #2A2D27;border-radius:2px;opacity:1}
+  .js .nav{opacity:0}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:13px;letter-spacing:.04em;font-weight:600}
+  .brand-mark{display:grid;place-items:center;width:24px;height:24px;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:10px}
+  .nav-links{display:flex;gap:26px;font-size:13px;color:var(--muted)}
+  .nav-links a{text-decoration:none;padding:4px 0;border-bottom:1px solid transparent;transition:color .25s var(--ease),border-color .25s var(--ease)}
+  .nav-links a:hover,.nav-links a:focus-visible{color:var(--ink);border-color:var(--accent)}
+  .folio{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);white-space:nowrap}
+
+  .hero{padding:138px 0 54px}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:56px;align-items:center}
+  .kicker{display:flex;align-items:center;gap:12px;margin:0 0 26px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted)}
+  .kicker b{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid var(--line-2);color:var(--accent);font-weight:500}
+  h1{font-family:var(--sans);font-weight:700;font-size:clamp(38px,4.3vw,60px);line-height:1.2;letter-spacing:-.03em;margin:0;max-width:620px;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--accent)}
+  .lede{margin:24px 0 0;max-width:520px;font-size:16.5px;line-height:1.9;color:#B9BAB0;text-wrap:pretty}
+  .hero-actions{display:flex;align-items:center;gap:18px;margin-top:32px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:13px;text-decoration:none;background:var(--accent);color:#140B08;padding:13px 18px;font-size:14.5px;font-weight:700;border:1px solid var(--accent);border-radius:2px;transition:transform .3s var(--ease),background .3s var(--ease)}
+  .btn span{font-family:var(--mono);font-size:12px}
+  .btn:hover,.btn:focus-visible{background:#F0663C;transform:translateY(-2px)}
+  .btn:active{transform:scale(.985)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-2)}
+  .btn.ghost:hover{border-color:var(--ink);background:#1B1E1A}
+  .hint{font-size:11.5px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em}
+  .proof{margin:28px 0 0;padding-top:16px;border-top:1px solid var(--line);max-width:500px;font-size:12.5px;color:var(--muted)}
+
+  /* studio */
+  .studio{background:var(--panel);border:1px solid var(--line-2);border-radius:3px;overflow:hidden;box-shadow:0 34px 80px rgba(0,0,0,.45)}
+  .studio-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted);background:#111310}
+  .studio-top .rec{display:flex;align-items:center;gap:6px;color:var(--accent)}
+  .studio-top .rec i{width:6px;height:6px;border-radius:50%;background:var(--accent);display:block}
+  .preview{position:relative;aspect-ratio:16/9;background:#090A09;border-bottom:1px solid var(--line);overflow:hidden}
+  .scene{position:absolute;inset:0;padding:22px 24px;opacity:0;display:flex;flex-direction:column;justify-content:space-between}
+  .scene.on{opacity:1}
+  .scene .sc-top{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint)}
+  .scene h3{font-family:var(--sans);font-size:clamp(18px,2vw,25px);line-height:1.35;margin:0;font-weight:700;letter-spacing:-.01em;max-width:420px}
+  .scene h3 span{color:var(--accent)}
+  .scene .sc-body{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:9px;letter-spacing:.04em;border:1px solid var(--line-2);padding:4px 7px;color:var(--muted);background:#111310}
+  .chip.on{border-color:var(--accent);color:var(--accent)}
+  .sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .sc-card{border:1px solid var(--line);background:#121411;padding:10px 11px}
+  .sc-card .t{font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:.08em}
+  .sc-card .v{font-size:12px;color:var(--ink);margin-top:3px}
+  .sc-card .p{height:2px;background:#252822;margin-top:8px;overflow:hidden}
+  .sc-card .p i{display:block;height:100%;background:var(--accent);width:62%}
+  .sc-list{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.9;margin-top:10px}
+  .sc-list b{color:var(--ink);font-weight:400}
+  .sc-list .ok{color:var(--accent)}
+  .transport{display:grid;grid-template-columns:30px 62px 1fr 62px;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);background:#111310}
+  .play{width:26px;height:26px;border:1px solid var(--line-2);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:10px;line-height:1;padding:0}
+  .play:hover,.play:focus-visible{border-color:var(--accent);color:var(--accent)}
+  .tc{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+  .tc b{color:var(--ink);font-weight:400}
+  input[type=range]{width:100%;height:18px;background:transparent;appearance:none;-webkit-appearance:none;cursor:pointer}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;background:#33372F}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:var(--accent);margin-top:-4px;border:0;border-radius:0}
+  input[type=range]::-moz-range-track{height:2px;background:#33372F}
+  input[type=range]::-moz-range-thumb{width:10px;height:10px;background:var(--accent);border:0;border-radius:0}
+  input[type=range]:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+  .timeline{padding:8px 0 10px;background:#101210}
+  .ruler{display:flex;justify-content:space-between;margin-left:54px;padding:0 12px 6px 0;font-family:var(--mono);font-size:8px;color:var(--faint);letter-spacing:.04em}
+  .tl-body{display:grid;grid-template-columns:54px 1fr}
+  .tl-labels{display:flex;flex-direction:column}
+  .tl-labels span{height:34px;display:flex;align-items:center;padding-left:12px;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;color:var(--faint);border-top:1px solid #1D201B}
+  .lanes{position:relative;border-top:1px solid #1D201B}
+  .lane{height:34px;position:relative;border-bottom:1px solid #1D201B}
+  .lane:last-child{border-bottom:0}
+  .clip{position:absolute;top:6px;height:22px;background:#22261F;border:1px solid #3A3E36;border-left:2px solid var(--faint);color:#B9BAB0;font-family:var(--mono);font-size:8px;letter-spacing:.02em;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s linear,border-color .2s linear,color .2s linear}
+  .clip.on{background:var(--accent-soft);border-color:#6B3626;border-left-color:var(--accent);color:var(--ink)}
+  .clip.sub{border-left-color:#7C8272}
+  .clip.sub.on{border-left-color:var(--accent)}
+  .ph{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);left:0;pointer-events:none;z-index:3}
+  .ph::before{content:"";position:absolute;top:-1px;left:-3px;width:7px;height:5px;background:var(--accent)}
+  .studio-foot{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;color:var(--faint);background:#111310}
+  .studio-foot b{color:var(--muted);font-weight:400}
+
+  section{padding:84px 0}
+  section[id]{scroll-margin-top:96px}
+  .sec-head{display:grid;grid-template-columns:180px minmax(0,1fr);gap:40px;align-items:start;margin-bottom:46px}
+  .sec-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--faint);padding-top:9px}
+  h2{font-family:var(--sans);font-weight:700;font-size:clamp(28px,3.2vw,42px);line-height:1.28;letter-spacing:-.02em;margin:0;max-width:780px;text-wrap:balance}
+  .sec-note{margin:14px 0 0;max-width:620px;color:var(--muted);font-size:14.5px}
+
+  .nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line-2)}
+  .node{background:var(--panel);padding:26px 22px 28px;min-height:250px;display:flex;flex-direction:column}
+  .node .n{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--accent)}
+  .node h3{font-size:20px;margin:40px 0 8px;font-weight:700;letter-spacing:-.01em}
+  .node p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.85}
+  .node code{margin-top:auto;padding-top:16px;font-family:var(--mono);font-size:9.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line-2)}
+  .col{background:var(--panel);padding:28px 26px 32px}
+  .col h3{font-size:18px;margin:0 0 20px;font-weight:700;display:flex;align-items:center;gap:9px}
+  .col h3 i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--accent);border:1px solid var(--line-2);width:20px;height:20px;display:grid;place-items:center}
+  .col ul{list-style:none;margin:0;padding:0}
+  .col li{padding:12px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;gap:10px;line-height:1.7}
+  .col li b{color:var(--ink);font-weight:600;min-width:88px;flex:none}
+  .col.no li b{color:#C9A091}
+
+  .packet{background:#0A0B09;border:1px solid var(--line-2);border-radius:3px;overflow:hidden}
+  .packet-top{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--faint)}
+  .packet pre{margin:0;padding:20px 18px 24px;font-family:var(--mono);font-size:12px;line-height:2;color:#C6C7BC;overflow-x:auto}
+  .packet .k{color:var(--accent)}
+  .packet .c{color:#6E7168}
+  .packet .s{color:#A9B79E}
+
+  .faq-list{border-top:1px solid var(--line-2)}
+  details{border-bottom:1px solid var(--line)}
+  summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 0;font-size:15.5px;font-weight:600}
+  summary::-webkit-details-marker{display:none}
+  summary .plus{font-family:var(--mono);font-size:17px;color:var(--accent);transition:transform .3s var(--ease);flex:none}
+  details[open] summary .plus{transform:rotate(45deg)}
+  details p{margin:0 0 22px;max-width:780px;color:var(--muted);font-size:13.5px;line-height:1.95}
+
+  .cta{padding:94px 0 104px}
+  .cta-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;align-items:end;border-top:1px solid var(--line-2);padding-top:42px}
+  .cta h2{font-size:clamp(30px,3.8vw,50px)}
+  .cta p{margin:14px 0 0;color:var(--muted);font-size:14px;max-width:540px}
+
+  footer{border-top:1px solid var(--line-2);padding:32px 0 44px}
+  .foot{display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:start}
+  .foot p{margin:0;font-size:11.5px;color:var(--faint);line-height:1.9}
+  .foot nav{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:flex-end;font-size:12px}
+  .foot nav a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+  .foot nav a:hover{color:var(--ink);border-color:var(--accent)}
+
+  .js .rise{opacity:0}
+  .reduced .rise{opacity:1 !important}
+  .reduced .nav{opacity:1 !important}
+
+  @media(max-width:1050px){
+    .hero-grid{grid-template-columns:1fr;gap:42px}
+    .studio{max-width:760px}
+    .nodes{grid-template-columns:1fr 1fr}
+    .node:nth-child(2){border-right:0}
+  }
+  @media(max-width:820px){
+    .wrap{width:calc(100% - 36px)}
+    .nav{width:calc(100% - 24px);top:8px;padding:8px 10px 8px 12px}
+    .nav-links{display:none}
+    .hero{padding:104px 0 44px}
+    h1{font-size:clamp(36px,9vw,48px)}
+    .lede{font-size:15.5px}
+    section{padding:60px 0}
+    .sec-head{grid-template-columns:1fr;gap:12px}
+    .sec-label{padding-top:0}
+    .nodes{grid-template-columns:1fr}
+    .node{min-height:0}
+    .node h3{margin-top:24px}
+    .compare{grid-template-columns:1fr}
+    .cta-inner{grid-template-columns:1fr;align-items:start}
+    .foot{grid-template-columns:1fr}
+    .foot nav{justify-content:flex-start}
+    .preview{padding:0}
+    .scene{padding:14px 15px}
+    .scene h3{font-size:17px;max-width:290px}
+    .sc-grid{grid-template-columns:1fr 1fr;gap:6px}
+    .sc-card{padding:7px 8px}
+    .sc-card .v{font-size:10.5px}
+    .transport{grid-template-columns:26px 52px 1fr 52px;gap:6px;padding:8px 9px}
+    .tl-body{grid-template-columns:38px 1fr}
+    .tl-labels span{padding-left:7px;font-size:7.5px;letter-spacing:0}
+    .ruler{margin-left:38px;font-size:6.5px}
+    .ruler span:nth-child(even){display:none}
+    .clip{font-size:7px;padding:0 3px}
+    .studio-foot{font-size:7px}
+    .studio-top{font-size:8px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+    .rise{opacity:1 !important}
+    .nav{opacity:1 !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="nav" id="nav">
+  <a class="brand" href="../index.html"><span class="brand-mark">GB</span> Grok Bot 能力档案</a>
+  <nav class="nav-links" aria-label="页内导航">
+    <a href="#chain">委派链</a>
+    <a href="#boundary">边界</a>
+    <a href="#packet">任务包</a>
+  </nav>
+  <span class="folio">03 / 16 · DELEGATION</span>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="kicker rise"><b>03</b> DELEGATION · 委派</p>
+        <h1 class="rise">把一段活交出去，<br><em>主线继续走。</em></h1>
+        <p class="lede rise">委派不是把任务扔走。先把边界拆清、上下文给足，再让子代理在自己的会话里做完，回传可验收的路径和结果。主线不必停在原地等。</p>
+        <div class="hero-actions rise">
+          <a class="btn" href="#studio" id="heroPlay">播放这条时间线 <span>▶</span></a>
+          <span class="hint">18s · 3 tracks</span>
+        </div>
+        <p class="proof rise">子代理有独立上下文；回传的是文件，不是一句「做好了」。</p>
+      </div>
+
+      <div class="studio rise" id="studio" aria-label="委派时间线预览">
+        <div class="studio-top">
+          <span>COMPOSITION / DELEGATION-01</span>
+          <span class="rec"><i aria-hidden="true"></i> PREVIEW</span>
+        </div>
+        <div class="preview">
+          <div class="scene on" data-scene="0">
+            <div class="sc-top"><span>SCENE 01 / 00:00</span><span>MAIN</span></div>
+            <h3>先把边界拆清：<span>哪几件，交到哪。</span></h3>
+            <div class="sc-body">
+              <span class="chip on">页面 04</span><span class="chip on">截图 ×2</span><span class="chip on">笔记 04</span><span class="chip">索引不动</span>
+            </div>
+          </div>
+          <div class="scene" data-scene="1">
+            <div class="sc-top"><span>SCENE 02 / 00:06</span><span>SUB AGENTS</span></div>
+            <h3>两个子代理并行，<span>主线继续写 03。</span></h3>
+            <div class="sc-grid">
+              <div class="sc-card"><div class="t">SUB-A / WRITE</div><div class="v">pages/04 · 62%</div><div class="p"><i style="width:62%"></i></div></div>
+              <div class="sc-card"><div class="t">SUB-B / CHECK</div><div class="v">shots · 48%</div><div class="p"><i style="width:48%"></i></div></div>
+            </div>
+          </div>
+          <div class="scene" data-scene="2">
+            <div class="sc-top"><span>SCENE 03 / 00:12</span><span>RETURN</span></div>
+            <h3>回传路径与结果，<span>主线逐项验收。</span></h3>
+            <div class="sc-list"><b>pages/04/index.html</b> <span class="ok">✓</span><br><b>screenshots/04-desktop.png</b> <span class="ok">✓</span><br><b>notes/04.md</b> <span class="ok">✓</span></div>
+          </div>
+        </div>
+        <div class="transport">
+          <button class="play" id="playBtn" type="button" aria-label="播放">▶</button>
+          <span class="tc"><b id="tcNow">00:00:00</b></span>
+          <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="拖动时间线">
+          <span class="tc">00:18:00</span>
+        </div>
+        <div class="timeline">
+          <div class="ruler" aria-hidden="true"><span>0s</span><span>3s</span><span>6s</span><span>9s</span><span>12s</span><span>15s</span><span>18s</span></div>
+          <div class="tl-body">
+            <div class="tl-labels" aria-hidden="true"><span>主线</span><span>SUB-A</span><span>SUB-B</span></div>
+            <div class="lanes" id="lanes">
+              <div class="lane">
+                <div class="clip" data-start="0" data-duration="5.4" style="left:0%;width:30%">拆边界</div>
+                <div class="clip" data-start="5.4" data-duration="8.4" style="left:30%;width:46.6%">继续写 03</div>
+                <div class="clip" data-start="13.8" data-duration="4.2" style="left:76.6%;width:23.4%">验收</div>
+              </div>
+              <div class="lane">
+                <div class="clip sub" data-start="2.4" data-duration="7.2" style="left:13.3%;width:40%">写 04 页面</div>
+                <div class="clip sub" data-start="9.6" data-duration="4.8" style="left:53.3%;width:26.6%">跑截图</div>
+              </div>
+              <div class="lane">
+                <div class="clip sub" data-start="3.6" data-duration="5.4" style="left:20%;width:30%">写 04 笔记</div>
+                <div class="clip sub" data-start="9" data-duration="6" style="left:50%;width:33.3%">自检</div>
+              </div>
+              <div class="ph" id="ph"></div>
+            </div>
+          </div>
+        </div>
+        <div class="studio-foot"><span>MODEL <b>tracks / clips / one paused timeline</b></span><span>NOT A RENDERED MP4</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="chain">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-label">委派链</p>
+        <div>
+          <h2 class="rise">交出去之前，<br>先把这四件事说清。</h2>
+          <p class="sec-note rise">少一件，子代理就会用猜测补；补出来的东西，最后还要主线返工。</p>
+        </div>
+      </div>
+      <div class="nodes">
+        <article class="node rise"><span class="n">01 / SCOPE</span><h3>拆边界</h3><p>只做什么、不做什么。把「顺便也改一下」挡在门外。</p><code>scope: pages/04 only</code></article>
+        <article class="node rise"><span class="n">02 / CONTEXT</span><h3>给上下文</h3><p>读哪些文件、参考哪一版、哪些事实已核实。</p><code>brief + owner_list + .skills</code></article>
+        <article class="node rise"><span class="n">03 / RETURN</span><h3>回传产物</h3><p>交路径，不交形容词。页面、截图、笔记各在哪。</p><code>path + result + gap</code></article>
+        <article class="node rise"><span class="n">04 / ACCEPT</span><h3>主线验收</h3><p>按验收锚点逐条核；缺项写缺口，不替它圆。</p><code>acceptance_anchors</code></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="boundary">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-label">边界</p>
+        <div><h2 class="rise">能交出去的，<br>和不能交出去的。</h2></div>
+      </div>
+      <div class="compare">
+        <div class="col yes">
+          <h3><i>YES</i> 适合委派</h3>
+          <ul>
+            <li><b>可拆的</b>一页页面、一组截图、一份笔记，边界能写清。</li>
+            <li><b>可验的</b>产物有路径、有规格，能逐项核。</li>
+            <li><b>独立的</b>不需要主人中途拍板，不需要登录。</li>
+            <li><b>并行的</b>两条线互不写同一个文件。</li>
+          </ul>
+        </div>
+        <div class="col no">
+          <h3><i>NO</i> 不该委派</h3>
+          <ul>
+            <li><b>要拍板的</b>方向、口径、是否发布，得主人定。</li>
+            <li><b>要登录的</b>平台账号、支付、对外提交，不能交给子代理。</li>
+            <li><b>拆不开的</b>上下文强耦合，交出去反而多一轮解释。</li>
+            <li><b>会撞车的</b>多个代理写同一个文件，必须串行。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="packet">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-label">任务包</p>
+        <div>
+          <h2 class="rise">一份任务包，<br>让接手的人不用猜。</h2>
+          <p class="sec-note rise">这不是某个系统的内部格式，是一条委派至少要说清的字段。可以直接照着写。</p>
+        </div>
+      </div>
+      <div class="packet rise">
+        <div class="packet-top"><span>task / 04-anything2explainer</span><span>PLAIN TEXT</span></div>
+<pre><span class="k">scope</span>:     只做 pages/04 与 notes/04，不动 pages/index.html
+<span class="k">read</span>:      brief.json / owner_list.md / .skills/anything2explainer/SKILL.md
+<span class="k">facts</span>:     只用已核实的来源；核不到就写 evidence_gap
+<span class="k">deliver</span>:   pages/04/index.html
+           screenshots/04-desktop.png (1440×900)
+           screenshots/04-mobile.png  (390×844)
+           notes/04-anything2explainer.md
+<span class="k">accept</span>:    中文 / 无 console error / 无登录支付表单 / 技法能指到具体段落
+<span class="k">return</span>:    路径 + 做了什么 + 缺什么 + 需要主线决定什么
+<span class="c"># 不包含：发布、登录、改别人的页面、编造数据</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-label">问答</p>
+        <div><h2 class="rise">交出去之后，<br>主线做什么。</h2></div>
+      </div>
+      <div class="faq-list">
+        <details class="rise">
+          <summary>子代理失败了，主线要重做吗？<span class="plus">+</span></summary>
+          <p>先看回传：失败在哪一步、有没有留下可用的中间产物。能局部补就局部补；整个方向错了才重开，并把失败原因写回任务包。</p>
+        </details>
+        <details class="rise">
+          <summary>怎么防止子代理改到别人的文件？<span class="plus">+</span></summary>
+          <p>在任务包里写死 scope，只给它的目录写权限；索引、报告这类共享文件由主线统一合并，子代理只回传自己的行。</p>
+        </details>
+        <details class="rise">
+          <summary>子代理说「做好了」，能信吗？<span class="plus">+</span></summary>
+          <p>不能只看这句话。要看路径在不在、截图尺寸对不对、控制台有没有 error、验收锚点逐条过不过。回传格式里要求写「缺什么」，就是为了逼出没做完的部分。</p>
+        </details>
+        <details class="rise">
+          <summary>为什么时间线要能拖？<span class="plus">+</span></summary>
+          <p>因为委派不是黑箱。播放头拖到 6 秒，能看到子代理刚接手；拖到 14 秒，能看到产物回来。每一步都能对上一条轨道，才知道时间花在哪。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap cta-inner">
+      <div>
+        <h2 class="rise">让子代理去跑，<br>让主线留在判断上。</h2>
+        <p class="rise">拆得清、给得足、收得回。委派的价值不是省掉人，是把人的注意力留给需要判断的那几步。</p>
+      </div>
+      <a class="btn" href="../04-anything2explainer/index.html">看下一页：记忆 <span>→</span></a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <p>Grok Bot 能力档案 · 03 / 16<br>非 xAI 官方页面；页面为能力展示，不构成官方说明。<br>本页技法取自 HyperFrames（Apache-2.0）的轨道/片段/可 seek 时间线模型；图形与文案为本页自绘。预览不是已渲染 MP4。</p>
+    <nav aria-label="档案导航">
+      <a href="../index.html">全部 16 项</a>
+      <a href="../01-landing-page-design/index.html">01 技能</a>
+      <a href="../02-design-to-motion/index.html">02 例程</a>
+      <a href="../04-anything2explainer/index.html">04 记忆</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="../vendor/gsap/gsap.min.js"></script>
+<script src="../vendor/gsap/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGSAP = typeof window.gsap !== 'undefined';
+  document.documentElement.classList.toggle('reduced', reduced || !hasGSAP);
+
+  var DUR = 18, PLAY = 12;
+  var scenes = (typeof gsap !== 'undefined' && gsap.utils) ? gsap.utils.toArray('.scene') : Array.prototype.slice.call(document.querySelectorAll('.scene'));
+  var clips = Array.prototype.slice.call(document.querySelectorAll('.clip'));
+  var ph = document.getElementById('ph');
+  var tcNow = document.getElementById('tcNow');
+  var scrub = document.getElementById('scrub');
+  var playBtn = document.getElementById('playBtn');
+  var state = {v:0};
+  var lastScene = -1;
+  var story = null;
+  var userPaused = false;
+
+  function render(){
+    var t = state.v * DUR;
+    var pct = (t / DUR) * 100;
+    if (ph) ph.style.left = pct + '%';
+    if (scrub) scrub.value = Math.round(state.v * 1000);
+    var totalFrames = Math.round(t * 30);
+    var ss = String(Math.floor(totalFrames / 30)).padStart(2,'0');
+    var ff = String(totalFrames % 30).padStart(2,'0');
+    if (tcNow) tcNow.textContent = '00:' + ss + ':' + ff;
+    var idx = t < 6 ? 0 : (t < 12 ? 1 : 2);
+    if (idx !== lastScene){
+      scenes.forEach(function(s,i){ s.classList.toggle('on', i === idx); });
+      lastScene = idx;
+    }
+    clips.forEach(function(c){
+      var s = parseFloat(c.dataset.start), d = parseFloat(c.dataset.duration);
+      c.classList.toggle('on', t >= s && t < s + d);
+    });
+  }
+
+  if (hasGSAP){
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.defaults({ease:'power3.out'});
+
+    story = gsap.timeline({paused:true, onUpdate:render});
+    story.to(state, {v:1, duration:PLAY, ease:'none'});
+    render();
+
+    // hero copy appear
+    gsap.set('.hero .rise, .nav', {opacity:1});
+    gsap.timeline({defaults:{duration:.8}})
+      .from('.nav',{opacity:0,y:-8,duration:.6},0)
+      .from('.hero .kicker',{opacity:0,y:6,filter:'blur(2px)',duration:.6},.05)
+      .from('.hero h1',{opacity:0,y:6,filter:'blur(2px)',duration:.85},.11)
+      .from('.hero .lede',{opacity:0,y:6,filter:'blur(2px)',duration:.75},.22)
+      .from('.hero-actions',{opacity:0,y:6,filter:'blur(2px)',duration:.65},.30)
+      .from('.hero .proof',{opacity:0,y:6,filter:'blur(2px)',duration:.65},.36)
+      .from('#studio',{opacity:0,y:16,filter:'blur(3px)',duration:.9},.24);
+
+    // section reveals
+    gsap.utils.toArray('.rise').forEach(function(el){
+      if (el.closest('.hero')) return;
+      gsap.fromTo(el,{opacity:0,y:22},{
+        opacity:1,y:0,duration:.8,
+        scrollTrigger:{trigger:el,start:'top 88%',once:true}
+      });
+    });
+
+    // play only when studio is on screen; pause when it leaves
+    if (!reduced) ScrollTrigger.create({
+      trigger:'#studio', start:'top 92%', end:'bottom 6%',
+      onEnter:function(){ if(!userPaused){ story.play(); } },
+      onEnterBack:function(){ if(!userPaused){ story.play(); } },
+      onLeave:function(){ story.pause(); },
+      onLeaveBack:function(){ story.pause(); }
+    });
+
+    playBtn.addEventListener('click', function(){
+      userPaused = false;
+      if (story.progress() >= .999){ story.progress(0); }
+      if (story.isActive()){ story.pause(); userPaused = true; } else { story.play(); }
+      playBtn.textContent = story.isActive() ? '❚❚' : '▶';
+      playBtn.setAttribute('aria-label', story.isActive() ? '暂停' : '播放');
+    });
+    story.eventCallback('onStart', function(){ playBtn.textContent='❚❚'; playBtn.setAttribute('aria-label','暂停'); });
+    story.eventCallback('onComplete', function(){ playBtn.textContent='▶'; playBtn.setAttribute('aria-label','播放'); });
+
+    scrub.addEventListener('input', function(){
+      story.pause(); userPaused = true;
+      story.progress(parseInt(scrub.value,10) / 1000);
+      playBtn.textContent = '▶'; playBtn.setAttribute('aria-label','播放');
+    });
+
+    document.getElementById('heroPlay').addEventListener('click', function(e){
+      e.preventDefault();
+      userPaused = false;
+      story.progress(0); story.play();
+      document.getElementById('studio').scrollIntoView({behavior:'smooth',block:'center'});
+    });
+
+    // nav backdrop
+    ScrollTrigger.create({start:'top -40',end:99999,onToggle:function(self){
+      gsap.to('#nav',{backgroundColor:self.isActive?'rgba(14,16,14,.94)':'rgba(14,16,14,.78)',duration:.3});
+    }});
+
+    if (reduced){
+      story.progress(1); userPaused = true;
+      playBtn.textContent='▶';
+    }
+  } else {
+    // no JS: show final scene, full playhead, all clips inactive
+    scenes.forEach(function(s,i){ s.classList.toggle('on', i===2); });
+    if (ph) ph.style.left='100%';
+    if (tcNow) tcNow.textContent='00:18:00';
+  }
+})();
+</script>
+</body>
+</html>

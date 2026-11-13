@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>看过的东西，不该每次重找 · Framer Gallery 与 Grok Bot 记忆</title>
+<meta name="description" content="Grok Bot 把参考收进长期记忆：你反复挑中的版式、材质、动效，会变成下一次起稿的偏好。本页用一面可选中的参考墙说明这件事。">
+<meta property="og:title" content="看过的东西，不该每次重找 · Framer Gallery">
+<meta property="og:description" content="灵感不是收藏夹，是下一次动手时少犹豫的那几秒。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3eee3'/%3E%3Crect x='7' y='7' width='8' height='18' fill='%2317150f'/%3E%3Crect x='18' y='7' width='7' height='8' fill='%232b3ff0'/%3E%3Crect x='18' y='18' width='7' height='7' fill='%2317150f'/%3E%3C/svg%3E">
+<style>
+:root{
+  --paper:#f3eee3; --paper-2:#eae3d4; --ink:#17150f; --muted:#6b6357; --dim:#948a79;
+  --accent:#2b3ff0; --line:rgba(23,21,15,.16); --line-soft:rgba(23,21,15,.08);
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --sans:"Manrope","Noto Sans CJK SC","Noto Sans SC",sans-serif;
+  --mono:"Geist Mono","Noto Sans Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+[id]{scroll-margin-top:84px}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.skip{position:absolute;left:-9999px;background:var(--ink);color:var(--paper);padding:12px 16px;z-index:99}
+.skip:focus{left:16px;top:16px}
+.wrap{width:min(1320px,calc(100% - 80px));margin:0 auto}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:"";width:7px;height:7px;background:var(--accent);flex:none}
+
+.nav{position:sticky;top:0;z-index:40;background:rgba(243,238,227,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:12px;font-size:14px}
+.brand b{font-weight:600}
+.brand span{color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+.nav-links{display:flex;gap:24px;font-size:14px;color:var(--muted)}
+.nav-links a{position:relative;padding:8px 0;transition:color .3s var(--ease)}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.nav-links a:hover{color:var(--ink)}.nav-links a:hover::after{transform:scaleX(1)}
+
+.hero{padding:72px 0 56px;display:grid;grid-template-columns:1.06fr .94fr;gap:64px;align-items:center}
+.hero h1{font-size:clamp(38px,5vw,72px);line-height:1.08;letter-spacing:-.035em;font-weight:600;text-wrap:balance;margin:22px 0 22px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lede{max-width:500px;color:var(--muted);font-size:17px;line-height:1.8;text-wrap:pretty}
+.hero .meta{display:flex;gap:36px;margin-top:36px;flex-wrap:wrap}
+.hero .meta div{display:flex;flex-direction:column;gap:2px}
+.hero .meta b{font-size:14px;font-weight:600}
+.hero .meta small{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+
+/* stack */
+.stack{position:relative;height:420px;perspective:1200px}
+.card3{position:absolute;width:64%;aspect-ratio:4/3;border:1px solid var(--line);background:var(--paper-2);border-radius:8px;overflow:hidden;box-shadow:0 18px 40px rgba(23,21,15,.14);transition:transform .8s var(--ease)}
+.card3:nth-child(1){left:2%;top:12%;transform:rotate(-7deg);z-index:1}
+.card3:nth-child(2){right:0;top:2%;transform:rotate(5deg);z-index:2}
+.card3:nth-child(3){left:16%;bottom:0;transform:rotate(-1deg);z-index:3;background:var(--ink)}
+.stack:hover .card3:nth-child(1){transform:rotate(-9deg) translate(-10px,-8px)}
+.stack:hover .card3:nth-child(2){transform:rotate(7deg) translate(10px,-6px)}
+.stack:hover .card3:nth-child(3){transform:rotate(0) translateY(-6px)}
+.mini{position:absolute;inset:0;padding:16px}
+.mini .top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--dim)}
+.mini .big{font-size:clamp(40px,5vw,72px);line-height:.9;letter-spacing:-.04em;font-weight:600;margin-top:18px}
+.mini .rule{height:1px;background:var(--line);margin-top:14px}
+.mini .bar{height:5px;background:var(--ink);margin-top:8px}
+.mini .bar.s{width:52%}
+.mini .blue{position:absolute;right:16px;bottom:16px;width:38%;height:34%;background:var(--accent)}
+.card3:nth-child(3) .top{color:rgba(243,238,227,.5)}
+.card3:nth-child(3) .big{color:var(--paper)}
+.card3:nth-child(3) .bar{background:var(--paper)}
+.card3:nth-child(3) .rule{background:rgba(243,238,227,.25)}
+.card3:nth-child(3) .blue{background:var(--accent);height:30%;bottom:12px}
+.card3:nth-child(2) .big{padding-left:20%}
+.card3:nth-child(3) .big{font-size:clamp(24px,3.2vw,38px);margin-top:24px}
+.stack-label{position:absolute;left:0;bottom:-8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.1em}
+
+/* filter */
+.wall-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;padding:56px 0 28px;border-top:1px solid var(--line)}
+.wall-head h2{font-size:clamp(24px,2.8vw,36px);line-height:1.2;font-weight:600;letter-spacing:-.02em;margin-top:14px;text-wrap:balance}
+.wall-head p{max-width:340px;font-size:14px;color:var(--muted);line-height:1.8}
+.filters{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:24px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;color:var(--muted);transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip:focus-visible,.card:focus-visible,.reset:focus-visible,.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* layout */
+.wall-grid{display:grid;grid-template-columns:1fr 300px;gap:40px;align-items:start;padding-bottom:80px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{text-align:left;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper);transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .3s var(--ease);position:relative;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(23,21,15,.1)}
+.card[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card.hide{display:none}
+.shot{aspect-ratio:4/3;position:relative;overflow:hidden;border-bottom:1px solid var(--line-soft)}
+.card-meta{padding:12px 14px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card-meta b{font-size:13px;font-weight:600;display:block}
+.card-meta small{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--dim);display:block;margin-top:2px}
+.pick{font-family:var(--mono);font-size:9px;letter-spacing:.08em;border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:var(--muted);flex:none;transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
+.card[aria-pressed=true] .pick{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* abstract shots */
+.s1{background:#efe8da;padding:14px}
+.s1 .a{font-size:54px;line-height:1;font-weight:600;letter-spacing:-.04em}
+.s1 .ln{height:1px;background:var(--ink);opacity:.35;margin-top:10px}
+.s1 .sq{position:absolute;right:14px;bottom:14px;width:34%;height:26%;background:var(--accent)}
+.s2{background:#1d1b16;padding:14px}
+.s2 .a{color:#f3eee3;font-size:40px;line-height:1;font-weight:500;margin-top:22px}
+.s2 .ln{height:3px;background:#f3eee3;width:44%;margin-top:12px}
+.s2 .dot{position:absolute;right:14px;top:14px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.s3{background:#e3dccb;padding:14px}
+.s3 .col{position:absolute;top:0;bottom:0;width:1px;background:rgba(23,21,15,.18)}
+.s3 .c1{left:14px}.s3 .c2{right:14px}
+.s3 .t{position:absolute;left:26px;top:22px;font-size:34px;line-height:1.05;font-weight:600;letter-spacing:-.03em;max-width:70%}
+.s3 .b{position:absolute;left:26px;bottom:22px;width:38%;height:5px;background:var(--accent)}
+.s4{background:#f7f3ea;padding:14px;display:flex;align-items:center;justify-content:center}
+.s4 .glyph{font-size:76px;line-height:1;font-weight:600;border:1px solid var(--ink);width:76%;height:76%;display:flex;align-items:center;justify-content:center}
+.s4 .tag{position:absolute;right:10px;bottom:8px;font-family:var(--mono);font-size:8px;color:var(--dim)}
+.s5{background:#20241f;padding:14px}
+.s5 .blocks{display:grid;grid-template-columns:1fr 1fr;gap:6px;height:100%}
+.s5 .bl{background:#3a4238;border-radius:2px}
+.s5 .bl:nth-child(2){background:#d9c9a3}
+.s5 .bl:nth-child(3){background:#d9c9a3}
+.s5 .bl:nth-child(4){background:#3a4238}
+.s6{background:#2f4a3f;padding:14px}
+.s6 .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54%;aspect-ratio:1;border:1px solid #d9c9a3;border-radius:50%}
+.s6 .ring:nth-child(2){width:36%}
+.s6 .ring:nth-child(3){width:18%;background:#d9c9a3;border:0}
+.s6 .cap{position:absolute;left:14px;bottom:12px;font-family:var(--mono);font-size:8px;color:rgba(243,238,227,.55);letter-spacing:.1em}
+.s7{background:#eae3d4;padding:14px;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.s7 .bar{height:10px;background:var(--ink)}
+.s7 .bar:nth-child(1){width:30%}
+.s7 .bar:nth-child(2){width:52%;background:var(--accent)}
+.s7 .bar:nth-child(3){width:74%}
+.s7 .bar:nth-child(4){width:44%}
+.s8{background:#f3eee3;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;align-content:center}
+.s8 span{font-family:var(--mono);font-size:11px;color:var(--ink);opacity:.7;text-align:center;padding:2px 0}
+
+/* memory panel */
+.memory{position:sticky;top:88px;border:1px solid var(--ink);background:var(--paper);padding:20px}
+.memory .mh{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding-bottom:14px;border-bottom:1px solid var(--line)}
+.memory .count{font-size:20px;color:var(--ink);font-weight:500;letter-spacing:-.02em}
+.memory h3{font-size:15px;font-weight:600;margin:16px 0 10px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;min-height:32px}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.04em;border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:var(--muted)}
+.tag b{color:var(--accent);font-weight:500;margin-left:4px}
+.sentence{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;line-height:1.75;min-height:96px;color:var(--muted)}
+.sentence b{color:var(--ink);font-weight:600}
+.reset{display:block;width:100%;margin-top:16px;border:1px solid var(--line);padding:8px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);transition:border-color .3s var(--ease),color .3s var(--ease)}
+.reset:hover{border-color:var(--ink);color:var(--ink)}
+.hint{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.7;margin-top:12px;letter-spacing:.02em}
+
+/* tagline */
+.tagline{padding:104px 0;border-top:1px solid var(--line)}
+.tagline p{font-size:clamp(30px,4.4vw,60px);line-height:1.24;font-weight:600;letter-spacing:-.03em;max-width:980px;text-wrap:balance}
+.tagline .w{color:rgba(23,21,15,.24)}
+.tagline .w.lit{color:var(--ink)}
+
+.section{padding:72px 0;border-top:1px solid var(--line)}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:40px}
+.section-head h2{font-size:clamp(24px,2.8vw,36px);line-height:1.2;font-weight:600;letter-spacing:-.02em;max-width:620px;margin-top:14px;text-wrap:balance}
+.section-head p{max-width:340px;font-size:14px;color:var(--muted);line-height:1.8}
+.rules{border-top:1px solid var(--line)}
+.rule-row{display:grid;grid-template-columns:56px 1fr 1.4fr;gap:24px;padding:22px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.rule-row .n{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.rule-row h3{font-size:18px;font-weight:600}
+.rule-row p{font-size:14px;color:var(--muted);line-height:1.75}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.step{padding:24px 20px 26px 0;border-right:1px solid var(--line)}
+.step+.step{padding-left:20px}
+.step:last-child{border-right:0}
+.step .n{font-family:var(--mono);font-size:10px;color:var(--accent);margin-bottom:22px}
+.step h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.step p{font-size:13px;color:var(--muted);line-height:1.7}
+.license{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.license h3{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;font-weight:400}
+.license p{font-size:14px;color:var(--muted);line-height:1.85;margin-bottom:10px}
+.license b{color:var(--ink);font-weight:600}
+.gap{display:flex;gap:10px;font-size:13px;color:var(--muted);line-height:1.7;padding:9px 0;border-top:1px solid var(--line-soft)}
+.gap:first-of-type{border-top:0}
+.gap i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--accent);padding-top:3px;flex:none}
+.foot{border-top:1px solid var(--line);padding:36px 0 52px;display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+.foot nav{display:flex;gap:22px;flex-wrap:wrap}
+.foot a:hover{color:var(--ink)}
+.foot .sig{font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+
+@media(max-width:1100px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .wall-grid{grid-template-columns:1fr 260px;gap:28px}
+  .stack{height:360px}
+}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:44px;padding-top:48px}
+  .stack{height:320px;max-width:520px}
+  .wall-grid{grid-template-columns:1fr}
+  .memory{position:static;order:-1}
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:720px){
+  .wrap{width:calc(100% - 40px)}
+  .nav-links a:not(.nav-keep){display:none}
+  .hero{padding:36px 0 32px}
+  .hero h1{margin:16px 0 16px}
+  .hero .lede{font-size:15px}
+  .hero .meta{gap:22px;margin-top:26px}
+  .stack{height:280px;margin-bottom:16px}
+  .card3{width:70%}
+  .wall-head{flex-direction:column;align-items:start;gap:12px;padding-top:40px}
+  .filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:18px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .chip{flex:none}
+  .grid{grid-template-columns:1fr;gap:14px}
+  .wall-grid{padding-bottom:56px}
+  .tagline{padding:64px 0}
+  .section{padding:48px 0}
+  .section-head{flex-direction:column;align-items:start;gap:12px;margin-bottom:26px}
+  .rule-row{grid-template-columns:36px 1fr;gap:12px}
+  .rule-row p{grid-column:2}
+  .steps{grid-template-columns:1fr}
+  .step{border-right:0;border-bottom:1px solid var(--line);padding:20px 0}
+  .step+.step{padding-left:0}
+  .license{grid-template-columns:1fr;gap:24px}
+  .foot{flex-direction:column;gap:16px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="../index.html"><b>Grok Bot 能力页</b><span>07 / 16</span></a>
+    <nav class="nav-links" aria-label="页内导航">
+      <a class="nav-keep" href="#wall">参考墙</a>
+      <a href="#memory">记忆</a>
+      <a href="#rules">纪律</a>
+      <a href="../notes/07-framer-gallery.md">笔记</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap hero">
+    <div>
+      <div class="eyebrow">记忆 · 长期偏好</div>
+      <h1>看过的东西，<br>不该每次<em>重找</em>。</h1>
+      <p class="lede">Grok Bot 可以把你反复挑中的版式、材质、动效留在长期记忆里。下次做页，不用从「你喜欢什么」重新问一遍。</p>
+      <div class="meta">
+        <div><b>先收参考</b><small>collect</small></div>
+        <div><b>再归纳</b><small>distill</small></div>
+        <div><b>下次直接用</b><small>apply</small></div>
+      </div>
+    </div>
+
+    <div class="stack" aria-hidden="true">
+      <div class="card3"><div class="mini"><div class="top"><span>REF / 01</span><span>LAYOUT</span></div><div class="big">Aa</div><div class="rule"></div><div class="bar"></div><div class="bar s"></div><div class="blue"></div></div></div>
+      <div class="card3"><div class="mini"><div class="top"><span>REF / 02</span><span>TYPE</span></div><div class="big" style="font-size:clamp(30px,4vw,54px);margin-top:28px">字阶</div><div class="ln" style="width:44%;height:4px;background:#f3eee3;margin-top:14px"></div><div class="dot"></div></div></div>
+      <div class="card3"><div class="mini"><div class="top"><span>REF / 03</span><span>MATERIAL</span></div><div class="big" style="font-size:clamp(26px,3.4vw,44px);margin-top:34px">暖纸<br>墨字</div><div class="rule"></div><div class="bar s"></div><div class="blue"></div></div></div>
+    </div>
+  </section>
+
+  <section class="wrap" id="wall">
+    <div class="wall-head">
+      <div>
+        <div class="eyebrow">参考墙 · 可筛选</div>
+        <h2>先按维度收，再让记忆归纳。</h2>
+      </div>
+      <p>Framer Gallery 把作品分到行业与场景两级，靠缩略图说话。这一面墙只做同一件事：让每张卡能被一个维度检索。</p>
+    </div>
+    <div class="filters" role="group" aria-label="筛选参考">
+      <button class="chip" data-filter="all" aria-pressed="true">全部 8</button>
+      <button class="chip" data-filter="layout" aria-pressed="false">版式</button>
+      <button class="chip" data-filter="material" aria-pressed="false">材质</button>
+      <button class="chip" data-filter="motion" aria-pressed="false">动效</button>
+      <button class="chip" data-filter="type" aria-pressed="false">字体</button>
+    </div>
+
+    <div class="wall-grid">
+      <div class="grid" id="grid">
+        <button class="card" data-tags="layout,type" data-name="单栏大字" aria-pressed="false">
+          <div class="shot s1"><div class="a">Aa</div><div class="ln"></div><div class="ln" style="width:60%"></div><div class="sq"></div></div>
+          <div class="card-meta"><div><b>单栏大字</b><small>LAYOUT / TYPE</small></div><span class="pick">记住</span></div>
+        </button>
+        <button class="card" data-tags="material,type" data-name="深底反白" aria-pressed="false">
+          <div class="shot s2"><div class="dot"></div><div class="a">深底<br>反白</div><div class="ln"></div></div>
+          <div class="card-meta"><div><b>深底反白</b><small>MATERIAL / TYPE</small></div><span class="pick">记住</span></div>
+        </button>
+        <button class="card" data-tags="layout,type" data-name="竖分栏" aria-pressed="false">
+          <div class="shot s3"><div class="col c1"></div><div class="col c2"></div><div class="t">竖排<br>标题</div><div class="b"></div></div>
+          <div class="card-meta"><div><b>竖分栏</b><small>LAYOUT / TYPE</small></div><span class="pick">记住</span></div>
+        </button>
+        <button class="card" data-tags="type,material" data-name="单字框" aria-pressed="false">
+          <div class="shot s4"><div class="glyph">永</div><div class="tag">GLYPH</div></div>
+          <div class="card-meta"><div><b>单字框</b><small>TYPE / MATERIAL</small></div><span class="pick">记住</span></div>
+        </button>
+        <button class="card" data-tags="layout,material" data-name="四宫格" aria-pressed="false">
+          <div class="shot s5"><div class="blocks"><div class="bl"></div><div class="bl"></div><div class="bl"></div><div class="bl"></div></div></div>
+          <div class="card-meta"><div><b>四宫格</b><small>LAYOUT / MATERIAL</small></div><span class="pick">记住</span></div>
+        </button>
+        <button class="card" data-tags="motion,material" data-name="同心环" aria-pressed="false">
+          <div class="shot s6"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="cap">RING / 01</div></div>
+          <div class="card-meta"><div><b>同心环</b><small>MOTION / MATERIAL</small></div><span class="pick">记住</span></div>
+        </button>
+        <button class="card" data-tags="motion,layout" data-name="错位条" aria-pressed="false">
+          <div class="shot s7"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+          <div class="card-meta"><div><b>错位条</b><small>MOTION / LAYOUT</small></div><span class="pick">记住</span></div>
+        </button>
+        <button class="card" data-tags="type,motion" data-name="等宽字表" aria-pressed="false">
+          <div class="shot s8"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span><span>I</span><span>J</span><span>K</span><span>L</span></div>
+          <div class="card-meta"><div><b>等宽字表</b><small>TYPE / MOTION</small></div><span class="pick">记住</span></div>
+        </button>
+      </div>
+
+      <aside class="memory" id="memory" aria-label="记忆面板">
+        <div class="mh"><span>MEMORY / 口味</span><span class="count"><b id="count">0</b> / 8</span></div>
+        <h3>已收维度</h3>
+        <div class="tags" id="tags"><span class="tag">还没选</span></div>
+        <div class="sentence" id="sentence">挑几张卡。它会把重复出现的维度留下来，变成下一次起稿的偏好。</div>
+        <button class="reset" id="reset">清空重选</button>
+        <div class="hint">本页的选择只存在当前标签页，刷新即清空；不上传，不写本地存储。</div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="wrap tagline" aria-label="本节观点">
+    <p id="tagline"><span class="w">灵感</span><span class="w">不是</span><span class="w">收藏夹。</span><br><span class="w">是下一次</span><span class="w">动手时，</span><span class="w">少犹豫的</span><span class="w">那几秒。</span></p>
+  </section>
+
+  <section class="section" id="rules">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">从画廊借来的</div>
+          <h2>三条纪律，<br>让参考墙不变成垃圾场。</h2>
+        </div>
+        <p>Framer Gallery 的结构很克制：分类、缩略图、一个 Open。学到的是取舍，不是把页面塞满。</p>
+      </div>
+      <div class="rules">
+        <div class="rule-row"><span class="n">01</span><h3>分类只做两级</h3><p>一级行业，二级场景。两级还找不到，说明这张卡不该收。</p></div>
+        <div class="rule-row"><span class="n">02</span><h3>图先说话</h3><p>卡片上只留名称、维度和一个动作。判断发生在图里，不在介绍文案里。</p></div>
+        <div class="rule-row"><span class="n">03</span><h3>一个动作</h3><p>打开，或者收进记忆。不同时给收藏、点赞、分享、下载四个按钮。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">记忆怎么用</div>
+          <h2>三步，把「看过」变成「用得上」。</h2>
+        </div>
+        <p>记忆不是聊天记录。它只保留你反复确认过的偏好，并且允许你改。</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="n">01 / COLLECT</div><h3>收窄</h3><p>一次只收一个维度。八张卡里三种版式，比八十张截图更好用。</p></div>
+        <div class="step"><div class="n">02 / DISTILL</div><h3>归纳</h3><p>把重复出现的词提出来，写成一句能执行的话：暖纸、大字、单栏、少动效。</p></div>
+        <div class="step"><div class="n">03 / APPLY</div><h3>起稿</h3><p>下次先按这句偏好出一版，再让你改。改完的结论回写记忆。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">许可与边界</div>
+          <h2>借结构，不借作品。</h2>
+        </div>
+        <p>画廊里的每一张图都归作者；这面墙的八张卡全部是本页用 CSS 画的抽象版式。</p>
+      </div>
+      <div class="license">
+        <div>
+          <h3>使用边界</h3>
+          <p><b>只链原站，不搬图。</b>Framer Gallery 的作品归各自作者 / 客户，Framer 的名称与界面归 Framer；本页没有下载或再分发任何截图、视频。</p>
+          <p>「Framer Gallery」只作被介绍对象的名称，不使用其 logo 或品牌色作为本页品牌。</p>
+          <p>若要批量抓取画廊做训练或再发布，需要先看 Framer 服务条款与各作品授权；本任务不做。</p>
+        </div>
+        <div>
+          <h3>没写进页面的</h3>
+          <div class="gap"><i>GAP</i><span>「收录了 4 万多个网页」在画廊页找不到总数或官方统计，不写。</span></div>
+          <div class="gap"><i>GAP</i><span>卡片总数、更新频率、审核标准未核实；只写「持续更新的精选库」。</span></div>
+          <div class="gap"><i>GAP</i><span>画廊作品的授权细节未核实；不声称可商用或可转载。</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <div>
+    <div class="sig">GROK BOT 能力展示 · 07 / 16</div>
+    <div style="margin-top:6px">页面为能力说明，不代表 xAI 或 Grok 官方。</div>
+  </div>
+  <nav aria-label="相关页面">
+    <a href="../index.html">全部 16 项</a>
+    <a href="../notes/07-framer-gallery.md">学习笔记</a>
+    <a href="https://www.framer.com/community/gallery/" target="_blank" rel="noopener">来源画廊</a>
+  </nav>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGsap = !!(window.gsap && window.ScrollTrigger);
+  if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+  if (hasGsap && !reduce){
+    gsap.from('.hero > div > *', {y:6, autoAlpha:0, filter:'blur(2px)', duration:.8, stagger:.06, ease:'power3.out'});
+    gsap.from('.stack', {y:12, autoAlpha:0, duration:.9, delay:.1, ease:'power3.out'});
+  }
+
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+  var tagsEl = document.getElementById('tags');
+  var sentence = document.getElementById('sentence');
+  var countEl = document.getElementById('count');
+  var reset = document.getElementById('reset');
+
+  var LABEL = {layout:'版式', material:'材质', motion:'动效', type:'字体'};
+  var selected = [];
+
+  function render(){
+    countEl.textContent = String(selected.length);
+    var counts = {};
+    selected.forEach(function(card){
+      card.getAttribute('data-tags').split(',').forEach(function(t){
+        counts[t] = (counts[t] || 0) + 1;
+      });
+    });
+    var keys = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; });
+    if (!keys.length){
+      tagsEl.innerHTML = '<span class="tag">还没选</span>';
+      sentence.textContent = '挑几张卡。它会把重复出现的维度留下来，变成下一次起稿的偏好。';
+      return;
+    }
+    tagsEl.innerHTML = keys.map(function(k){
+      return '<span class="tag">' + LABEL[k] + '<b>' + counts[k] + '</b></span>';
+    }).join('');
+    var names = selected.map(function(c){ return c.getAttribute('data-name'); });
+    var top = keys.slice(0,3).map(function(k){ return LABEL[k]; }).join('、');
+    sentence.innerHTML = '<b>这次收到的偏好：</b>' + top + '。已收 ' + names.length + ' 张：' + names.join('、') + '。下次先按这句起稿。';
+  }
+
+  cards.forEach(function(card){
+    card.addEventListener('click', function(){
+      var i = selected.indexOf(card);
+      if (i > -1){ selected.splice(i,1); card.setAttribute('aria-pressed','false'); }
+      else { selected.push(card); card.setAttribute('aria-pressed','true'); }
+      render();
+    });
+  });
+
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      chips.forEach(function(c){ c.setAttribute('aria-pressed','false'); });
+      chip.setAttribute('aria-pressed','true');
+      var f = chip.getAttribute('data-filter');
+      cards.forEach(function(card){
+        var show = f === 'all' || card.getAttribute('data-tags').split(',').indexOf(f) > -1;
+        card.classList.toggle('hide', !show);
+      });
+    });
+  });
+
+  reset.addEventListener('click', function(){
+    selected = [];
+    cards.forEach(function(c){ c.setAttribute('aria-pressed','false'); });
+    render();
+  });
+  render();
+
+  var tagWords = Array.prototype.slice.call(document.querySelectorAll('#tagline .w'));
+  if (hasGsap && !reduce){
+    gsap.to(tagWords, {color:'#17150f', stagger:.08, ease:'none',
+      scrollTrigger:{trigger:'#tagline', start:'top 80%', end:'bottom 62%', scrub:.6}});
+  } else {
+    tagWords.forEach(function(w){ w.classList.add('lit'); });
+  }
+
+  if (hasGsap && !reduce){
+    gsap.utils.toArray('.wall-head, .filters, .card, .rule-row, .step, .license').forEach(function(el){
+      gsap.from(el, {y:16, autoAlpha:0, duration:.7, ease:'power3.out',
+        scrollTrigger:{trigger:el, start:'top 99%', once:true}});
+    });
+  }
+})();
+</script>
+</body>
+</html>

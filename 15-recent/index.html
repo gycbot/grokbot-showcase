@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刚刚发生过什么 · Grok Bot 能力展示</title>
+<meta name="description" content="Grok Bot 把一次任务的现场写成可再打开的文件：brief、来源、判断、页面。第 15 页，Recent 的混合比例信息流方法。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23f4f2ee'/><rect x='14' y='14' width='16' height='16' fill='%23131210'/><rect x='34' y='14' width='16' height='10' fill='%232036c8'/><rect x='14' y='34' width='10' height='16' fill='%232036c8'/><rect x='28' y='28' width='22' height='22' fill='%23131210'/></svg>">
+<style>
+  :root{
+    --paper:#f4f2ee;
+    --card:#fbfaf7;
+    --ink:#131210;
+    --muted:#5f5a50;
+    --faint:#a39c8f;
+    --line:#d9d4c9;
+    --accent:#2036c8;
+    --accent-soft:#e6e8fb;
+    --serif:"Noto Serif CJK SC","Songti SC","Source Han Serif SC",serif;
+    --sans:"Noto Sans CJK SC","PingFang SC","Source Han Sans SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--paper);color:var(--ink);scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:12px 16px;z-index:99}
+  .skip:focus{left:12px;top:12px}
+  .wrap{width:min(1320px,100% - 96px);margin-inline:auto}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+  header.site{padding:24px 0 0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:16px;border-bottom:1px solid var(--ink)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{width:18px;height:18px;background:var(--ink);position:relative;flex:none}
+  .brand .mark::after{content:"";position:absolute;left:5px;top:5px;width:8px;height:8px;background:var(--accent)}
+  .brand b{font-size:13px;font-weight:600;letter-spacing:.15em}
+  .topnav{display:flex;gap:26px;align-items:center}
+  .topnav a{font-size:12px;letter-spacing:.05em;color:var(--muted);transition:color .3s var(--ease)}
+  .topnav a:hover,.topnav a[aria-current]{color:var(--ink)}
+  .counter{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+  .counter b{color:var(--accent);font-weight:500}
+
+  .mast{padding:42px 0 30px;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:56px;align-items:end}
+  .kicker{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .live{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:blink 2s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(46px,6.6vw,96px);line-height:1.02;letter-spacing:-.03em;max-width:900px}
+  h1 .thin{color:var(--faint);font-weight:400}
+  h1 .blue{color:var(--accent)}
+  .lede{margin-top:24px;max-width:600px;font-size:16px;line-height:1.9;color:#49453d}
+  .lede strong{font-weight:600;color:var(--ink)}
+  .stats{border-top:2px solid var(--ink);padding-top:14px}
+  .stat{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .stat span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+  .stat b{font-size:12px;font-weight:500}
+
+  .feedbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin-top:12px}
+  .feedbar .label{margin-right:8px}
+  .chip{border:1px solid var(--line);background:transparent;padding:6px 11px;font-size:11px;color:var(--muted);transition:all .3s var(--ease)}
+  .chip sup{font-family:var(--mono);font-size:9px;margin-left:5px;color:var(--faint)}
+  .chip:hover{border-color:#b8b1a4;color:var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+  .chip[aria-pressed="true"] sup{color:#a9a29a}
+  .feedbar .hint{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--faint)}
+
+  .feed{padding:18px 0 22px;display:grid;grid-template-columns:repeat(12,1fr);gap:14px;align-items:stretch}
+  .tile{margin:0;border:1px solid var(--line);background:var(--card);position:relative;display:flex;flex-direction:column;min-width:0;transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .45s var(--ease);will-change:transform}
+  .tile:hover,.tile:focus-within{transform:translateY(-3px);box-shadow:0 14px 30px rgba(19,18,16,.08);border-color:#bdb6a7}
+  .tile .visual{position:relative;overflow:hidden;background:#e9e5dc;flex:1;min-height:0}
+  .tile .tag{position:absolute;left:9px;top:8px;z-index:3;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#6f6a60;background:rgba(251,250,247,.86);padding:2px 5px}
+  .tile .st{position:absolute;right:9px;top:8px;z-index:3;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#6f6a60;display:flex;align-items:center;gap:4px}
+  .tile .st i{width:4px;height:4px;border-radius:50%;background:#6f8a6a;display:block}
+  .tile .st.gap i{background:#c04a2e}
+  .tile .body{padding:11px 12px 12px}
+  .tile h3{font-size:14px;font-weight:600;line-height:1.4;display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .tile h3 em{font-family:var(--mono);font-style:normal;font-size:8px;color:var(--faint);letter-spacing:.08em;font-weight:400;white-space:nowrap}
+  .tile p{font-size:11px;line-height:1.7;color:var(--muted);margin-top:5px}
+  .tile .path{font-family:var(--mono);font-size:8px;color:var(--faint);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tile[data-cat="build"]{border-color:#c9c3b6}
+  .tile[data-cat="build"] .body{background:#f7f5ef}
+
+  .v-brief .scope{position:absolute;right:11px;top:34px;writing-mode:vertical-rl;font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:#6f675a}
+  .v-skills{position:relative}
+  .v-skills .big16{position:absolute;right:8px;bottom:-6px;font-family:var(--serif);font-size:82px;line-height:1;color:#cfc7b7;z-index:0}
+  .v-skills i{position:relative;z-index:1}
+  .reel-label{position:absolute;left:10px;bottom:16px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:#8e8678}
+  .recent-label{position:absolute;right:8px;bottom:7px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:#8f8778}
+  .page-label{position:absolute;right:10px;bottom:9px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:#9a9284}
+  .page-label.dark{color:#8f8778}
+  .tile .v-brief{background:#171614}
+  .tile .v-reel{background:#141414}
+  .tile .v-skills{background:#e7e2d7}
+  .tile .v-recent{background:#e9e4da}
+  .tile .v-anime{background:#f0ece2}
+  .tile .v-gap{background:#eae4d9}
+  .tile .v-page13{background:#0d0d0e}
+  .tile .v-page14{background:#f0ece2}
+  .tile .v-index{background:#f8f6f0}
+
+  .t1{grid-column:span 5;height:348px}
+  .t2{grid-column:span 3;height:348px}
+  .t3{grid-column:span 4;height:348px}
+  .t4,.t5,.t6,.t7,.t8,.t9{grid-column:span 4;height:302px}
+  .t1 .v-brief,.t3 .v-reel,.t7 .v-page13{flex:1}
+  .t2 .v-skills,.t4 .v-anime,.t5 .v-recent,.t6 .v-gap,.t8 .v-page14,.t9 .v-index{flex:1;aspect-ratio:auto}
+
+  /* visuals */
+  .v-brief{background:#171614;padding:30px 16px 14px;display:flex;flex-direction:column;gap:8px}
+  .v-brief .top{display:flex;gap:5px;margin-bottom:6px}
+  .v-brief .top i{height:4px;background:#3f3c38;display:block}
+  .v-brief .top i:nth-child(1){width:18%;background:var(--accent)}
+  .v-brief .top i:nth-child(2){width:10%}
+  .v-brief .top i:nth-child(3){width:26%}
+  .v-brief .ln{height:4px;background:#343230;display:block}
+  .v-brief .ln:nth-of-type(2){width:84%;background:#5e594f}
+  .v-brief .ln:nth-of-type(3){width:66%}
+  .v-brief .ln:nth-of-type(4){width:74%}
+  .v-brief .stamp{margin-top:auto;font-family:var(--mono);font-size:8px;color:#7c7568;letter-spacing:.08em}
+
+  .v-skills{background:#e7e2d7;padding:26px 14px 14px;display:flex;flex-direction:column;gap:5px;justify-content:center}
+  .v-skills i{display:block;height:20px;border:1px solid #cfc8ba;background:#f7f5ef;position:relative}
+  .v-skills i::after{content:"";position:absolute;left:5px;top:7px;width:22%;height:4px;background:#c9c2b4}
+  .v-skills i.on{background:var(--ink);border-color:var(--ink)}
+  .v-skills i.on::after{background:var(--accent);width:34%}
+
+  .v-reel{background:#141414;display:flex;align-items:center;justify-content:center}
+  .v-reel .play{width:0;height:0;border-left:14px solid #f2efe8;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+  .v-reel .bars{position:absolute;left:10px;right:10px;bottom:9px;display:flex;gap:2px;height:3px}
+  .v-reel .bars i{flex:1;background:#4a4640;display:block}
+  .v-reel .bars i:nth-child(3){background:var(--accent)}
+
+  .v-anime{background:#f0ece2;padding:1px}
+  .v-anime svg{width:100%;height:100%;display:block}
+
+  .v-recent{background:#e9e4da;padding:24px 8px 8px;display:grid;grid-template-columns:1fr 1.2fr 0.8fr;gap:4px;align-items:start}
+  .v-recent i{display:block;background:#cfc7b8}
+  .v-recent i:nth-child(1){height:42%;background:#bdb4a3}
+  .v-recent i:nth-child(2){height:62%;background:#f8f6f0}
+  .v-recent i:nth-child(3){height:34%;background:var(--accent-soft)}
+  .v-recent i:nth-child(4){height:30%;grid-column:1;background:#f8f6f0}
+  .v-recent i:nth-child(5){height:20%;grid-column:2;background:#a9a08f}
+  .v-recent i:nth-child(6){height:44%;grid-column:3;background:#f8f6f0}
+
+  .v-gap{background:#eae4d9;border:1px dashed #c3bbab;display:flex;align-items:center;justify-content:center;position:relative}
+  .v-gap .q{font-family:var(--serif);font-size:64px;color:#b7af9f;line-height:1}
+  .v-gap .note{position:absolute;bottom:8px;right:9px;font-family:var(--mono);font-size:8px;color:#8f8778;letter-spacing:.1em}
+
+  .v-page13{background:#0d0d0e;padding:26px 12px 12px;display:flex;flex-direction:column;gap:5px}
+  .v-page13 i{display:block;height:4px;background:#35322f}
+  .v-page13 i:nth-child(1){width:74%;background:#f2efe8;height:7px}
+  .v-page13 i:nth-child(2){width:52%;height:7px;background:#726c62}
+  .v-page13 i:nth-child(3){width:44%;height:7px;background:#e2552f;margin-bottom:5px}
+  .v-page13 .row{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:4px}
+  .v-page13 .row{flex:1;align-items:end}
+  .v-page13 .row span{height:70%;border:1px solid #34312e;display:block;background:#1a1917}
+  .v-page13 .row span:nth-child(2){border-color:#5b352a;background:#2a1a15}
+
+  .v-page14{background:#f0ece2;padding:28px 10px 10px;display:flex;flex-direction:column;gap:6px}
+  .v-page14 i{display:block;height:5px;background:#1c1a17}
+  .v-page14 i:nth-child(1){width:62%;height:9px}
+  .v-page14 i:nth-child(2){width:40%;background:#c0b8a8;height:9px}
+  .v-page14 .row{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:4px}
+  .v-page14 .row{flex:1;align-items:stretch;position:relative}
+  .v-page14 .row span{height:100%;border:1px solid #cfc7b8;background:#e7e1d5;display:block}
+  .v-page14 .row::after{content:"";position:absolute;left:18%;top:34%;width:10px;height:10px;border-radius:50%;background:#ff4b2b}
+  .v-page14 .row span:nth-child(2){background:#1a1916}
+
+  .v-index{background:#f8f6f0;padding:24px 10px 10px;display:flex;flex-direction:column;gap:3px}
+  .v-index i{display:flex;justify-content:space-between;height:5px;background:#e3ddd1;position:relative}
+  .v-index i::after{content:"";position:absolute;left:2px;top:1px;width:34%;height:3px;background:#b8b0a1}
+  .v-index i.on{background:#dfe2f8}
+  .v-index i.on::after{background:var(--accent)}
+
+  .statement{border-top:1px solid var(--line);padding:64px 0 60px;display:grid;grid-template-columns:1fr 300px;gap:70px;align-items:start}
+  .statement blockquote{font-family:var(--serif);font-size:clamp(32px,4.4vw,58px);line-height:1.25;font-weight:600;letter-spacing:-.02em;max-width:840px}
+  .statement blockquote span{transition:color .6s var(--ease)}
+  .statement blockquote .dim{color:var(--faint)}
+  .statement blockquote .hit{color:var(--ink)}
+  .statement blockquote .blue{color:var(--accent)}
+  .side-note{padding-top:8px}
+  .side-note .n{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.12em}
+  .side-note p{font-size:12px;line-height:1.9;color:var(--muted);margin-top:12px}
+
+  .how{border-top:1px solid var(--line);padding:38px 0 54px;display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  .how .col{padding:0 26px;border-right:1px solid var(--line)}
+  .how .col:first-child{padding-left:0}
+  .how .col:last-child{border-right:0}
+  .how .n{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.12em}
+  .how h3{font-size:15px;font-weight:600;margin:10px 0 6px}
+  .how p{font-size:12px;line-height:1.85;color:var(--muted);max-width:32ch}
+  .how code{font-family:var(--mono);font-size:10px;background:#e9e4da;padding:1px 4px}
+
+  footer.site{border-top:1px solid var(--ink);padding:24px 0 38px}
+  .foot{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+  .foot p{font-size:11px;line-height:1.9;color:var(--faint);max-width:56ch}
+  .foot p a{border-bottom:1px solid #c7c0b2}
+  .foot .meta{text-align:right;font-family:var(--mono);font-size:10px;line-height:1.9;color:var(--faint);letter-spacing:.05em;white-space:nowrap}
+
+  @media (max-width:1080px){
+    .wrap{width:calc(100% - 56px)}
+    .mast{grid-template-columns:1fr;gap:30px}
+    .stats{max-width:420px}
+    .feed{grid-template-columns:repeat(6,1fr)}
+    .t1,.t2,.t3,.t4,.t5,.t6,.t7,.t8,.t9{grid-column:span 3;height:320px}
+    .statement{grid-template-columns:1fr;gap:30px}
+  }
+  @media (max-width:820px){ .feed{grid-template-columns:1fr}
+    .t1,.t2,.t3,.t4,.t5,.t6,.t7,.t8,.t9{grid-column:span 1;height:auto}
+    .tile .visual{flex:none;aspect-ratio:16/10}
+    .t2 .visual{aspect-ratio:4/5}
+  }
+  @media (max-width:680px){
+    .wrap{width:calc(100% - 36px)}
+    .topnav{display:none}
+    .mast{padding:32px 0 24px}
+    h1{font-size:clamp(40px,11.5vw,56px)}
+    .lede{font-size:15px;margin-top:18px}
+    .feed{grid-template-columns:1fr;padding-top:14px}
+    .tile{height:auto}
+    .tile .visual{flex:none;aspect-ratio:16/10}
+    .t2 .visual{aspect-ratio:4/5}
+    .feedbar .hint{display:none}
+    .statement{padding:42px 0 38px}
+    .statement blockquote{font-size:clamp(30px,8.6vw,40px)}
+    .how{grid-template-columns:1fr}
+    .how .col{border-right:0;border-bottom:1px solid var(--line);padding:20px 0}
+    .how .col:last-child{border-bottom:0}
+    .foot{flex-direction:column}
+    .foot .meta{text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="site">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><b>GROK BOT / 现场</b></div>
+    <nav class="topnav" aria-label="页面导航">
+      <a href="#feed" aria-current="page">最近</a>
+      <a href="#memory">记忆方式</a>
+      <a href="../index.html">总索引</a>
+    </nav>
+    <div class="counter">REEL <b>15</b> / 16</div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap mast" aria-labelledby="h1">
+    <div>
+      <div class="kicker"><span class="live" aria-hidden="true"></span><span class="mono">Recent · 本次会话 / 2026-11-13</span></div>
+      <h1 id="h1">刚刚<br><span class="thin">发生过</span><span class="blue">什么？</span></h1>
+      <p class="lede">Grok Bot 的记忆不靠“我记得”。它把 brief、来源、判断和产物写在磁盘上，下一轮先读文件。<strong>能再打开，才算发生过。</strong></p>
+    </div>
+    <aside class="stats" aria-label="本次会话统计">
+      <div class="stat"><span>本批页面</span><b>4 / 16</b></div>
+      <div class="stat"><span>已核实来源</span><b>3 + 1 个缺口</b></div>
+      <div class="stat"><span>截图</span><b>8 张</b></div>
+      <div class="stat"><span>发布</span><b>0 次</b></div>
+      <div class="stat"><span>时区</span><b>Asia/Shanghai</b></div>
+    </aside>
+  </section>
+
+  <section class="wrap" id="feed" aria-labelledby="feed-h">
+    <h2 id="feed-h" style="position:absolute;left:-9999px">本次会话的信息流</h2>
+    <div class="feedbar" role="group" aria-label="按阶段筛选">
+      <span class="mono label">阶段</span>
+      <button class="chip" data-filter="all" aria-pressed="true">全部<sup>9</sup></button>
+      <button class="chip" data-filter="input" aria-pressed="false">输入<sup>2</sup></button>
+      <button class="chip" data-filter="research" aria-pressed="false">检索<sup>4</sup></button>
+      <button class="chip" data-filter="build" aria-pressed="false">构建<sup>3</sup></button>
+      <span class="hint" id="shown">09 / 09</span>
+    </div>
+
+    <div class="feed" id="feedList">
+      <article class="tile t1" data-cat="input" tabindex="0">
+        <div class="visual v-brief">
+          <span class="tag">01 / INPUT</span><span class="st"><i></i>READ</span>
+          <div class="top" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span class="ln" aria-hidden="true"></span><span class="ln" aria-hidden="true"></span><span class="ln" aria-hidden="true"></span>
+          <span class="stamp">brief.json · 范围 13–16</span>
+          <span class="scope" aria-hidden="true">SCOPE 13—16</span>
+        </div>
+        <div class="body">
+          <h3>先读 brief <em>T+00</em></h3>
+          <p>范围、平台、禁止项、验收锚点。先读文件，不从记忆里补。</p>
+          <div class="path">brief.json</div>
+        </div>
+      </article>
+      <article class="tile t2" data-cat="input" tabindex="0">
+        <div class="visual v-skills">
+          <span class="tag">02 / INPUT</span><span class="st"><i></i>LOADED</span>
+          <span class="big16" aria-hidden="true">16</span>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><i class="on" aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
+        </div>
+        <div class="body">
+          <h3>16 份技能 <em>T+01</em></h3>
+          <p>不是每个都读一遍。按本单要产出的东西挑：写作、动效、交付。</p>
+          <div class="path">.skills/*/SKILL.md</div>
+        </div>
+      </article>
+      <article class="tile t3" data-cat="research" tabindex="0">
+        <div class="visual v-reel">
+          <span class="tag">03 / LOOK</span><span class="st"><i></i>FETCHED</span>
+          <span class="reel-label" aria-hidden="true">261 REELS / MOTION</span>
+          <div class="play" aria-hidden="true"></div>
+          <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="body">
+          <h3>Showreel Design <em>T+02</em></h3>
+          <p>261 条动效作品，按行业、风格、声音三组筛。学的是索引，不是片子。</p>
+          <div class="path">showreel.design</div>
+        </div>
+      </article>
+      <article class="tile t4" data-cat="research" tabindex="0">
+        <div class="visual v-anime">
+          <span class="tag">04 / LOOK</span><span class="st"><i></i>FETCHED</span>
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <path d="M18 150 C 58 150, 58 60, 98 60 S 138 140, 182 140" fill="none" stroke="#1a1916" stroke-width="1.4"/>
+            <circle cx="98" cy="60" r="7" fill="#ff4b2b"/>
+            <rect x="24" y="168" width="46" height="3" fill="#b9b1a1"/>
+            <rect x="80" y="168" width="30" height="3" fill="#d5cec0"/>
+            <text x="24" y="188" font-family="ui-monospace, monospace" font-size="7" fill="#8f8778" letter-spacing="1">3.4 SEC / DRAW</text>
+          </svg>
+        </div>
+        <div class="body">
+          <h3>Anime.js 4.5 <em>T+03</em></h3>
+          <p>时间轴、SVG 描边、stagger。先把关键帧排好，再写缓动。</p>
+          <div class="path">animejs.com · MIT</div>
+        </div>
+      </article>
+      <article class="tile t5" data-cat="research" tabindex="0">
+        <div class="visual v-recent">
+          <span class="tag">05 / LOOK</span><span class="st"><i></i>FETCHED</span>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
+          <span class="recent-label" aria-hidden="true">MIXED RATIO</span>
+        </div>
+        <div class="body">
+          <h3>Recent <em>T+04</em></h3>
+          <p>混合宽高比的信息流。学的是“每条保留自己的形状”，不是等高卡片墙。</p>
+          <div class="path">recent.design</div>
+        </div>
+      </article>
+      <article class="tile t6" data-cat="research" tabindex="0">
+        <div class="visual v-gap">
+          <span class="tag">06 / LOOK</span><span class="st gap"><i></i>GAP</span>
+          <span class="q" aria-hidden="true">?</span>
+          <span class="note">SOURCE NOT FOUND</span>
+        </div>
+        <div class="body">
+          <h3>Thrine <em>T+05</em></h3>
+          <p>域名与站点都没核实到。笔记里写明 evidence_gap，技法改取自 Httpster。</p>
+          <div class="path">notes/16-thrine.md</div>
+        </div>
+      </article>
+
+      <a class="tile t8" data-cat="build" href="../13-showreel-design/index.html">
+        <div class="visual v-page13">
+          <span class="tag">07 / BUILD</span><span class="st"><i></i>BUILT</span><span class="page-label" aria-hidden="true">SKILL REEL</span>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
+          <div class="row" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h3>第 13 页 <em>T+06</em></h3>
+          <p>技能放映室。筛选项、16:9 卡、悬停预览，全部从 Showreel 的结构里来。</p>
+          <div class="path">pages/13-showreel-design/</div>
+        </div>
+      </a>
+
+      <a class="tile t9" data-cat="build" href="../14-anime/index.html">
+        <div class="visual v-page14">
+          <span class="tag">08 / BUILD</span><span class="st"><i></i>BUILT</span><span class="page-label dark" aria-hidden="true">MOTION / 3.4s</span>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i>
+          <div class="row" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div class="body">
+          <h3>第 14 页 <em>T+07</em></h3>
+          <p>一帧一动作。页面里真的跑着一条 3.4 秒的 anime.js 时间轴。</p>
+          <div class="path">pages/14-anime/</div>
+        </div>
+      </a>
+      <article class="tile t9" data-cat="build" tabindex="0">
+        <div class="visual v-index">
+          <span class="tag">09 / BUILD</span><span class="st"><i></i>THIS</span><span class="page-label dark" aria-hidden="true">INDEX 01—16</span>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><span class="big16" aria-hidden="true">16</span>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><i class="on" aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
+        </div>
+        <div class="body">
+          <h3>第 15 页 <em>T+08</em></h3>
+          <p>就是这一页。把上面八条写成一条能筛、能回到原文件的流。</p>
+          <div class="path">pages/15-recent/</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap statement" id="memory" aria-labelledby="memory-h">
+    <blockquote id="memory-h">
+      <span class="dim">记忆不是</span> <span class="dim">“我记得”，</span><br>
+      <span class="hit">是</span> <span class="hit">“文件还在”，</span><br>
+      <span class="blue">下一轮能再打开。</span>
+    </blockquote>
+    <div class="side-note">
+      <div class="n">WHY THIS PAGE EXISTS</div>
+      <p>Recent 把设计灵感做成一条持续更新的流。Grok Bot 把一次任务做成同样的东西：每条不是感想，是一个能再打开的文件、页面或截图。</p>
+      <p>所以这一页不写“我完成了”，只列现场。缺口也留在流里，和完成项同样显眼。</p>
+    </div>
+  </section>
+
+  <section class="wrap how" aria-label="记忆的三个动作">
+    <div class="col">
+      <div class="n">01 / WRITE</div>
+      <h3>先落盘</h3>
+      <p>brief、来源、决定、截图路径，写进 <code>notes/</code> 与 <code>output/</code>。不靠会话上下文记。</p>
+    </div>
+    <div class="col">
+      <div class="n">02 / READ</div>
+      <h3>下一轮先读</h3>
+      <p>续跑时先读 <code>self_check.md</code> 与 <code>run.jsonl</code>，只补缺口，不推倒重写。</p>
+    </div>
+    <div class="col">
+      <div class="n">03 / CHECK</div>
+      <h3>用文件对账</h3>
+      <p>页面能不能打开、截图在不在、索引有没有漏。对不上就写 GAP，不写“已完成”。</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <p>本页是 Grok Bot 能力展示的第 15 页，学习对象为 <a href="https://recent.design/" target="_blank" rel="noopener">Recent</a> 的混合比例信息流。页面不使用其作品图、头像或标识。研究记录见 <span class="mono">notes/15-recent.md</span>。</p>
+    <div class="meta">2026-11-13 · ASIA/SHANGHAI<br>GROK BOT / SESSION FEED<br>NO PUBLISH</div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+  if (!reduce && window.gsap) {
+    gsap.from('.feed .tile', {
+      opacity:0, y:16, duration:.6, stagger:.05, ease:'power3.out',
+      scrollTrigger:{trigger:'.feed', start:'top 88%', once:true}
+    });
+    gsap.from('.mast h1, .mast .lede, .stats', {
+      opacity:0, y:10, duration:.8, stagger:.07, ease:'power3.out'
+    });
+  }
+
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.tile'));
+  var shown = document.getElementById('shown');
+  function apply(filter){
+    var n = 0;
+    tiles.forEach(function(t){
+      var on = filter === 'all' || t.getAttribute('data-cat') === filter;
+      t.style.display = on ? '' : 'none';
+      if (on) n++;
+    });
+    shown.textContent = String(n).padStart(2,'0') + ' / 09';
+    if (!reduce && window.gsap) {
+      gsap.fromTo(tiles.filter(function(t){return t.style.display !== 'none';}),
+        {opacity:0, y:8}, {opacity:1, y:0, duration:.4, stagger:.03, ease:'power2.out', overwrite:true});
+    }
+  }
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      chips.forEach(function(x){x.setAttribute('aria-pressed','false')});
+      c.setAttribute('aria-pressed','true');
+      apply(c.getAttribute('data-filter'));
+    });
+  });
+})();
+</script>
+</body>
+</html>

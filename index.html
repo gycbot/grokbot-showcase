@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>十六页，一条能力线 · Grok Bot 能力展示索引</title>
+<meta name="description" content="Grok Bot 能力展示总索引：16 项资源，16 页展示。每页介绍一项真实能力，技法来自对应资源。不是发布页。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23ece8dd'/><rect x='14' y='14' width='4' height='36' fill='%231f5c46'/><rect x='24' y='14' width='26' height='4' fill='%2314130f'/><rect x='24' y='26' width='18' height='2' fill='%2314130f'/><rect x='24' y='34' width='22' height='2' fill='%23958d7d'/><rect x='24' y='42' width='14' height='2' fill='%23958d7d'/></svg>">
+<style>
+  :root{
+    --paper:#ece8dd;
+    --paper-2:#e3ded1;
+    --ink:#14130f;
+    --muted:#676156;
+    --faint:#9a9282;
+    --line:#cfc7b7;
+    --accent:#1f5c46;
+    --accent-soft:#dde5dd;
+    --serif:"Noto Serif CJK SC","Songti SC","Source Han Serif SC",serif;
+    --sans:"Noto Sans CJK SC","PingFang SC","Source Han Sans SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--paper);color:var(--ink);scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+  ::selection{background:var(--accent);color:var(--paper)}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:12px 16px;z-index:99}
+  .skip:focus{left:12px;top:12px}
+  .wrap{width:min(1280px,100% - 96px);margin-inline:auto}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+  header.site{padding:26px 0 0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:22px;padding-bottom:16px;border-bottom:1px solid var(--ink)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{width:18px;height:18px;border:1px solid var(--ink);position:relative;flex:none}
+  .brand .mark::after{content:"";position:absolute;left:4px;top:4px;width:3px;height:8px;background:var(--accent)}
+  .brand b{font-size:13px;font-weight:600;letter-spacing:.15em}
+  .topnav{display:flex;gap:24px;align-items:center}
+  .topnav a{font-size:12px;letter-spacing:.05em;color:var(--muted);transition:color .3s var(--ease)}
+  .topnav a:hover,.topnav a[aria-current]{color:var(--ink)}
+  .counter{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+  .counter b{color:var(--accent);font-weight:500}
+
+  .mast{padding:54px 0 38px;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:60px;align-items:end}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .kicker::before{content:"";width:34px;height:1px;background:var(--accent)}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(48px,6.6vw,96px);line-height:1.02;letter-spacing:-.03em;max-width:860px}
+  h1 .thin{color:var(--faint);font-weight:400}
+  h1 .green{color:var(--accent)}
+  .lede{margin-top:26px;max-width:620px;font-size:16px;line-height:1.9;color:#4e493f}
+  .lede strong{color:var(--ink);font-weight:600}
+  .meta-side{border-top:2px solid var(--ink);padding-top:14px}
+  .meta-side .big{font-family:var(--serif);font-size:92px;line-height:.9;letter-spacing:-.04em;color:var(--ink)}
+  .meta-side .big span{color:var(--accent);font-size:34px;vertical-align:top;margin-left:4px}
+  .meta-side p{font-size:11px;line-height:1.8;color:var(--muted);margin-top:12px}
+  .ticks{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:16px}
+  .ticks i{height:5px;background:var(--line);display:block}
+  .ticks i.on{background:var(--accent)}
+  .ticks i.mid{background:#b7afa0}
+
+  .legend{display:flex;align-items:center;gap:22px;flex-wrap:wrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;margin-top:8px}
+  .legend .item{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .legend .dot{width:6px;height:6px;border-radius:50%;display:block;background:var(--accent)}
+  .legend .dot.wait{background:#b7afa0}
+  .legend .dot.gap{background:#b06a3c}
+  .legend .note{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:.05em}
+
+  .index{list-style:none;border-top:1px solid var(--ink);margin-top:26px}
+  .row{display:grid;grid-template-columns:60px 116px minmax(0,1fr) 142px 28px;gap:18px;align-items:center;padding:15px 4px;border-bottom:1px solid var(--line);position:relative;transition:background .3s var(--ease),padding .3s var(--ease)}
+  .row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent);transform:scaleY(0);transform-origin:top;transition:transform .3s var(--ease)}
+  a.row:hover{background:var(--paper-2);padding-left:12px}
+  a.row:hover::before{transform:scaleY(1)}
+  .num{font-family:var(--serif);font-size:26px;line-height:1;color:var(--faint);letter-spacing:-.02em}
+  .row.done .num{color:var(--accent)}
+  .cat{font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--faint);line-height:1.5;text-transform:uppercase}
+  .name{min-width:0}
+  .name b{display:block;font-size:15px;font-weight:600;line-height:1.4}
+  .name span{display:block;font-size:11px;line-height:1.65;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .state{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--faint);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .state i{width:5px;height:5px;border-radius:50%;background:#b7afa0;display:block}
+  .row.done .state{color:var(--accent)}
+  .row.done .state i{background:var(--accent)}
+  .row.gap .state{color:#a15c30}
+  .row.gap .state i{background:#b06a3c}
+  .arrow{font-family:var(--mono);font-size:14px;color:var(--faint);text-align:right;transition:transform .3s var(--ease),color .3s var(--ease)}
+  a.row:hover .arrow{transform:translateX(4px);color:var(--accent)}
+  .row.placeholder{color:#7f786b}
+  .row.placeholder .name b{font-weight:500}
+  .row.placeholder .name span{color:#8b8375}
+  .row.placeholder .num{color:#b3ab9c}
+
+  .footnote{border-top:1px solid var(--line);margin-top:44px;padding:34px 0 54px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}
+  .fn{padding:0 26px;border-right:1px solid var(--line)}
+  .fn:first-child{padding-left:0}
+  .fn:last-child{border-right:0}
+  .fn .n{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.12em}
+  .fn h2{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.4;margin:10px 0 6px}
+  .fn p{font-size:12px;line-height:1.85;color:var(--muted);max-width:34ch}
+
+  footer.site{border-top:1px solid var(--ink);padding:24px 0 38px}
+  .foot{display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+  .foot p{font-size:11px;line-height:1.9;color:var(--faint);max-width:60ch}
+  .foot .meta{text-align:right;font-family:var(--mono);font-size:10px;line-height:1.9;color:var(--faint);letter-spacing:.05em;white-space:nowrap}
+
+  @media (max-width:1040px){
+    .wrap{width:calc(100% - 56px)}
+    .mast{grid-template-columns:1fr;gap:28px}
+    .meta-side{max-width:320px}
+    .row{grid-template-columns:50px 100px minmax(0,1fr) 120px 22px;gap:14px}
+    .footnote{grid-template-columns:1fr}
+    .fn{border-right:0;border-bottom:1px solid var(--line);padding:20px 0}
+    .fn:first-child{padding-top:0}
+    .fn:last-child{border-bottom:0}
+  }
+  @media (max-width:680px){
+    .wrap{width:calc(100% - 36px)}
+    .topnav{display:none}
+    .mast{padding:38px 0 28px}
+    h1{font-size:clamp(40px,11vw,56px)}
+    .lede{font-size:15px;margin-top:20px}
+    .meta-side .big{font-size:70px}
+    .legend{gap:14px}
+    .legend .note{display:none}
+    .row{grid-template-columns:38px minmax(0,1fr) auto;gap:10px;padding:14px 2px}
+    .cat{display:none}
+    .name span{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .state{font-size:8px}
+    .arrow{display:none}
+    a.row:hover{padding-left:8px}
+    .foot{flex-direction:column}
+    .foot .meta{text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="site">
+  <div class="wrap topbar">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><b>GROK BOT / 能力索引</b></div>
+    <nav class="topnav" aria-label="索引导航">
+      <a href="#index" aria-current="page">十六页</a>
+      <a href="#notes">收束方式</a>
+    </nav>
+    <div class="counter">16 PAGES / <b>4</b> SESSIONS</div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="wrap mast" aria-labelledby="h1">
+    <div>
+      <div class="kicker mono">Index / 2026-11-13 / Asia-Shanghai</div>
+      <h1 id="h1">十六页，<br><span class="thin">一条</span><span class="green">能力线。</span></h1>
+      <p class="lede">这是 Grok Bot 的能力展示目录，<strong>不是发布页</strong>。主人把 16 项资源交过来，每项学一页：一页只讲一项真实能力，版式与技法从那一项里来。四条会话各做 4 项，最后把索引收在一处。</p>
+    </div>
+    <aside class="meta-side" aria-label="进度">
+      <div class="big">16<span>/16</span></div>
+      <p>16 页已生成。13–16 由本会话交付；01–12 由并行会话交付，本会话只做链接与完整性检查。</p>
+      <div class="ticks" aria-hidden="true">
+        <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+        <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+      </div>
+    </aside>
+  </section>
+
+  <div class="wrap legend" aria-label="状态图例">
+    <span class="item"><i class="dot"></i>已交付</span>
+    <span class="item"><i class="dot gap"></i>证据缺口</span>
+    <span class="note">01–12 由并行会话交付；本会话只挂链，不改其页面</span>
+  </div>
+
+  <section class="wrap" id="index" aria-labelledby="index-h">
+    <h2 id="index-h" style="position:absolute;left:-9999px">十六项资源与页面</h2>
+    <ol class="index">
+      <li><a class="row done" href="./01-landing-page-design/index.html">
+<span class="num">01</span><span class="cat">AI 编码与设计<br>Skills</span>
+        <span class="name"><b>Landing Page Design</b><span>从零构建落地页的 AI 设计 Skill，含页面结构与视觉系统。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./02-design-to-motion/index.html">
+<span class="num">02</span><span class="cat">AI 编码与设计<br>Skills</span>
+        <span class="name"><b>Design to Motion</b><span>把静态设计转成像素级动画，可导出 MP4 与 GIF。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./03-hyperframes/index.html">
+<span class="num">03</span><span class="cat">DSH 剪辑<br>与动效</span>
+        <span class="name"><b>HyperFrames</b><span>DSH 热门剪辑与动效项目。主人清单里的星标与排名未在本页复核。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./04-anything2explainer/index.html">
+<span class="num">04</span><span class="cat">DSH 剪辑<br>与动效</span>
+        <span class="name"><b>anything2explainer</b><span>解释类视频生成项目。主人清单里的排名未在本页复核。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./05-video-talkcraft/index.html">
+<span class="num">05</span><span class="cat">DSH 剪辑<br>与动效</span>
+        <span class="name"><b>video-talkcraft</b><span>DSH 热门剪辑与动效项目，偏口播对齐。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./06-motion-harness/index.html">
+<span class="num">06</span><span class="cat">DSH 剪辑<br>与动效</span>
+        <span class="name"><b>Motion Harness</b><span>代码驱动的视频制作套件，强调省 token 与 Pro 模式。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./07-framer-gallery/index.html">
+<span class="num">07</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Framer Gallery</b><span>全球网页设计灵感库。收录量以站点现状为准，本页不复述未核实数字。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./08-awwwards/index.html">
+<span class="num">08</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Awwwards</b><span>全球网页设计参考与获奖网站。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./09-motionsites/index.html">
+<span class="num">09</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>motionsites</b><span>3D 首屏、滚动动画、液态玻璃等交互灵感。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./10-react-bits/index.html">
+<span class="num">10</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>React Bits</b><span>动效组件与设计灵感。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./11-aceternity/index.html">
+<span class="num">11</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Aceternity</b><span>前端设计灵感与组件。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./12-uiverse/index.html">
+<span class="num">12</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Uiverse</b><span>UI 组件与设计灵感。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./13-showreel-design/index.html">
+        <span class="num">13</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Showreel Design</b><span>视频卡墙与行业 / 风格 / 声音三维筛选；页面主题是技能库的装载。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./14-anime/index.html">
+        <span class="num">14</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Anime（anime.js）</b><span>时间轴、SVG 描边、stagger；页面主题是把静态版式排成动作。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./15-recent/index.html">
+        <span class="num">15</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Recent</b><span>混合比例信息流与阶段筛选；页面主题是会话现场与记忆。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done gap" href="./16-thrine/index.html">
+        <span class="num">16</span><span class="cat">网页设计<br>灵感与参考</span>
+        <span class="name"><b>Thrine</b><span>排印索引与双轴分类；原始站点未核实，技法参照 Httpster，笔记留证据缺口。</span></span>
+        <span class="state"><i></i>已交付 · GAP</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+    </ol>
+  </section>
+
+  <section class="wrap footnote" id="notes" aria-labelledby="notes-h">
+    <div class="fn">
+      <div class="n">01 / ONE PAGE, ONE CAPABILITY</div>
+      <h2 id="notes-h">一页只讲一件事</h2>
+      <p>不把 16 项写成一篇大综述。每页只挑一项真实能力：读技能、排动作、记现场、做委派；页面的版式必须能看出它学了哪一项。</p>
+    </div>
+    <div class="fn">
+      <div class="n">02 / FOUR SESSIONS</div>
+      <h2>四条会话，同一张桌子</h2>
+      <p>每条会话在自己的工作区做 4 项，交付写进共享目录。索引和 REPORT 是唯一会交叉写的文件，规矩是先读后写、只补自己那四行。</p>
+    </div>
+    <div class="fn">
+      <div class="n">03 / CLOSE THE INDEX</div>
+      <h2>最后收索引</h2>
+      <p>本会话做完 13–16 后，逐项检查 16 个页面链接是否可达：已有的链过去，缺的保留占位，不删别人的链接，也不把占位写成已完成。</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <p>本页是 Grok Bot 能力展示的总索引，不是发布页，也不代表 xAI 或 Grok 官方。页面只链到本地共享目录里的展示页；研究记录在共享 <span class="mono">notes/</span>，逐项对账在 <span class="mono">REPORT.md</span>。</p>
+    <div class="meta">2026-11-13 · ASIA/SHANGHAI<br>GROK BOT / 16 PAGES<br>NO PUBLISH</div>
+  </div>
+</footer>
+</body>
+</html>

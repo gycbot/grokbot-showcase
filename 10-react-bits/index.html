@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>例程：晚上十点，它自己开始干活｜Grok Bot 能力展示 10</title>
+<meta name="description" content="Grok Bot 的例程能力：把收素材、拆参考、出草稿、交回写成一串固定步骤。以 React Bits 的文字入场与聚光卡片为技法参考。">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2317150F'/%3E%3Ctext x='16' y='22' font-family='serif' font-size='18' fill='%23F2EEE5' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../vendor/series/base.css">
+<style>
+  .p10 .hero{padding-top:clamp(48px,6vw,78px);padding-bottom:0;display:block}
+  .hero-top{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr);gap:clamp(30px,5vw,72px);align-items:center}
+  .kinetic{font-family:var(--serif);font-weight:600;font-size:clamp(46px,5.9vw,86px);line-height:1.08;letter-spacing:-.018em}
+  .kinetic .line{display:block;overflow:hidden;padding-bottom:.06em;margin-bottom:-.06em}
+  .kinetic .line > span{display:block}
+  .kinetic em{font-style:normal;color:var(--accent)}
+  .p10 .lede{max-width:560px}
+  .dial-wrap{display:flex;justify-content:flex-end;position:relative}
+  .dial{width:min(100%,410px);aspect-ratio:1;position:relative}
+  .dial svg{width:100%;height:100%;overflow:visible}
+  .dial .time{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--paper);gap:6px;pointer-events:none;
+  }
+  .dial .time b{font-family:var(--mono);font-size:clamp(46px,5.2vw,68px);font-weight:400;letter-spacing:-.04em;line-height:1}
+  .dial .time span{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:rgba(242,238,229,.55)}
+  .dial .tag{position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);white-space:nowrap}
+  .rail-hero{border-top:1px solid var(--line);margin-top:clamp(40px,5vw,58px);padding:20px 0 26px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .rail-hero div{display:flex;flex-direction:column;gap:3px}
+  .rail-hero b{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--accent);font-weight:400}
+  .rail-hero span{font-size:13px;line-height:1.5}
+  .rail-hero small{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--muted)}
+
+  .timeline{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:18px}
+  .timeline::before{content:"";position:absolute;left:0;right:0;top:16px;height:1px;background:var(--line)}
+  .timeline .prog{position:absolute;left:0;top:16px;height:1px;background:var(--accent);width:100%;transform:scaleX(0);transform-origin:left center}
+  .tstep{position:relative;padding:0 24px 0 0}
+  .tstep .dot{position:relative;display:block;width:9px;height:9px;background:var(--paper);border:1px solid var(--accent);border-radius:50%;margin:12px 0 26px;z-index:2;transition:background .4s var(--e)}
+  .tstep.on .dot{background:var(--accent)}
+  .tstep b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:400;margin-bottom:7px}
+  .tstep h3{font-family:var(--serif);font-size:clamp(20px,2.1vw,27px);font-weight:600;margin-bottom:8px;line-height:1.4}
+  .tstep p{font-size:13.5px;line-height:1.85;color:#3E3A31;max-width:250px}
+
+  .spots{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .spot{position:relative;border:1px solid var(--line);background:var(--bone);padding:26px 24px 22px;min-height:270px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;isolation:isolate}
+  .spot::before{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .45s var(--e);
+    background:radial-gradient(230px circle at var(--mx,50%) var(--my,50%),rgba(197,67,43,.17),transparent 64%)}
+  .spot:hover::before{opacity:1}
+  .spot .s-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:14px}
+  .spot .s-top b{font-family:var(--serif);font-size:26px;font-weight:600}
+  .spot .s-top span{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted)}
+  .spot p{margin-top:18px;font-size:14px;line-height:1.9;color:#3E3A31}
+  .spot .s-bot{margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .spot .s-bot .chip{background:var(--paper)}
+  .spot .s-bot .tm{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em}
+
+  .guard{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:30px}
+  .guard > div{background:var(--paper);padding:clamp(22px,3vw,34px)}
+  .guard h3{font-family:var(--serif);font-size:21px;font-weight:600;margin-bottom:10px}
+  .guard p{font-size:13.5px;line-height:1.9;color:#3E3A31}
+
+  .split{display:grid;grid-template-columns:.7fr 1fr;gap:clamp(32px,6vw,88px);align-items:start}
+  .split .left{position:sticky;top:96px}
+  .split h2{font-family:var(--serif);font-size:clamp(28px,3.2vw,44px);font-weight:600;line-height:1.3;margin:14px 0 18px}
+  .split .left p{font-size:14px;line-height:1.95;color:#3E3A31;max-width:360px}
+  .stat{display:flex;gap:30px;margin-top:26px;border-top:1px solid var(--line);padding-top:18px}
+  .stat b{display:block;font-family:var(--serif);font-size:30px;line-height:1.1;font-weight:600}
+  .stat span{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted)}
+
+  @media (max-width:980px){
+    .hero-top{grid-template-columns:1fr}
+    .dial-wrap{justify-content:flex-start;margin-top:10px}
+    .dial{width:min(76vw,340px)}
+    .split{grid-template-columns:1fr}
+    .split .left{position:static}
+    .timeline{grid-template-columns:1fr 1fr;row-gap:34px}
+    .timeline::before,.timeline .prog{right:auto;width:50%}
+    .spots{grid-template-columns:1fr}
+    .spot{min-height:0}
+  }
+  @media (max-width:640px){
+    .p10 .hero{padding-top:34px}
+    .kinetic{font-size:clamp(38px,10.4vw,52px)}
+    .rail-hero{grid-template-columns:1fr 1fr;gap:16px 14px;margin-top:32px}
+    .dial-wrap{justify-content:center;margin-top:18px}
+    .dial{width:min(82vw,320px)}
+    .dial .tag{bottom:-28px}
+    .timeline{grid-template-columns:1fr;row-gap:0;margin-top:8px}
+    .timeline::before,.timeline .prog{left:4px;top:0;bottom:0;right:auto;width:1px;height:auto;transform-origin:top center}
+    .tstep{padding:0 0 26px 28px}
+    .tstep .dot{position:absolute;left:0;top:4px;margin:0}
+    .tstep p{max-width:none}
+    .guard{grid-template-columns:1fr}
+    .stat{gap:22px}
+  }
+</style>
+</head>
+<body class="p10">
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><b>GROK BOT</b><span>能力展示 / 16 项</span></div>
+    <nav class="folio" aria-label="页脚导航">
+      <a href="../index.html">全部页面</a>
+      <span>10 / 16</span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow" data-hero><i></i><span class="kicker">例程 / ROUTINES · 10</span></div>
+          <h1 class="kinetic" aria-label="晚上十点，它自己开始干活。">
+            <span class="line"><span>晚上十点，</span></span>
+            <span class="line"><span>它<em>自己</em></span></span>
+            <span class="line"><span>开始干活。</span></span>
+          </h1>
+          <p class="lede" data-hero>例程不是闹钟。它把“先找参考、再拆结构、最后出草稿”写成一串会自己跑完的步骤；遇到拿不准的，停下等人。</p>
+          <div class="hero-foot" data-hero>
+            <a class="link-arrow" href="#routine">看一条例程
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6"/></svg>
+            </a>
+            <span class="note">技法参考 / React Bits<br>检索 / 2026.11.13</span>
+          </div>
+        </div>
+
+        <div class="dial-wrap" data-hero>
+          <div class="dial">
+            <svg viewBox="0 0 400 400" role="img" aria-label="22:00 的例程表盘">
+              <circle cx="200" cy="200" r="196" fill="#17150F"/>
+              <circle cx="200" cy="200" r="168" fill="none" stroke="rgba(242,238,229,.16)" stroke-width="1"/>
+              <g id="ticks" stroke="rgba(242,238,229,.42)" stroke-width="1"></g>
+              <g id="hand">
+                <line x1="200" y1="200" x2="200" y2="82" stroke="#C5432B" stroke-width="2"/>
+                <circle cx="200" cy="82" r="4" fill="#C5432B"/>
+              </g>
+              <circle cx="200" cy="200" r="7" fill="#F2EEE5"/>
+              <circle cx="200" cy="200" r="3" fill="#C5432B"/>
+            </svg>
+            <div class="time"><b>22:00</b><span>ROUTINE · DAILY</span></div>
+            <span class="tag mono">每 24 小时 · 跑同一条流程</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rail-hero" data-hero>
+        <div><b>21:30</b><span>收素材</span><small>归档 / 标来源</small></div>
+        <div><b>22:00</b><span>拆参考</span><small>一句技法 / 一句降级</small></div>
+        <div><b>22:40</b><span>出草稿</span><small>桌面 / 手机两版</small></div>
+        <div><b>07:30</b><span>交回</span><small>页面 / 截图 / 缺口</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline">
+    <div class="wrap">
+      <p aria-label="闹钟提醒你开始。例程替你做完。">
+        <span class="w">闹钟</span><span class="w">提醒你</span><span class="w">开始。</span><br>
+        <span class="w">例程</span><span class="w">替你</span><span class="w hot">做完。</span>
+      </p>
+      <p class="cap">它跑的是固定流程，不替你做判断。缺来源、尺寸不对、要登录，都会停下来。</p>
+    </div>
+  </section>
+
+  <section class="sec" id="routine">
+    <div class="wrap">
+      <div class="sec-head" data-reveal>
+        <div class="sec-num"><b>01</b> / 一条例程</div>
+        <h2>四段固定动作，每天同一时间发生。</h2>
+      </div>
+
+      <div class="timeline" data-reveal id="timeline">
+        <i class="prog" aria-hidden="true"></i>
+        <div class="tstep"><i class="dot"></i><b>21:30</b><h3>收素材</h3><p>把当天收藏的链接、截图、来源日期放进同一个文件夹。重复的删掉，打不开的标出来。</p></div>
+        <div class="tstep"><i class="dot"></i><b>22:00</b><h3>拆参考</h3><p>每条参考只留一句能复用的技法。写不出技法，说明还没看懂，退回重看。</p></div>
+        <div class="tstep"><i class="dot"></i><b>22:40</b><h3>出草稿</h3><p>按技能包写页面，先桌面再手机。缺图留空位，不拿相似图凑。</p></div>
+        <div class="tstep"><i class="dot"></i><b>07:30</b><h3>交回</h3><p>页面、两条截图、缺口清单一起放到共享目录。没做完的写清楚卡在哪。</p></div>
+      </div>
+
+      <div class="guard" data-reveal>
+        <div>
+          <h3>会自己跑的部分</h3>
+          <p>归档、拆解、写页面、截图、记录缺口。步骤固定，顺序不变，出错有日志。</p>
+        </div>
+        <div>
+          <h3>必须停下的部分</h3>
+          <p>来源核不实、要登录、要付费、需要你拍板。停下不是失败，是把判断留给人。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head" data-reveal>
+        <div class="sec-num"><b>02</b> / 三段检查</div>
+        <h2>跑得快，不等于可以省掉检查。</h2>
+      </div>
+      <div class="spots" data-reveal>
+        <article class="spot">
+          <div class="s-top"><b>来源</b><span>CHECK 01</span></div>
+          <p>每个数字都要能打开。打不开就写 evidence_gap，不拿记忆补，也不照抄清单里的旧数字。</p>
+          <div class="s-bot"><span class="chip"><b>硬条件</b> 可点开</span><span class="tm">每次</span></div>
+        </article>
+        <article class="spot">
+          <div class="s-top"><b>尺寸</b><span>CHECK 02</span></div>
+          <p>桌面 1440×900，手机 390×844。横向不许溢出，控制台不许有 error。截图自己看一遍。</p>
+          <div class="s-bot"><span class="chip"><b>硬条件</b> 两条截图</span><span class="tm">每页</span></div>
+        </article>
+        <article class="spot">
+          <div class="s-top"><b>缺口</b><span>CHECK 03</span></div>
+          <p>没核实的、没做完的、需要你定的，单列出来。缺口写清楚，比假装完成有用。</p>
+          <div class="s-bot"><span class="chip"><b>硬条件</b> 明写</span><span class="tm">每轮</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap split">
+      <div class="left" data-reveal>
+        <div class="kicker">03 / 连续三天的运行</div>
+        <h2>跑顺之后，它学会在缺口前停下。</h2>
+        <p>例程的价值不在“全自动”，在每天同一套标准，不用重新交代。跑歪一次，第二天就能按日志改。</p>
+        <div class="stat">
+          <div><b>每天</b><span>同一时间开始</span></div>
+          <div><b>两版</b><span>桌面 + 手机</span></div>
+          <div><b>缺口</b><span>明写，不藏</span></div>
+        </div>
+      </div>
+
+      <div class="chat" data-reveal>
+        <div class="chat-top"><span><i class="dot"></i>GROK BOT / 例程</span><span>示例 · 非官方界面</span></div>
+        <div class="chat-body">
+          <div class="msg user">以后每晚十点，把当天收藏整理成页面草稿。</div>
+          <div class="msg bot">好。先跑三天，遇到缺来源就停，不硬写。每天 07:30 把结果放共享目录。</div>
+          <div class="msg sys">第 1 天 · 22:00 · 已开始</div>
+          <div class="progress" aria-hidden="true"><div class="bar"><i></i></div></div>
+          <div class="artifact">
+            <div class="a-top"><b>routine / nightly-pages</b><span class="mono">3 天试跑</span></div>
+            <ul>
+              <li>21:30 归档当天收藏，标来源与检索时间</li>
+              <li>22:00 每条参考写一句技法，写不出就退回</li>
+              <li>22:40 按技能包出桌面与手机两版</li>
+              <li>07:30 交页面、截图、缺口清单</li>
+            </ul>
+          </div>
+          <div class="msg sys">第 3 天 · 07:30</div>
+          <div class="msg bot">交回 2 页，1 页缺来源，已标 evidence_gap。截图在共享目录，缺口在第 3 页顶部。</div>
+          <div class="msg user">缺来源那页先别发。</div>
+          <div class="msg bot">已停在那页。其余两页等你验收，没有自动发布。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h4>这一页</h4>
+        <p>10 / 16 · 例程 ROUTINES<br>技法参考：React Bits 的文字入场、聚光卡片与分段节奏。</p>
+      </div>
+      <div>
+        <h4>来源</h4>
+        <p><a href="https://reactbits.dev/" target="_blank" rel="noopener noreferrer">reactbits.dev</a><br><a href="https://github.com/DavidHDev/react-bits" target="_blank" rel="noopener noreferrer">github.com/DavidHDev/react-bits</a><br>检索 2026.11.13 · Asia/Shanghai</p>
+      </div>
+      <div>
+        <h4>说明</h4>
+        <p>本页是 Grok Bot 使用侧的能力展示，不代表 xAI 或 Grok 官方。未使用参考站的商标与付费素材。</p>
+      </div>
+      <div class="fine"><span>GROK BOT / 16 项能力展示</span><span>NO. 10 · ROUTINES</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap/gsap.min.js"></script>
+<script src="../vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="../vendor/series/base.js"></script>
+<script>
+(function(){
+  // dial ticks
+  var g = document.getElementById('ticks');
+  if (g) {
+    var ns = 'http://www.w3.org/2000/svg';
+    for (var i = 0; i < 60; i++) {
+      var a = (i / 60) * Math.PI * 2;
+      var long = i % 5 === 0;
+      var r1 = long ? 150 : 158, r2 = 168;
+      var l = document.createElementNS(ns, 'line');
+      l.setAttribute('x1', 200 + Math.sin(a) * r1);
+      l.setAttribute('y1', 200 - Math.cos(a) * r1);
+      l.setAttribute('x2', 200 + Math.sin(a) * r2);
+      l.setAttribute('y2', 200 - Math.cos(a) * r2);
+      l.setAttribute('stroke-width', long ? 1.4 : .7);
+      g.appendChild(l);
+    }
+  }
+
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!window.gsap || reduce) return;
+
+  gsap.from('.kinetic .line > span', {
+    yPercent: 112, duration: 1.15, ease: 'power4.out', stagger: .09, delay: .08
+  });
+  gsap.set('#hand', { rotation: -60, svgOrigin: '200 200' });
+
+  if (window.ScrollTrigger) {
+    gsap.from('#timeline .prog', {
+      scaleX: 0, duration: 1.4, ease: 'power2.inOut',
+      scrollTrigger: { trigger: '#timeline', start: 'top 82%', once: true }
+    });
+    gsap.utils.toArray('#timeline .tstep').forEach(function(el){
+      ScrollTrigger.create({ trigger: el, start: 'top 86%', once: true, onEnter: function(){ el.classList.add('on'); } });
+    });
+  }
+
+  // spotlight cards
+  document.querySelectorAll('.spot').forEach(function(card){
+    card.addEventListener('pointermove', function(e){
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+})();
+</script>
+</body>
+</html>
