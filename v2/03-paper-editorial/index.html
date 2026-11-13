@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#DCD8CD">
+<meta name="color-scheme" content="light">
+<title>先读说明书，再动手 · Grok Bot 能力档案 03</title>
+<meta name="description" content="Grok Bot 的工作方法：读技能文件、按步骤做、自己查、再交付。纸感编辑向单页，非官方整理。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23DCD8CD'/%3E%3Crect x='6' y='7' width='20' height='18' fill='none' stroke='%2314150F' stroke-width='1.5'/%3E%3Crect x='10' y='11' width='12' height='2' fill='%231E3F6E'/%3E%3Crect x='10' y='16' width='8' height='1.5' fill='%2314150F'/%3E%3Crect x='10' y='20' width='10' height='1.5' fill='%2314150F'/%3E%3C/svg%3E">
+<style>
+:root{
+  --paper:#DCD8CD;
+  --sheet:#F1EEE5;
+  --sheet-2:#E8E4D9;
+  --ink:#14150F;
+  --ink-soft:#2A2B23;
+  --muted:#5F5E54;
+  --faint:#757366;
+  --line:#B8B3A4;
+  --line-soft:#C9C4B6;
+  --blue:#1E3F6E;
+  --blue-ink:#16304F;
+  --blue-wash:#D3DCE7;
+  --serif:"Noto Serif CJK SC","Source Han Serif SC","Songti SC",serif;
+  --sans:"Noto Sans CJK SC","Source Han Sans SC","PingFang SC",sans-serif;
+  --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,consolas,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --pad:clamp(20px,4.4vw,64px);
+  --maxw:1240px;
+}
+*{box-sizing:border-box}
+html{background:var(--paper);color:var(--ink);scroll-behavior:smooth;overflow-x:clip}
+body{
+  margin:0;font-family:var(--serif);font-size:17px;line-height:1.85;
+  background:var(--paper);color:var(--ink);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:clip;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+::selection{background:var(--blue);color:var(--sheet)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.skip{position:absolute;left:-9999px;top:0;z-index:99;background:var(--ink);color:var(--sheet);padding:12px 16px}
+.skip:focus{left:12px;top:12px}
+.wrap{width:min(var(--maxw),100% - var(--pad)*2);margin-inline:auto}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- masthead ---------- */
+.mast{padding-top:26px;position:relative;z-index:5}
+.mast-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+.wordmark{display:flex;align-items:baseline;gap:14px;min-width:0}
+.wordmark b{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.wordmark span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.mast-side{display:flex;align-items:center;gap:22px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.mast-side b{color:var(--blue);font-weight:500}
+.mast-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.mast-nav .links{display:flex;gap:26px;font-family:var(--sans);font-size:13px;color:var(--muted);flex-wrap:wrap}
+.mast-nav .links a{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;border-bottom:1px solid transparent}
+.mast-nav .links a:hover{color:var(--ink);border-color:var(--blue)}
+.mast-nav .folio{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--faint)}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(40px,7vw,92px) 0 clamp(48px,7vw,86px);position:relative}
+.hero-grid{display:grid;grid-template-columns:132px minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start}
+.hero-rail{position:sticky;top:28px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.hero-rail .big{font-family:var(--serif);font-size:64px;line-height:.9;letter-spacing:-.05em;color:var(--ink);display:block;margin-bottom:16px;text-transform:none}
+.hero-rail .rule{display:block;width:100%;height:1px;background:var(--line);margin:14px 0}
+.hero-rail p{margin:0 0 8px;line-height:1.7}
+.hero-rail .blue{color:var(--blue)}
+.kicker{display:flex;align-items:center;gap:12px;margin:0 0 22px;font-family:var(--sans);font-size:12px;letter-spacing:.04em;color:var(--muted)}
+.kicker::before{content:"";width:26px;height:1px;background:var(--blue)}
+.kicker b{color:var(--blue);font-weight:600}
+h1{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(46px,8.2vw,104px);line-height:1.02;
+  letter-spacing:-.035em;margin:0;max-width:12em;
+}
+h1 .line{display:block;white-space:nowrap}
+.sort{display:inline-block;will-change:transform,filter}
+.sort-in{display:inline-block;will-change:transform,filter}
+h1 .blue{color:var(--blue)}
+.assembly-rule{height:3px;background:var(--blue);width:100%;margin:26px 0 0;transform:scaleX(0);transform-origin:left center}
+.hero-cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:clamp(26px,4vw,54px);align-items:start;margin-top:clamp(30px,4vw,46px)}
+.hero-sub{margin:0;font-size:clamp(16px,1.55vw,19px);line-height:1.95;color:var(--ink-soft);max-width:35em}
+.hero-sub .bl{display:block;will-change:transform,filter}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin:26px 0 0;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.hero-meta span{display:inline-flex;align-items:center;gap:8px}
+.hero-meta b{color:var(--blue);font-weight:500}
+.scroll-hint{display:inline-flex;align-items:center;gap:10px;margin-top:26px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;min-height:44px}
+.scroll-hint i{display:block;width:34px;height:1px;background:var(--line);position:relative;overflow:hidden}
+.scroll-hint i::after{content:"";position:absolute;left:0;top:0;width:12px;height:1px;background:var(--blue)}
+
+/* skill sheet */
+.sheet{
+  background:var(--sheet);border:1px solid var(--line);box-shadow:0 22px 50px -30px rgba(20,21,15,.38);
+  position:relative;
+}
+.sheet::after{content:"";position:absolute;inset:5px;border:1px solid rgba(20,21,15,.05);pointer-events:none}
+.sheet-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.sheet-bar b{color:var(--ink);font-weight:500}
+.sheet-dots{display:flex;gap:5px}
+.sheet-dots i{width:6px;height:6px;border:1px solid var(--line);border-radius:50%}
+.sheet-dots i:first-child{background:var(--blue);border-color:var(--blue)}
+.skill-body{padding:8px 0 12px;font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--ink-soft);overflow-x:auto}
+.skill-body .ln{display:block;padding:6px 16px 6px 14px;border-left:3px solid transparent;white-space:pre-wrap;overflow-wrap:anywhere;transition:background .3s var(--ease),border-color .3s var(--ease)}
+.skill-body .ln b{display:inline-block;min-width:58px;color:var(--blue);font-weight:500}
+.skill-body .ln.on{background:var(--blue-wash);border-left-color:var(--blue);color:var(--ink)}
+.skill-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase}
+.stamp{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--blue);
+  border:1.5px solid var(--blue);padding:5px 9px;transform:rotate(-6deg) scale(1.25);
+  opacity:0;text-transform:uppercase;white-space:nowrap;
+}
+.sheet-note{margin:10px 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.7;color:var(--faint)}
+
+/* ---------- sections ---------- */
+section{padding:clamp(54px,7vw,92px) 0;border-top:1px solid var(--line-soft);scroll-margin-top:20px}
+.sec-head{display:grid;grid-template-columns:132px minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start;margin-bottom:clamp(30px,4vw,52px)}
+.sec-rail{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;position:sticky;top:28px}
+.sec-rail .no{display:block;font-family:var(--serif);font-size:34px;line-height:1;letter-spacing:-.03em;color:var(--blue);margin-bottom:10px;text-transform:none}
+.sec-rail .k{display:block}
+.sec-rail .tick{display:block;width:26px;height:1px;background:var(--blue);margin:12px 0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.4vw,52px);line-height:1.24;letter-spacing:-.02em;margin:0;max-width:18em}
+h2 .blue{color:var(--blue)}
+.ink{position:relative;display:inline-block;z-index:0;white-space:nowrap}
+.ink::before{content:"";position:absolute;left:-.06em;right:-.06em;bottom:.06em;height:.32em;background:rgba(30,63,110,.18);transform:scaleX(var(--ink,0));transform-origin:left center;z-index:-1}
+.sec-lede{margin:18px 0 0;max-width:45em;color:var(--muted);font-size:16px;line-height:1.9}
+.sec-lede b{color:var(--ink);font-weight:600}
+
+/* process */
+.proc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--line)}
+.proc{position:relative;padding:22px 20px 26px 0;border-right:1px solid var(--line);min-width:0}
+.proc:last-child{border-right:0}
+.proc:not(:first-child){padding-left:20px}
+.proc .n{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--blue)}
+.proc h3{font-family:var(--serif);font-size:clamp(21px,2.2vw,26px);font-weight:700;margin:10px 0 10px;letter-spacing:-.01em}
+.proc p{margin:0;font-size:14.5px;line-height:1.85;color:var(--ink-soft)}
+.proc .note{display:block;margin-top:16px;padding-top:10px;border-top:1px solid var(--line-soft);font-family:var(--sans);font-size:11.5px;line-height:1.7;color:var(--blue)}
+.proc:hover{background:rgba(241,238,229,.5)}
+
+/* memory */
+.memory-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(28px,5vw,64px);align-items:start}
+.quote{position:relative;padding-left:34px;margin:0 0 26px;font-size:clamp(25px,3.1vw,38px);line-height:1.55;letter-spacing:-.01em;font-weight:600;color:var(--ink)}
+.quote::before{content:"“";position:absolute;left:0;top:-.18em;font-family:var(--serif);font-size:74px;line-height:1;color:var(--blue);opacity:.85}
+.quote .bl{display:block;will-change:transform,filter}
+.mem-copy p{margin:0 0 14px;color:var(--muted);font-size:15.5px;line-height:1.95;max-width:38em}
+.mem-copy p b{color:var(--ink);font-weight:600}
+.palette{border:1px solid var(--line);background:var(--sheet);padding:18px 18px 16px}
+.pal-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:14px}
+.pal-row{display:grid;grid-template-columns:74px minmax(0,1fr);gap:12px;align-items:start;padding:13px 0;border-bottom:1px dashed var(--line-soft);position:relative}
+.pal-row:last-child{border-bottom:0}
+.pal-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--faint);text-transform:uppercase;line-height:1.5;padding-top:3px}
+.pal-body{min-width:0}
+.chips{display:flex;gap:6px;margin-bottom:8px}
+.chip{height:30px;flex:1;border:1px solid rgba(20,21,15,.18);position:relative}
+.chip small{position:absolute;left:4px;bottom:2px;font-family:var(--mono);font-size:8.5px;letter-spacing:.02em;color:rgba(20,21,15,.7);text-transform:uppercase}
+.chip.dark small{color:rgba(241,238,229,.82)}
+.pal-label{font-family:var(--sans);font-size:11.5px;line-height:1.65;color:var(--muted)}
+.strike,.tick{position:absolute;left:74px;top:26px;height:2px;width:calc(100% - 86px);transform:scaleX(0);transform-origin:left center;pointer-events:none}
+.strike{background:var(--blue)}
+.tick{background:var(--blue);top:auto;bottom:12px;height:1.5px;opacity:.85}
+.pal-row.dim .chips{opacity:.62}
+.pal-foot{margin:12px 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.75;color:var(--faint)}
+.blue-mark{color:var(--blue);font-weight:600}
+
+/* delegate */
+.del-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:clamp(28px,5vw,60px);align-items:start}
+.dispatch{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.dispatch li{border-bottom:1px solid var(--line)}
+.dispatch button{width:100%;display:grid;grid-template-columns:38px minmax(0,1fr) 44px;gap:12px;align-items:center;padding:16px 0;text-align:left;min-height:64px}
+.dispatch button .num{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.08em}
+.dispatch button .tt{min-width:0}
+.dispatch button .tt b{display:block;font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.01em}
+.dispatch button .tt span{display:block;font-family:var(--sans);font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.6}
+.dispatch button .plus{justify-self:end;width:30px;height:30px;border:1px solid var(--line);display:grid;place-items:center;position:relative;transition:border-color .25s var(--ease),background .25s var(--ease)}
+.dispatch button .plus::before,.dispatch button .plus::after{content:"";position:absolute;background:var(--ink);transition:transform .3s var(--ease)}
+.dispatch button .plus::before{width:10px;height:1px}
+.dispatch button .plus::after{width:1px;height:10px}
+.dispatch button[aria-expanded="true"] .plus{background:var(--blue);border-color:var(--blue)}
+.dispatch button[aria-expanded="true"] .plus::before,.dispatch button[aria-expanded="true"] .plus::after{background:var(--sheet)}
+.dispatch button[aria-expanded="true"] .plus::after{transform:rotate(90deg)}
+.dispatch button:hover .tt b{color:var(--blue)}
+.return-card{background:var(--sheet);border:1px solid var(--line);padding:18px 18px 16px;position:relative;min-height:250px}
+.return-card .rc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:9px}
+.return-card .rc-top b{color:var(--blue);font-weight:500}
+.return-card h3{font-family:var(--serif);font-size:23px;margin:14px 0 8px;font-weight:700;letter-spacing:-.01em}
+.return-card p{margin:0;font-family:var(--sans);font-size:13.5px;line-height:1.85;color:var(--ink-soft)}
+.return-card .rc-note{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:10px;line-height:1.8;color:var(--muted);overflow-wrap:anywhere}
+.rc-body{will-change:transform,filter}
+.branch{margin-top:18px;width:100%;height:auto;overflow:visible}
+.branch path{fill:none;stroke:var(--line);stroke-width:1.2}
+.branch path.hot{stroke:var(--blue);stroke-width:1.6}
+.branch circle{fill:var(--paper);stroke:var(--line);stroke-width:1.2}
+.branch circle.hot{stroke:var(--blue);fill:var(--blue)}
+.branch text{font-family:var(--mono);font-size:9px;letter-spacing:.06em;fill:var(--muted)}
+.del-side-note{margin:16px 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.7;color:var(--faint)}
+
+/* desk */
+.desk-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:clamp(24px,4vw,48px);align-items:start}
+.dials{display:flex;flex-direction:column;gap:20px}
+.dial-group{border-top:1px solid var(--ink);padding-top:12px}
+.dial-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;gap:8px}
+.dial-label b{color:var(--blue);font-weight:500}
+.dial-opts{display:flex;flex-wrap:wrap;gap:6px}
+.dial{min-height:44px;padding:9px 13px;border:1px solid var(--line);background:transparent;font-family:var(--sans);font-size:13px;color:var(--muted);transition:border-color .2s,background .2s,color .2s}
+.dial:hover{border-color:var(--ink);color:var(--ink)}
+.dial[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.dial[aria-pressed="true"] span{color:var(--blue-wash)}
+.dial span{font-family:var(--mono);font-size:9px;margin-left:6px;color:var(--faint)}
+.desk-status{margin-top:6px;display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.desk-status i{width:7px;height:7px;border:1px solid var(--faint);border-radius:50%;display:block}
+.desk-status.busy i{background:var(--blue);border-color:var(--blue)}
+.specimen{background:var(--sheet);border:1px solid var(--line);position:relative;min-height:330px;padding:0}
+.spec-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase}
+.spec-top b{color:var(--ink);font-weight:500}
+.spec-progress{height:2px;background:var(--line-soft);transform-origin:left center;transform:scaleX(0)}
+.spec-body{padding:clamp(20px,3vw,34px) clamp(18px,3.2vw,38px) 26px}
+.spec-text{margin:0;font-size:clamp(19px,2.1vw,25px);line-height:1.78;letter-spacing:-.005em;color:var(--ink);min-height:8.4em}
+.spec-text .sl{display:block;will-change:transform,filter}
+.spec-src{margin:22px 0 0;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;line-height:1.8;color:var(--muted);min-height:36px}
+.spec-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 clamp(18px,3.2vw,38px) 18px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--faint);text-transform:uppercase}
+.desk-hint{margin:18px 0 0;font-family:var(--sans);font-size:11.5px;line-height:1.7;color:var(--faint)}
+
+/* handover */
+.hand-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:8px}
+.file{background:var(--sheet);border:1px solid var(--line);padding:16px;min-width:0;position:relative;overflow:hidden}
+.file .ft{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--ink);padding-bottom:9px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.file .ft span{color:var(--faint);font-size:9px;white-space:nowrap}
+.file pre{margin:12px 0 0;font-family:var(--mono);font-size:10.5px;line-height:1.8;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.file pre b{color:var(--blue);font-weight:500}
+.hand-note{display:flex;align-items:flex-start;gap:16px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.hand-note p{margin:0;font-size:14.5px;line-height:1.9;color:var(--muted);max-width:46em}
+.hand-note p b{color:var(--ink)}
+.big-stamp{margin-left:auto;flex:none;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--blue);border:2px solid var(--blue);padding:8px 12px;transform:rotate(-7deg) scale(1.35);opacity:0;text-transform:uppercase;white-space:nowrap}
+.close{padding:clamp(48px,7vw,80px) 0 0;border-top:1px solid var(--line-soft)}
+.close h2{max-width:16em}
+.close-copy{margin:20px 0 0;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(24px,4vw,54px)}
+.close-copy p{margin:0;font-size:15.5px;line-height:1.95;color:var(--muted);max-width:40em}
+.close-copy p b{color:var(--ink)}
+.next-link{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid var(--ink);padding:16px 18px;min-height:64px;font-family:var(--sans);font-size:14px;transition:background .25s var(--ease),color .25s var(--ease)}
+.next-link:hover{background:var(--ink);color:var(--sheet)}
+.next-link b{font-family:var(--serif);font-size:20px;font-weight:700;display:block;letter-spacing:-.01em}
+.next-link span{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.08em}
+.next-link:hover span{color:var(--blue-wash)}
+
+/* footer */
+footer{border-top:2px solid var(--ink);margin-top:clamp(48px,7vw,86px);padding:22px 0 34px}
+.foot-grid{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.foot-grid p{margin:0;font-family:var(--sans);font-size:11.5px;line-height:1.8;color:var(--muted);max-width:46em}
+.foot-grid p b{color:var(--ink)}
+.foot-links{display:flex;gap:18px;flex-wrap:wrap}
+.foot-links a{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid transparent}
+.foot-links a:hover{color:var(--blue);border-color:var(--blue)}
+.foot-bottom{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:18px;padding-top:12px;border-top:1px solid var(--line-soft);font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase}
+
+/* ---------- responsive ---------- */
+@media(max-width:980px){
+  .hero-grid,.sec-head{grid-template-columns:104px minmax(0,1fr)}
+  .hero-cols,.memory-grid,.del-grid{grid-template-columns:1fr}
+  .desk-grid{grid-template-columns:1fr}
+  .dials{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px}
+  .proc-grid{grid-template-columns:1fr 1fr}
+  .proc:nth-child(2){border-right:0}
+  .proc:nth-child(3){border-top:1px solid var(--line);padding-left:0}
+  .proc:nth-child(4){border-top:1px solid var(--line)}
+  .hand-grid{grid-template-columns:1fr}
+  .close-copy{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  body{font-size:16px;line-height:1.8}
+  .mast{padding-top:16px}
+  .mast-top{padding-bottom:10px;align-items:flex-start;flex-direction:column;gap:8px}
+  .wordmark b{font-size:19px}
+  .mast-side{gap:14px;flex-wrap:wrap;font-size:9.5px}
+  .mast-nav{padding:6px 0;gap:8px;align-items:flex-start}
+  .mast-nav .links{gap:14px;font-size:12px}
+  .mast-nav .links a{min-height:44px}
+  .mast-nav .folio{display:none}
+  .hero{padding:28px 0 44px}
+  .hero-grid,.sec-head{grid-template-columns:1fr;gap:0}
+  .hero-rail,.sec-rail{position:static;display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .hero-rail .big,.sec-rail .no{font-size:22px;margin:0;display:inline-block}
+  .hero-rail .rule,.sec-rail .tick{display:none}
+  .hero-rail p{margin:0;font-size:9.5px}
+  .hero-rail p:nth-of-type(2),.hero-rail p:nth-of-type(3){display:none}
+  h1{font-size:clamp(40px,12.4vw,58px);line-height:1.06;letter-spacing:-.04em;max-width:none}
+  h1 .line{white-space:normal}
+  .assembly-rule{margin-top:18px;height:2px}
+  .hero-cols{gap:26px;margin-top:24px}
+  .hero-sub{font-size:15.5px;line-height:1.9}
+  .hero-meta{gap:6px 14px;font-size:9px;margin-top:20px}
+  .skill-body{font-size:11px;line-height:1.7}
+  .skill-body .ln{padding:5px 12px 5px 11px}
+  .skill-body .ln b{min-width:46px}
+  .skill-foot{font-size:8.5px;padding:9px 12px}
+  .stamp{font-size:9px;padding:4px 7px}
+  section{padding:44px 0 48px}
+  .sec-head{margin-bottom:24px}
+  h2{font-size:clamp(27px,7.8vw,36px);line-height:1.3}
+  .sec-lede{font-size:14.5px;line-height:1.85;margin-top:14px}
+  .proc-grid{grid-template-columns:1fr;border-top:1px solid var(--ink)}
+  .proc,.proc:not(:first-child),.proc:nth-child(3),.proc:nth-child(4){border-right:0;border-top:0;border-bottom:1px solid var(--line);padding:18px 0 20px}
+  .proc:last-child{border-bottom:0}
+  .proc h3{margin:6px 0 8px}
+  .proc p{font-size:14px}
+  .quote{font-size:clamp(23px,6.3vw,30px);padding-left:24px;line-height:1.55}
+  .quote::before{font-size:50px;top:-.12em}
+  .mem-copy p{font-size:14.5px}
+  .pal-row{grid-template-columns:1fr;gap:6px}
+  .pal-tag{padding-top:0}
+  .strike,.tick{left:0;top:auto;bottom:16px;width:100%}
+  .chip{height:38px}
+  .dispatch button{grid-template-columns:28px minmax(0,1fr) 34px;gap:10px;padding:14px 0}
+  .dispatch button .tt b{font-size:18px}
+  .dispatch button .plus{width:32px;height:32px}
+  .return-card{min-height:0;margin-top:18px}
+  .dials{grid-template-columns:1fr}
+  .dial{min-height:46px}
+  .specimen{min-height:0}
+  .spec-text{min-height:0;font-size:18px;line-height:1.8}
+  .spec-body{padding:18px 16px 20px}
+  .spec-foot{padding:0 16px 14px;font-size:8px}
+  .hand-note{flex-direction:column;gap:12px}
+  .big-stamp{margin-left:0;transform:rotate(-6deg) scale(1)}
+  .close{padding-top:44px}
+  .foot-links{gap:8px 18px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="mast-top">
+      <div class="wordmark">
+        <b>工作说明书</b>
+        <span>A workbook on how it works</span>
+      </div>
+      <div class="mast-side">
+        <span>Grok Bot · 能力档案</span>
+        <span>第三辑 / <b>纸感 · 骨色</b></span>
+        <span>2026</span>
+      </div>
+    </div>
+    <div class="mast-nav">
+      <nav class="links" aria-label="页内导航">
+        <a href="#process">工序</a>
+        <a href="#memory">记忆</a>
+        <a href="#delegate">委派</a>
+        <a href="#desk">编辑台</a>
+        <a href="#handover">交付</a>
+      </nav>
+      <span class="folio">P.03 / 05 SECTIONS</span>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="hero-rail" aria-hidden="true">
+        <span class="big">03</span>
+        <span class="rule"></span>
+        <p>纸感 / 骨色</p>
+        <p>活字排版台</p>
+        <p class="blue">普鲁士蓝 · 单色</p>
+      </div>
+
+      <div>
+        <p class="kicker"><b>开工之前</b> 先让规则进入上下文</p>
+        <h1 id="heroTitle" class="assembly" aria-label="先读说明书，再动手。">
+          <span class="line">先读说明书，</span>
+          <span class="line"><span class="blue">再</span>动手。</span>
+        </h1>
+        <div class="assembly-rule" id="assemblyRule" aria-hidden="true"></div>
+
+        <div class="hero-cols">
+          <div>
+            <p class="hero-sub" id="heroSub">
+              <span class="bl">技能不是一句提示词，是一份放在工作区里的文件。</span>
+              <span class="bl">什么时候用、按哪几步做、做完拿什么对照，都写在里面。</span>
+              <span class="bl">读完才开工。</span>
+            </p>
+            <div class="hero-meta" aria-label="四道工序">
+              <span><b>01</b> 读规则</span>
+              <span><b>02</b> 做东西</span>
+              <span><b>03</b> 自己查</span>
+              <span><b>04</b> 交出去</span>
+            </div>
+            <a class="scroll-hint" href="#process"><i aria-hidden="true"></i>往下翻，看它怎么把一页做出来</a>
+          </div>
+
+          <div>
+            <div class="sheet" aria-label="技能文件摘录">
+              <div class="sheet-bar">
+                <span><b>SKILL.md</b> · 摘录</span>
+                <span class="sheet-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              </div>
+              <div class="skill-body" id="skillBody">
+                <span class="ln"><b>name</b> de-ai-zh</span>
+                <span class="ln"><b>use</b> 中文稿去套话，不编事实</span>
+                <span class="ln"><b>rule</b> 删宏大开头、三段排比、假互动</span>
+                <span class="ln"><b>rule</b> 数字、专名、hedge 原样保留</span>
+                <span class="ln"><b>out</b> 改稿 + 删了哪些套话 + 拒编清单</span>
+              </div>
+              <div class="skill-foot">
+                <span id="skillState">READING</span>
+                <span class="stamp" id="skillStamp">已读</span>
+                <span>1 / 1</span>
+              </div>
+            </div>
+            <p class="sheet-note">这不是全文。真正的文件更长，包含触发条件、步骤和禁止项；这里只摘出能看见的五段。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-rail"><span class="no">01</span><span class="tick"></span><span class="k">PROCESS / 工序</span></div>
+        <div>
+          <h2>四道工序，<br>少一道都不算做完。</h2>
+          <p class="sec-lede">读、做、查、交。顺序不能换，因为后一步要拿前一步留下的文件对照。<b>不是凭印象说“差不多了”。</b></p>
+        </div>
+      </div>
+
+      <div class="proc-grid" id="procGrid">
+        <article class="proc">
+          <span class="n">01 / READ</span>
+          <h3>读规则</h3>
+          <p>先看这份活该用哪份技能。里面写着触发条件、硬规则、禁止项，以及做完要交什么。</p>
+          <span class="note">读的是文件，不是记忆里的印象。</span>
+        </article>
+        <article class="proc">
+          <span class="n">02 / MAKE</span>
+          <h3>做东西</h3>
+          <p>按步骤动手，产物直接落在工作区。中途不猜结果；缺什么，就在缺口里写清楚。</p>
+          <span class="note">能在本机打开，才写进交付。</span>
+        </article>
+        <article class="proc">
+          <span class="n">03 / CHECK</span>
+          <h3>自己查</h3>
+          <p>拿同一份技能的验收条逐条对照：有没有漏项、有没有编数字、手机能不能看。</p>
+          <span class="note">自检写成 self_check.md，不口头说。</span>
+        </article>
+        <article class="proc">
+          <span class="n">04 / HAND OVER</span>
+          <h3>交出去</h3>
+          <p>页面、截图、文件清单、运行记录放在一起。做完只代表可以验收，发不发由人决定。</p>
+          <span class="note">完成和发布，是两道闸。</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="memory">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-rail"><span class="no">02</span><span class="tick"></span><span class="k">MEMORY / 记忆</span></div>
+        <div>
+          <h2 id="memH2">你说过一次的不要，<br><span class="ink">它不该再问第二次。</span></h2>
+        </div>
+      </div>
+
+      <div class="memory-grid">
+        <div>
+          <blockquote class="quote" id="memQuote">
+            <span class="bl">这一批的需求里写着：</span>
+            <span class="bl">不要奶油底配珊瑚红。</span>
+            <span class="bl">它先读了这句，才开色盘。</span>
+          </blockquote>
+          <div class="mem-copy">
+            <p>被纠正过的口味会写成一条记录：<b>不要什么、为什么、下一次怎么判断</b>。下一次开工先读它，而不是重新问一遍。</p>
+            <p>记忆不是把聊天记录存起来。是把一次纠正压成一条下次能执行的规则，放在下次一定会读到的地方。</p>
+          </div>
+        </div>
+
+        <div class="palette" aria-label="两批页面的配色对照">
+          <div class="pal-head"><span>色盘对照 / 不是换一个红</span><span>2 组</span></div>
+          <div class="pal-row dim" id="palOld">
+            <span class="pal-tag">上一批<br>页面</span>
+            <div class="pal-body">
+              <div class="chips">
+                <span class="chip" style="background:#F3F0E8"><small>#F3F0E8</small></span>
+                <span class="chip dark" style="background:#17160F"><small>#17160F</small></span>
+                <span class="chip" style="background:#C64A2C"><small>#C64A2C</small></span>
+              </div>
+              <p class="pal-label">奶油底 + 炭黑 + 珊瑚红。远看像同一本册子。</p>
+            </div>
+            <span class="strike" aria-hidden="true"></span>
+          </div>
+          <div class="pal-row" id="palNew">
+            <span class="pal-tag">这一批<br>03 站</span>
+            <div class="pal-body">
+              <div class="chips">
+                <span class="chip" style="background:#DCD8CD"><small>#DCD8CD</small></span>
+                <span class="chip dark" style="background:#14150F"><small>#14150F</small></span>
+                <span class="chip" style="background:#1E3F6E"><small>#1E3F6E</small></span>
+              </div>
+              <p class="pal-label">冷骨灰 + 墨 + 普鲁士蓝。蓝只落在该出现的地方。</p>
+            </div>
+            <span class="tick" aria-hidden="true"></span>
+          </div>
+          <p class="pal-foot">先把底从奶油挪到骨灰，再让蓝去承担强调。<span class="blue-mark">换的不是一个色号，是整页的光线。</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="delegate">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-rail"><span class="no">03</span><span class="tick"></span><span class="k">DELEGATION / 委派</span></div>
+        <div>
+          <h2>把一段活交出去，<br>主线继续走。</h2>
+          <p class="sec-lede">委派不是许愿。要写清<b>边界、回件格式、停在哪里</b>，再开一段新的上下文。回来的应该是一个能直接放进交付物的结果，而不是一堆过程。</p>
+        </div>
+      </div>
+
+      <div class="del-grid">
+        <div>
+          <ul class="dispatch" id="dispatchList">
+            <li>
+              <button type="button" aria-expanded="true" aria-controls="rcBody" data-key="ref">
+                <span class="num">A</span>
+                <span class="tt"><b>拆参考</b><span>只读，不改原文件。要的是能复用的做法，不是截图。</span></span>
+                <span class="plus" aria-hidden="true"></span>
+              </button>
+            </li>
+            <li>
+              <button type="button" aria-expanded="false" aria-controls="rcBody" data-key="build">
+                <span class="num">B</span>
+                <span class="tt"><b>写页面</b><span>一个目录，一套依赖，做完自己开浏览器。</span></span>
+                <span class="plus" aria-hidden="true"></span>
+              </button>
+            </li>
+            <li>
+              <button type="button" aria-expanded="false" aria-controls="rcBody" data-key="check">
+                <span class="num">C</span>
+                <span class="tt"><b>查移动端</b><span>390×844 起步，只报问题，不顺手改别的。</span></span>
+                <span class="plus" aria-hidden="true"></span>
+              </button>
+            </li>
+          </ul>
+
+          <svg class="branch" viewBox="0 0 420 96" role="img" aria-label="主线分出三段支线，各自回件">
+            <path class="hot" d="M4 48 H70" pathLength="1"/>
+            <path d="M70 48 C110 48 112 16 152 16 H204" pathLength="1"/>
+            <path d="M70 48 H204" pathLength="1"/>
+            <path d="M70 48 C110 48 112 80 152 80 H204" pathLength="1"/>
+            <circle class="hot" cx="70" cy="48" r="3.5"/>
+            <circle cx="208" cy="16" r="3.5"/>
+            <circle cx="208" cy="48" r="3.5"/>
+            <circle cx="208" cy="80" r="3.5"/>
+            <text x="222" y="19">回件 · 三条做法</text>
+            <text x="222" y="51">回件 · 页面 + 截图</text>
+            <text x="222" y="83">回件 · 溢出点清单</text>
+            <text x="4" y="70">主线</text>
+          </svg>
+          <p class="del-side-note">图只是结构示意：主线和支线各自有上下文，靠一份写清楚的交接单接上。</p>
+        </div>
+
+        <aside class="return-card" aria-live="polite">
+          <div class="rc-top"><span>RETURN / 回件</span><b id="rcKey">A</b></div>
+          <div class="rc-body" id="rcBody">
+            <h3>拆参考</h3>
+            <p>读三份参考，各留一条能直接用的做法：版式怎么切、字怎么进、手机先看哪一处。原文件不动。</p>
+            <div class="rc-note">回件格式：<br>1. 做法一句话<br>2. 用在本页哪一段<br>3. 不采用的部分与原因</div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section id="desk">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-rail"><span class="no">04</span><span class="tick"></span><span class="k">DESK / 编辑台</span></div>
+        <div>
+          <h2>同一段话，<br>可以改成三种样子。</h2>
+          <p class="sec-lede">语气、长度、证据，是三个会打架的旋钮。改一个，另外两个要跟着让路。下面这段是编辑台里的样例，按一下看它重排。</p>
+        </div>
+      </div>
+
+      <div class="desk-grid">
+        <div class="dials">
+          <div class="dial-group">
+            <div class="dial-label"><span>语气 / TONE</span><b id="toneNow">克制</b></div>
+            <div class="dial-opts" id="toneGroup" role="group" aria-label="语气">
+              <button class="dial" type="button" data-tone="calm" aria-pressed="true">克制<span>A</span></button>
+              <button class="dial" type="button" data-tone="talk" aria-pressed="false">口语<span>B</span></button>
+              <button class="dial" type="button" data-tone="short" aria-pressed="false">更短<span>C</span></button>
+            </div>
+          </div>
+          <div class="dial-group">
+            <div class="dial-label"><span>证据 / EVIDENCE</span><b id="evNow">关</b></div>
+            <div class="dial-opts" id="evGroup" role="group" aria-label="证据">
+              <button class="dial" type="button" data-ev="off" aria-pressed="true">只写可核验</button>
+              <button class="dial" type="button" data-ev="on" aria-pressed="false">标出来源</button>
+            </div>
+          </div>
+          <div class="desk-status" id="deskStatus"><i aria-hidden="true"></i><span>SPECIMEN A · 已停稳</span></div>
+          <p class="desk-hint">这段样例没有编造数据。它只描述工作方法；带来源的模式会多出一行依据。</p>
+        </div>
+
+        <div class="specimen">
+          <div class="spec-top"><span><b>SPECIMEN</b> · 编辑台样例</span><span id="specId">A / OFF</span></div>
+          <div class="spec-progress" id="specProgress" aria-hidden="true"></div>
+          <div class="spec-body">
+            <p class="spec-text" id="specText">
+              <span class="sl">它先把需求读一遍，标出不能写的东西：</span>
+              <span class="sl">没有来源的数字、假装官方的口气、</span>
+              <span class="sl">上一批用过的配色。然后才开第一笔。</span>
+            </p>
+            <p class="spec-src" id="specSrc"></p>
+          </div>
+          <div class="spec-foot"><span>纸样 / 非最终稿</span><span>BLUR-SLIDE · 同进度三通道</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="handover">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-rail"><span class="no">05</span><span class="tick"></span><span class="k">HANDOVER / 交付</span></div>
+        <div>
+          <h2>做完，留下能查的账。</h2>
+          <p class="sec-lede">一页 HTML 不是全部。运行记录、文件清单、自检表放在一起，别人才知道这东西怎么来的、还缺什么。</p>
+        </div>
+      </div>
+
+      <div class="hand-grid">
+        <div class="file">
+          <div class="ft">run.jsonl <span>event log</span></div>
+          <pre>{"step":"<b>build</b>","result":"ok"}
+{"step":"<b>screenshot</b>","size":"1440×900"}
+{"step":"<b>mobile</b>","size":"390×844"}
+{"step":"<b>check</b>","console":"0 error"}</pre>
+        </div>
+        <div class="file">
+          <div class="ft">asset_manifest.json <span>files</span></div>
+          <pre>{"path":"<b>pages/03.../index.html</b>",
+ "kind":"page","w":1440}
+{"path":"<b>screenshots/...png</b>",
+ "kind":"image","w":1440}</pre>
+        </div>
+        <div class="file">
+          <div class="ft">self_check.md <span>anchors</span></div>
+          <pre><b>skills_used</b>: 15 份，逐条对应产物
+<b>anchors</b>: PASS / FAIL / GAP 逐条写
+<b>gaps</b>: 打不开的参考标 evidence_gap</pre>
+        </div>
+      </div>
+
+      <div class="hand-note">
+        <p><b>文件在，才叫交付。</b>文件不在，只是一段演示。做完之后，页面、两张截图、清单和自检放在同一个目录里；缺口也写进去，不拿“差不多了”盖过去。</p>
+        <span class="big-stamp" id="handStamp">可复查</span>
+      </div>
+
+      <div class="close">
+        <h2>说明书不是保证书。</h2>
+        <div class="close-copy">
+          <p>它不保证每次都对。它保证动手之前读过规则，做完之后拿同一份规则对照；不对的地方写进缺口，不写成成绩。<b>下一页也一样，先跑一遍，再说话。</b></p>
+          <a class="next-link" href="../04-dither-lab/index.html">
+            <span><b>第 04 页 · 实验室</b><span>NEXT / DITHER · LASER</span></span>
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <p><b>工作说明书</b> · Grok Bot 能力档案 03。纸感/骨色编辑向单页，记录它怎么读规则、做东西、自己查、再交付。非官方页面，与 xAI / Grok 无隶属关系。</p>
+      <div class="foot-links">
+        <a href="../index.html">总索引</a>
+        <a href="../04-dither-lab/index.html">04 实验室</a>
+        <a href="#top">回到页首</a>
+      </div>
+    </div>
+    <div class="foot-bottom"><span>03 / PAPER · BONE · PRUSSIAN BLUE</span><span>2026</span></div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap/gsap.min.js"></script>
+<script src="../vendor/gsap/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var hasGSAP = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
+  if(!hasGSAP){ document.documentElement.classList.add("no-anim"); return; }
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.defaults({ease:"power3.out"});
+
+  // Split the hero headline into characters without changing the accessible name.
+  function splitLine(line){
+    var text = line.textContent;
+    line.textContent = "";
+    line.setAttribute("aria-hidden","true");
+    Array.prototype.forEach.call(text, function(ch){
+      var outer = document.createElement("span");
+      outer.className = "sort";
+      var inner = document.createElement("span");
+      inner.className = "sort-in";
+      inner.textContent = ch;
+      if(ch === "再"){ inner.classList.add("blue"); }
+      outer.appendChild(inner);
+      line.appendChild(outer);
+    });
+    return line.querySelectorAll(".sort-in");
+  }
+  var heroTitle = document.getElementById("heroTitle");
+  var allChars = [];
+  Array.prototype.forEach.call(heroTitle.querySelectorAll(".line"), function(line){
+    allChars = allChars.concat(Array.prototype.slice.call(splitLine(line)));
+  });
+
+  // Split sub / quote into lines already marked with .bl.
+  function lineEls(sel){ return gsap.utils.toArray(sel); }
+
+  var mm = gsap.matchMedia();
+  mm.add({desktop:"(min-width: 721px)", mobile:"(max-width: 720px)", reduce:"(prefers-reduced-motion: reduce)"}, function(ctx){
+    var c = ctx.conditions;
+    if(c.reduce){
+      gsap.set([heroTitle, "#heroSub .bl", "#memQuote .bl", ".proc", "#procGrid", ".pal-row", "#handStamp"], {clearProps:"all", autoAlpha:1});
+      gsap.set("#assemblyRule", {scaleX:1});
+      gsap.set(["#palOld .strike","#palNew .tick"], {scaleX:1});
+      gsap.set(["#handStamp","#skillStamp"], {autoAlpha:1, scale:1, rotation:-6});
+      gsap.set("#memH2 .ink", {"--ink":1});
+      document.getElementById("specProgress").style.transform = "scaleX(1)";
+      document.getElementById("skillStamp").style.opacity = "1";
+      document.getElementById("specText").innerHTML = '<span class="sl">它先把需求读一遍，标出不能写的东西：</span><span class="sl">没有来源的数字、假装官方的口气、</span><span class="sl">上一批用过的配色。然后才开第一笔。</span>';
+      document.getElementById("specSrc").textContent = "";
+      document.getElementById("specId").textContent = "A / OFF";
+      document.querySelectorAll(".skill-body .ln").forEach(function(l){ l.classList.add("on"); });
+      return;
+    }
+
+    // ---------- HERO: type-assembly + one-pass skill reading ----------
+    var hero = gsap.timeline({defaults:{ease:"power4.out"}});
+    hero.addLabel("set", 0)
+      .from(allChars, {
+        y: c.mobile ? 54 : 86,
+        x: function(){ return gsap.utils.random(c.mobile ? -12 : -22, c.mobile ? 12 : 22); },
+        rotation: function(){ return gsap.utils.random(-11, 11); },
+        autoAlpha: 0,
+        filter: "blur(10px)",
+        duration: .95,
+        stagger: {each: c.mobile ? .035 : .045, from: "start"}
+      }, .12)
+      .addLabel("lock", .9)
+      .to("#assemblyRule", {scaleX: 1, duration: .7, ease:"power2.inOut"}, "lock")
+      .from("#heroSub .bl", {
+        y: 30, autoAlpha: 0, filter: "blur(10px)",
+        duration: .8, stagger: .1, ease: "power3.out"
+      }, "lock+=.18");
+
+    // skill sheet: read the five lines once, then stamp and stop.
+    var skillLines = gsap.utils.toArray(".skill-body .ln");
+    var skillState = document.getElementById("skillState");
+    var readTl = gsap.timeline({delay: 1.1});
+    skillLines.forEach(function(line, i){
+      readTl.call(function(){
+        skillLines.forEach(function(l){ l.classList.remove("on"); });
+        line.classList.add("on");
+        skillState.textContent = i === skillLines.length - 1 ? "BOUND" : "READING";
+      }, null, i * .24);
+    });
+    readTl.call(function(){
+      skillLines.forEach(function(l){ l.classList.remove("on"); });
+      skillState.textContent = "BOUND";
+      gsap.to("#skillStamp", {autoAlpha:1, scale:1, rotation:-6, duration:.45, ease:"power2.out"});
+    }, null, skillLines.length * .24 + .1);
+
+    // ---------- PROCESS: list reveal, no blur, clip wipe ----------
+    gsap.from(".proc", {
+      y: 22, autoAlpha: 0,
+      clipPath: "inset(0 0 100% 0)",
+      duration: .75, stagger: .12, ease: "power3.out",
+      scrollTrigger: {trigger: "#procGrid", start: "top 82%", once: true}
+    });
+
+    // ---------- MEMORY: blur-slide 02 + palette strike ----------
+    gsap.from("#memQuote .bl", {
+      y: 34, autoAlpha: 0, filter: "blur(12px)",
+      duration: .9, stagger: .9 * 0.12, ease: "power3.out",
+      scrollTrigger: {trigger: "#memQuote", start: "top 80%", once: true}
+    });
+    gsap.to("#palOld .strike", {
+      scaleX: 1, duration: .75, ease: "power2.inOut",
+      scrollTrigger: {trigger: "#palOld", start: "top 84%", once: true}
+    });
+    gsap.to("#palNew .tick", {
+      scaleX: 1, duration: .7, ease: "power2.inOut", delay: .1,
+      scrollTrigger: {trigger: "#palNew", start: "top 84%", once: true}
+    });
+    gsap.from(".pal-row", {
+      y: 14, autoAlpha: 0, duration: .55, stagger: .12,
+      scrollTrigger: {trigger: ".palette", start: "top 84%", once: true}
+    });
+    gsap.to("#memH2 .ink", {
+      "--ink": 1, duration: .8, ease: "power2.inOut",
+      scrollTrigger: {trigger: "#memH2", start: "top 84%", once: true}
+    });
+
+    // ---------- DELEGATION: branch draw ----------
+    gsap.from(".branch path", {
+      strokeDashoffset: 1, duration: 1.1, stagger: .12, ease: "power2.inOut",
+      scrollTrigger: {trigger: ".branch", start: "top 88%", once: true}
+    });
+
+    // ---------- DESK: 2.2s re-typeset, settles ----------
+    var COPY = {
+      calm: [
+        "它先把需求读一遍，标出不能写的东西：",
+        "没有来源的数字、假装官方的口气、",
+        "上一批用过的配色。然后才开第一笔。"
+      ],
+      talk: [
+        "先别急着写。它会把需求翻一遍，",
+        "把不能碰的挑出来：没出处的数字、",
+        "装官方的口气、上一批刚用过的配色。",
+        "挑完才动笔。"
+      ],
+      short: [
+        "先读需求，划掉三样：",
+        "没来源的数字、官方口气、上一批的配色。",
+        "再动笔。"
+      ]
+    };
+    var SRC = "依据：需求里的禁止项 / 上一批页面源码 / 本页 self_check.md";
+    var specText = document.getElementById("specText");
+    var specSrc = document.getElementById("specSrc");
+    var specProgress = document.getElementById("specProgress");
+    var specId = document.getElementById("specId");
+    var deskStatus = document.getElementById("deskStatus");
+    var tone = "calm", ev = "off", deskBusy = false, deskTl = null;
+
+    function buildLines(lines){
+      specText.innerHTML = "";
+      lines.forEach(function(t){
+        var s = document.createElement("span");
+        s.className = "sl";
+        s.textContent = t;
+        specText.appendChild(s);
+      });
+      return gsap.utils.toArray("#specText .sl");
+    }
+    function paintInitial(){
+      buildLines(COPY.calm);
+      specSrc.textContent = "";
+      specId.textContent = "A / OFF";
+      gsap.set(specProgress, {scaleX: 1});
+    }
+    paintInitial();
+
+    function retitle(){
+      if(deskBusy) return;
+      deskBusy = true;
+      document.querySelectorAll("#toneGroup .dial, #evGroup .dial").forEach(function(b){ b.setAttribute("aria-disabled","true"); });
+      deskStatus.classList.add("busy");
+      deskStatus.querySelector("span").textContent = "TYPESETTING · 重排中";
+      var idMap = {calm:"A", talk:"B", short:"C"};
+      specId.textContent = idMap[tone] + " / " + ev.toUpperCase();
+      var oldLines = gsap.utils.toArray("#specText .sl");
+      if(deskTl) deskTl.kill();
+      deskTl = gsap.timeline({
+        defaults:{ease:"power3.out"},
+        onComplete:function(){
+          deskBusy = false;
+          document.querySelectorAll("#toneGroup .dial, #evGroup .dial").forEach(function(b){ b.removeAttribute("aria-disabled"); });
+          deskStatus.classList.remove("busy");
+          deskStatus.querySelector("span").textContent = "SPECIMEN " + idMap[tone] + " · 已停稳";
+          gsap.set(specProgress, {scaleX: 1});
+        }
+      });
+      deskTl.set(specProgress, {scaleX: 0, transformOrigin:"left center"})
+        .to(specProgress, {scaleX: 1, duration: 1.55, ease: "power1.inOut"}, 0)
+        .to(oldLines, {y: -8, autoAlpha: 0, filter: "blur(6px)", duration: .3, stagger: .025}, 0.05)
+        .call(function(){
+          var nextLines = buildLines(COPY[tone]);
+          gsap.set(nextLines, {y: 26, autoAlpha: 0, filter: "blur(10px)"});
+          specSrc.textContent = ev === "on" ? SRC : "";
+          gsap.set(specSrc, {autoAlpha: ev === "on" ? 0 : 1, y: ev === "on" ? 8 : 0, filter: ev === "on" ? "blur(6px)" : "blur(0px)"});
+          deskTl.to(nextLines, {
+            y: 0, autoAlpha: 1, filter: "blur(0px)",
+            duration: .78, stagger: .075, ease: "power3.out"
+          }, .56);
+        }, null, .48)
+        .to(specSrc, {
+          autoAlpha: ev === "on" ? 1 : 1, y: 0, filter: "blur(0px)",
+          duration: .5
+        }, 1.5)
+        .to({}, {duration: .18});
+    }
+
+    document.querySelectorAll("#toneGroup .dial").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if(deskBusy) return;
+        tone = btn.dataset.tone;
+        document.querySelectorAll("#toneGroup .dial").forEach(function(b){ b.setAttribute("aria-pressed", String(b === btn)); });
+        document.getElementById("toneNow").textContent = btn.textContent.replace(/[ABC]$/,"");
+        retitle();
+      });
+    });
+    document.querySelectorAll("#evGroup .dial").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if(deskBusy) return;
+        ev = btn.dataset.ev;
+        document.querySelectorAll("#evGroup .dial").forEach(function(b){ b.setAttribute("aria-pressed", String(b === btn)); });
+        document.getElementById("evNow").textContent = ev === "on" ? "开" : "关";
+        retitle();
+      });
+    });
+
+    // ---------- HANDOVER stamp ----------
+    gsap.to("#handStamp", {
+      autoAlpha: 1, scale: 1, rotation: -7, duration: .5, ease: "power2.out",
+      scrollTrigger: {trigger: ".hand-note", start: "top 88%", once: true}
+    });
+
+    return function(){ if(deskTl) deskTl.kill(); };
+  });
+
+  // ---------- delegation panel (independent of breakpoint) ----------
+  var RETURN = {
+    ref: {key:"A", title:"拆参考", body:"读三份参考，各留一条能直接用的做法：版式怎么切、字怎么进、手机先看哪一处。原文件不动。", note:"回件格式：<br>1. 做法一句话<br>2. 用在本页哪一段<br>3. 不采用的部分与原因"},
+    build: {key:"B", title:"写页面", body:"一个目录写完一页：HTML、样式、脚本、两份截图。依赖只放一份，不每页装一套。做完自己开浏览器，不把第一次打开留给人。", note:"回件格式：<br>1. index.html 路径<br>2. 1440×900 / 390×844 截图<br>3. 控制台与溢出的检查结果"},
+    check: {key:"C", title:"查移动端", body:"先量 390×844：标题几行、正文多大、哪里横向溢出、按钮够不够 44。只报问题，不顺手改别的段落。", note:"回件格式：<br>1. 溢出元素与宽度<br>2. 小于 44px 的热区<br>3. 不能读的段落与行号"}
+  };
+  var rcBody = document.getElementById("rcBody");
+  var rcKey = document.getElementById("rcKey");
+  var dispatchBtns = document.querySelectorAll("#dispatchList button");
+  dispatchBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var key = btn.dataset.key;
+      dispatchBtns.forEach(function(b){ b.setAttribute("aria-expanded", String(b === btn)); });
+      if(!hasGSAP || reduce){
+        rcKey.textContent = RETURN[key].key;
+        rcBody.innerHTML = "<h3>"+RETURN[key].title+"</h3><p>"+RETURN[key].body+"</p><div class='rc-note'>"+RETURN[key].note+"</div>";
+        return;
+      }
+      gsap.to(rcBody, {autoAlpha:0, y:-6, filter:"blur(5px)", duration:.22, ease:"power2.in", onComplete:function(){
+        rcKey.textContent = RETURN[key].key;
+        rcBody.innerHTML = "<h3>"+RETURN[key].title+"</h3><p>"+RETURN[key].body+"</p><div class='rc-note'>"+RETURN[key].note+"</div>";
+        gsap.fromTo(rcBody, {autoAlpha:0, y:16, filter:"blur(8px)"}, {autoAlpha:1, y:0, filter:"blur(0px)", duration:.5, ease:"power3.out"});
+      }});
+    });
+  });
+
+  // Refresh after webfonts settle so ScrollTrigger start positions are right.
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ ScrollTrigger.refresh(); }); }
+  window.addEventListener("load", function(){ ScrollTrigger.refresh(); });
+})();
+</script>
+</body>
+</html>

@@ -138,6 +138,12 @@
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
   }
+
+  .batch{margin-top:56px;padding-top:32px;border-top:1px solid var(--ink)}
+  .batch .kicker{margin-bottom:10px}
+  .batch h2{font-family:var(--serif);font-size:clamp(28px,4vw,46px);font-weight:600;letter-spacing:-.03em;line-height:1.15;margin:0 0 12px}
+  .batch .intro{max-width:40em;font-size:15px;line-height:1.85;color:#4e493f;margin-bottom:8px}
+  .batch .intro a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -148,6 +154,7 @@
     <div class="brand"><span class="mark" aria-hidden="true"></span><b>GROK BOT / 能力索引</b></div>
     <nav class="topnav" aria-label="索引导航">
       <a href="#index" aria-current="page">十六页</a>
+      <a href="#v2">第二批</a>
       <a href="#notes">收束方式</a>
     </nav>
     <div class="counter">16 PAGES / <b>4</b> SESSIONS</div>
@@ -175,6 +182,7 @@
     <span class="item"><i class="dot"></i>已交付</span>
     <span class="item"><i class="dot gap"></i>证据缺口</span>
     <span class="note">01–12 由并行会话交付；本会话只挂链，不改其页面</span>
+    <a class="item" href="#v2" style="color:var(--accent);text-transform:none;letter-spacing:.04em">第二批 / 动效加字效 →</a>
   </div>
 
   <section class="wrap" id="index" aria-labelledby="index-h">
@@ -263,6 +271,40 @@
     </ol>
   </section>
 
+
+  <section class="wrap batch" id="v2" aria-labelledby="v2-h">
+    <div class="kicker mono">Batch 02 / 2026-11-13</div>
+    <h2 id="v2-h">第二批 / 动效加字效</h2>
+    <p class="intro">这一批另外做了四个新站，专门加强 UI 动效和字效，配色也拆开，不再共用第一批常见的奶油底。先打开<a href="./v2/index.html">第二批目录</a>，或从下面进各站。原有十六页没有改动。</p>
+    <ol class="index">
+      <li><a class="row done" href="./v2/index.html">
+        <span class="num">目</span><span class="cat">第二批<br>目录</span>
+        <span class="name"><b>第二批总目录</b><span>四站合在一页，方便对照配色和动法。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./v2/01-cinematic-gold/index.html">
+        <span class="num">01</span><span class="cat">电影感深金<br>放映室</span>
+        <span class="name"><b>交给它的事，中间少盯几眼</b><span>深咖啡 + 香槟金；blur-slide、逐字装配、关键词扫光；场景播放器 3.4 秒一轮后停稳。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./v2/02-bright-bento/index.html">
+        <span class="num">02</span><span class="cat">明亮 bento<br>任务板</span>
+        <span class="name"><b>把一句话，拆成能做完的事</b><span>冷白 + 钴蓝 / 橘 / 薄荷；blur-slide、逐字装配、词条滚动；三步拆解与可点开的抽屉。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./v2/03-paper-editorial/index.html">
+        <span class="num">03</span><span class="cat">纸感编辑<br>活字台</span>
+        <span class="name"><b>先读说明书，再动手</b><span>冷骨灰 + 普鲁士蓝；逐字装配、blur-slide、墨扫与列表显影；技能卡与编辑台停稳。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+      <li><a class="row done" href="./v2/04-dither-lab/index.html">
+        <span class="num">04</span><span class="cat">抖动实验室<br>扫描线</span>
+        <span class="name"><b>它不猜，它跑一遍</b><span>近黑 + 薄荷青；半调显影、blur-slide、扫描括号；仪表与实验台跑完停在 SETTLED。</span></span>
+        <span class="state"><i></i>已交付</span><span class="arrow" aria-hidden="true">→</span>
+      </a></li>
+    </ol>
+  </section>
+
   <section class="wrap footnote" id="notes" aria-labelledby="notes-h">
     <div class="fn">
       <div class="n">01 / ONE PAGE, ONE CAPABILITY</div>
@@ -284,7 +326,7 @@
 
 <footer class="site">
   <div class="wrap foot">
-    <p>本页是 Grok Bot 能力展示的总索引，不是发布页，也不代表 xAI 或 Grok 官方。页面只链到本地共享目录里的展示页；研究记录在共享 <span class="mono">notes/</span>，逐项对账在 <span class="mono">REPORT.md</span>。</p>
+    <p>本页是 Grok Bot 能力展示的总索引，也不代表 xAI 或 Grok 官方。第一批十六页仍在本目录；第二批目录在 <a href="./v2/index.html">./v2/</a>。</p>
     <div class="meta">2026-11-13 · ASIA/SHANGHAI<br>GROK BOT / 16 PAGES<br>NO PUBLISH</div>
   </div>
 </footer>

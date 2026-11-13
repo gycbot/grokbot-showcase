@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0906">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230B0906'/%3E%3Crect x='14' y='14' width='36' height='36' fill='none' stroke='%23E7C98B' stroke-width='2'/%3E%3Crect x='26' y='26' width='12' height='12' fill='%23E7C98B'/%3E%3C/svg%3E">
+<title>交给它的事，中间少盯几眼 · Grok Bot 能力放映室</title>
+<meta name="description" content="Grok Bot 能力展示 01：电影感深金。六个场景，从一句人话开始，看技能、例程、记忆、连接器、委派与电脑怎么把活接住。">
+<script>
+(function(){
+  var q = location.search;
+  var still = /[?&]still=1/.test(q);
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.__still = still;
+  window.__errors = [];
+  window.addEventListener('error', function(e){ window.__errors.push(String(e.message || e.error || 'error')); });
+  if(!still && !reduce) document.documentElement.classList.add('motion');
+})();
+</script>
+<style>
+  :root{
+    --ink:#0B0906; --ink-2:#120D08; --ink-3:#1B130B;
+    --ivory:#F4EAD8; --ivory-2:#D8CBB6; --muted:#A2937D; --faint:#6F6250;
+    --gold:#E7C98B; --gold-2:#B8893F; --gold-3:#7A5A22;
+    --line:rgba(231,201,139,.18); --line-2:rgba(231,201,139,.09);
+    --serif:"Noto Serif CJK SC","Songti SC","Source Han Serif SC",serif;
+    --sans:"Noto Sans CJK SC","Noto Sans SC","PingFang SC","Source Han Sans SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.2,.75,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--ink);color:var(--ivory);scroll-behavior:smooth;overflow-x:clip}
+  body{font-family:var(--sans);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:clip;background:var(--ink)}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  img,svg{max-width:100%;display:block}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  ::selection{background:var(--gold);color:var(--ink)}
+  .wrap{width:min(1320px,100% - 64px);margin-inline:auto}
+  .mono{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--gold);color:var(--ink);padding:14px 18px;z-index:99}
+  .skip:focus{left:14px;top:14px}
+
+  .grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.13;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E")}
+  .vignette{position:fixed;inset:0;z-index:59;pointer-events:none;background:radial-gradient(120% 90% at 50% 42%,transparent 52%,rgba(0,0,0,.42) 100%)}
+
+  header.top{position:sticky;top:0;z-index:40;background:rgba(11,9,6,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-2)}
+  .top-in{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:64px}
+  .brand{display:flex;align-items:center;gap:11px;min-height:44px;font-size:12px;font-weight:700;letter-spacing:.14em}
+  .brand .mark{width:15px;height:15px;border:1px solid var(--gold);position:relative;flex:none}
+  .brand .mark::after{content:"";position:absolute;inset:4px;background:var(--gold)}
+  .brand span{font-weight:400;color:var(--muted);letter-spacing:.06em;font-family:var(--mono);font-size:10px}
+  .nav{display:flex;align-items:center;gap:4px}
+  .nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 13px;font-size:12px;color:var(--muted);transition:color .25s var(--ease)}
+  .nav a:hover{color:var(--ivory)}
+  .idx{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--gold)}
+  .idx:hover{background:var(--gold);color:var(--ink)}
+
+  .hero{padding:18px 18px 0}
+  .stage{position:relative;width:min(1400px,100%);margin:0 auto;min-height:calc(100svh - 100px);border:1px solid var(--line);overflow:hidden;background:
+    radial-gradient(900px 620px at 16% 8%,rgba(231,201,139,.16),transparent 62%),
+    radial-gradient(600px 500px at 88% 96%,rgba(184,137,63,.08),transparent 64%),
+    linear-gradient(158deg,#100B06 0%,#090705 58%,#130D07 100%);
+    display:grid;align-items:center}
+  .stage::before{content:"";position:absolute;top:-22%;left:6%;width:62%;height:82%;background:linear-gradient(112deg,rgba(231,201,139,.18),rgba(231,201,139,.04) 44%,transparent 68%);filter:blur(18px);transform:rotate(-8deg);pointer-events:none}
+  .stage::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.44),transparent 34%,transparent 70%,rgba(0,0,0,.36));pointer-events:none}
+  .letterbox{position:absolute;left:0;right:0;height:9px;background:#050403;z-index:3}
+  .letterbox.t{top:0}.letterbox.b{bottom:0}
+  .sprocket{position:absolute;left:14px;top:46px;bottom:46px;width:9px;z-index:4;display:flex;flex-direction:column;justify-content:space-between;opacity:.5}
+  .sprocket i{display:block;width:7px;height:12px;border:1px solid var(--gold-2);border-radius:1px}
+  .stage-in{position:relative;z-index:5;padding:76px clamp(26px,7vw,104px) 70px;max-width:1080px}
+  .slug{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted)}
+  .slug i{width:7px;height:7px;background:var(--gold);border-radius:50%;display:block;box-shadow:0 0 0 4px rgba(231,201,139,.08)}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(44px,6.4vw,92px);line-height:1.06;letter-spacing:-.035em;color:var(--ivory)}
+  h1 .l1,h1 .l2{display:block}
+  h1 .l2{color:var(--gold)}
+  .mask{display:block;overflow:hidden;padding-bottom:.09em}
+  .chars{display:inline-block;white-space:nowrap;perspective:900px}
+  .chars .ch{display:inline-block;transform-origin:50% 100%;will-change:transform,opacity}
+  .sweep{background:linear-gradient(100deg,var(--gold-3) 0%,var(--gold) 28%,#FFF4D6 46%,var(--gold) 64%,var(--gold-3) 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;background-position:0% 0}
+  .lede{margin-top:26px;max-width:620px;font-size:clamp(15px,1.35vw,17px);line-height:1.95;color:var(--ivory-2);letter-spacing:.005em}
+  .lede b{color:var(--ivory);font-weight:500}
+  .hero-foot{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:34px}
+  .cta{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:0 22px;background:var(--gold);color:var(--ink);font-size:13px;font-weight:600;letter-spacing:.04em;border-radius:2px;transition:transform .25s var(--ease),background .25s var(--ease)}
+  .cta:hover{background:#F1D8A2;transform:translateY(-2px)}
+  .cta span{font-family:var(--mono);font-size:14px}
+  .hero-note{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);line-height:1.8}
+  .rail{position:absolute;right:clamp(18px,3vw,40px);top:50%;transform:translateY(-50%);z-index:5;width:150px;display:flex;flex-direction:column;gap:2px;padding-left:16px;border-left:1px solid var(--line)}
+  .rail .r{display:flex;align-items:center;gap:9px;min-height:30px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--faint);transition:color .3s var(--ease)}
+  .rail .r b{font-weight:400;font-size:8px;color:var(--gold-2)}
+  .rail .r.on{color:var(--gold)}
+  .rail .r.on b{color:var(--gold)}
+  .rail .r i{width:5px;height:5px;border-radius:50%;background:transparent;border:1px solid var(--gold-2);display:block}
+  .rail .r.on i{background:var(--gold);border-color:var(--gold)}
+  .hero-mark{position:absolute;right:clamp(140px,13vw,220px);top:12%;z-index:2;font-family:var(--serif);font-size:clamp(160px,20vw,280px);line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(231,201,139,.13);letter-spacing:-.08em;pointer-events:none;user-select:none}
+  .scrollline{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:8px;letter-spacing:.18em;color:var(--faint)}
+  .scrollline::before{content:"";width:46px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-2))}
+
+  .sec{padding:104px 0 0}
+  .sec-head{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:44px;align-items:end;border-top:1px solid var(--line);padding-top:18px}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:20px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--gold-2);text-transform:uppercase}
+  .kicker::before{content:"";width:32px;height:1px;background:var(--gold-2)}
+  h2{font-family:var(--serif);font-weight:500;font-size:clamp(30px,3.4vw,48px);line-height:1.2;letter-spacing:-.025em}
+  .sec-head p{font-size:13px;line-height:1.9;color:var(--muted);max-width:34ch;padding-bottom:4px}
+  .sec-head p b{color:var(--ivory-2);font-weight:500}
+
+  .strip-wrap{position:relative;margin-top:30px;display:grid;grid-template-columns:52px minmax(0,1fr) 52px;gap:10px;align-items:center}
+  .strip{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 12px;scroll-behavior:smooth}
+  .strip::-webkit-scrollbar{display:none}
+  .frame{flex:0 0 min(320px,78vw);scroll-snap-align:start;text-align:left;min-height:340px;border:1px solid var(--line);background:linear-gradient(158deg,#140E08,#0A0806);padding:18px;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:border-color .3s var(--ease),transform .3s var(--ease)}
+  .frame:hover{border-color:rgba(231,201,139,.6);transform:translateY(-3px)}
+  .frame.on{border-color:var(--gold)}
+  .frame .fno{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--gold-2);display:flex;justify-content:space-between;align-items:center}
+  .frame .fno em{font-style:normal;color:var(--faint);font-size:8px}
+  .frame h3{font-family:var(--serif);font-size:23px;font-weight:500;margin-top:22px;letter-spacing:-.02em}
+  .frame p{font-size:12px;line-height:1.75;color:var(--muted);margin-top:7px;max-width:24ch}
+  .frame .viz{margin-top:auto;padding-top:18px;height:120px;display:flex;align-items:flex-end}
+  .frame .go{position:absolute;right:14px;bottom:12px;font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:.08em}
+  .frame:hover .go{color:var(--gold)}
+  .arrowbtn{width:52px;height:52px;border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:var(--mono);font-size:15px;transition:background .25s var(--ease),color .25s var(--ease)}
+  .arrowbtn:hover{background:var(--gold);color:var(--ink)}
+  .strip-hint{margin-top:2px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--faint)}
+
+  .viz-doc{width:100%;height:88px;border:1px solid rgba(231,201,139,.25);background:rgba(231,201,139,.03);padding:11px 12px;display:flex;flex-direction:column;gap:6px}
+  .viz-doc i{display:block;height:3px;background:rgba(231,201,139,.28)}
+  .viz-doc i:nth-child(1){width:38%;background:var(--gold)}
+  .viz-doc i:nth-child(2){width:82%}.viz-doc i:nth-child(3){width:64%}.viz-doc i:nth-child(4){width:74%}.viz-doc i:nth-child(5){width:44%}
+  .viz-cal{width:100%;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .viz-cal i{height:22px;border:1px solid rgba(231,201,139,.16);display:block}
+  .viz-cal i.on{background:rgba(231,201,139,.75);border-color:var(--gold)}
+  .viz-chips{display:flex;flex-wrap:wrap;gap:5px;width:100%}
+  .viz-chips i{font-style:normal;font-family:var(--mono);font-size:8px;border:1px solid rgba(231,201,139,.28);padding:4px 7px;color:var(--gold);display:block}
+  .viz-flow{display:flex;align-items:center;gap:0;width:100%}
+  .viz-flow i{width:26px;height:26px;border:1px solid var(--gold-2);border-radius:50%;display:block;position:relative}
+  .viz-flow i::after{content:"";position:absolute;inset:8px;background:rgba(231,201,139,.5);border-radius:50%}
+  .viz-flow b{height:1px;flex:1;background:linear-gradient(90deg,var(--gold-2),rgba(231,201,139,.2))}
+  .viz-stack{position:relative;width:100%;height:88px}
+  .viz-stack i{position:absolute;left:0;right:34px;height:34px;border:1px solid rgba(231,201,139,.25);background:#100B06;display:block}
+  .viz-stack i:nth-child(1){top:0;left:26px}.viz-stack i:nth-child(2){top:24px;left:13px}.viz-stack i:nth-child(3){top:48px;border-color:var(--gold)}
+  .viz-win{width:100%;height:88px;border:1px solid rgba(231,201,139,.25);background:#0E0A06;padding:8px}
+  .viz-win b{display:flex;gap:4px;margin-bottom:8px}
+  .viz-win b i{width:5px;height:5px;border-radius:50%;background:rgba(231,201,139,.4);display:block}
+  .viz-win u{display:block;height:3px;background:rgba(231,201,139,.22);margin:6px 0;text-decoration:none}
+  .viz-win u:nth-of-type(1){width:72%;background:rgba(231,201,139,.55)}
+  .viz-win u:nth-of-type(2){width:48%}.viz-win u:nth-of-type(3){width:62%}
+
+  .player-shell{margin-top:30px;border:1px solid var(--line);background:#0C0906;display:grid;grid-template-columns:210px minmax(0,1fr)}
+  .tabs{display:flex;flex-direction:column;border-right:1px solid var(--line);padding:8px}
+  .tab{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 13px;text-align:left;border-left:2px solid transparent;color:var(--muted);transition:color .25s var(--ease),background .25s var(--ease),border-color .25s var(--ease)}
+  .tab b{font-family:var(--mono);font-size:9px;font-weight:400;color:var(--faint)}
+  .tab span{font-size:12px}
+  .tab:hover{color:var(--ivory);background:rgba(231,201,139,.03)}
+  .tab.on{color:var(--gold);border-left-color:var(--gold);background:rgba(231,201,139,.05)}
+  .tab.on b{color:var(--gold)}
+  .tabs-foot{margin-top:auto;padding:14px 13px 6px;border-top:1px solid var(--line-2);font-family:var(--mono);font-size:8px;line-height:1.8;letter-spacing:.12em;color:var(--faint)}
+  .screen{position:relative;min-height:470px;display:flex;flex-direction:column;overflow:hidden}
+  .screen-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line-2);font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--faint)}
+  .live{display:flex;align-items:center;gap:7px;color:var(--gold)}
+  .live i{width:5px;height:5px;border-radius:50%;background:var(--gold);display:block;animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .slides{position:relative;flex:1;min-height:370px}
+  .slide{position:absolute;inset:0;padding:22px 22px 18px;display:grid;grid-template-columns:1fr 1.05fr 1.12fr;gap:26px;align-items:start;opacity:0;visibility:hidden}
+  .slide.on{opacity:1;visibility:visible}
+  .who{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--gold-2)}
+  .who i{width:5px;height:5px;background:var(--gold);display:block}
+  .ask p{font-family:var(--serif);font-size:20px;line-height:1.72;color:var(--ivory);max-width:23ch}
+  .ask small{display:block;margin-top:14px;font-size:10px;line-height:1.7;color:var(--faint);font-family:var(--mono);letter-spacing:.04em}
+  .steps{list-style:none;border-top:1px solid var(--line);padding-top:4px}
+  .steps li{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line-2);align-items:flex-start}
+  .steps b{font-family:var(--mono);font-size:9px;font-weight:400;color:var(--gold-2);padding-top:2px;width:18px;flex:none}
+  .steps strong{display:block;font-size:12px;font-weight:500;color:var(--ivory-2);line-height:1.5}
+  .steps span{display:block;font-size:10px;color:var(--faint);line-height:1.65;margin-top:2px}
+  .result{border-left:1px solid var(--line);padding-left:24px;min-width:0}
+  .rtag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--ink);background:var(--gold);padding:4px 8px;margin-bottom:14px}
+  .result h3{font-family:var(--serif);font-size:24px;font-weight:500;line-height:1.35;letter-spacing:-.02em}
+  .result p{font-size:11px;line-height:1.8;color:var(--muted);margin-top:7px;max-width:26ch}
+  .artifact{margin-bottom:14px;height:132px;border:1px solid rgba(231,201,139,.22);background:rgba(231,201,139,.035);padding:12px;overflow:hidden}
+  .artifact .viz-doc,.artifact .viz-win{height:100%;border:0;background:transparent;padding:0}
+  .artifact .viz-cal{height:100%;align-content:center}
+  .artifact .viz-cal i{height:26px}
+  .artifact .viz-chips{align-content:center;height:100%}
+  .artifact .viz-chips i{padding:7px 9px;font-size:9px}
+  .artifact .viz-flow{height:100%;align-items:center}
+  .artifact .viz-flow i{width:38px;height:38px}
+  .artifact .viz-flow i::after{inset:12px}
+  .artifact .viz-stack{height:100%}
+  .artifact .viz-stack i{height:52px}
+  .artifact .viz-stack i:nth-child(1){top:0}.artifact .viz-stack i:nth-child(2){top:36px}.artifact .viz-stack i:nth-child(3){top:72px}
+  .screen-foot{display:flex;align-items:center;gap:14px;padding:12px 18px;border-top:1px solid var(--line-2)}
+  .bar{height:2px;background:rgba(231,201,139,.14);flex:1;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--gold);transform-origin:left;transform:scaleX(0)}
+  .take{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--faint);white-space:nowrap}
+  .playbtn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:48px;padding:0 14px;border:1px solid var(--line);font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--gold);white-space:nowrap}
+  .playbtn:hover{background:rgba(231,201,139,.08)}
+
+  .boundaries{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:30px}
+  .bcol{padding:24px 26px 26px;border-right:1px solid var(--line);min-width:0}
+  .bcol:first-child{padding-left:0}
+  .bcol:last-child{border-right:0}
+  .bcol .tag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:8px;letter-spacing:.1em;padding:4px 8px;border:1px solid var(--line);color:var(--gold);margin-bottom:16px}
+  .bcol h3{font-family:var(--serif);font-size:20px;font-weight:500;line-height:1.45;margin-bottom:10px}
+  .bcol ul{list-style:none}
+  .bcol li{font-size:11px;line-height:1.8;color:var(--muted);padding:5px 0;border-bottom:1px dotted var(--line-2)}
+  .bcol li:last-child{border-bottom:0}
+  .bcol li b{color:var(--ivory-2);font-weight:500}
+
+  .close{padding:110px 0 0}
+  .close-in{border:1px solid var(--line);padding:clamp(28px,5vw,60px);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:end;background:radial-gradient(600px 300px at 10% 0%,rgba(231,201,139,.1),transparent 70%)}
+  .close h2{max-width:13ch}
+  .close p{font-size:12px;line-height:1.9;color:var(--muted);margin-top:14px;max-width:42ch}
+  .next{display:flex;gap:10px;flex-wrap:wrap}
+  .next a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border:1px solid var(--line);font-size:11px;color:var(--gold)}
+  .next a:first-child{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+  .next a:hover{border-color:var(--gold)}
+
+  footer{border-top:1px solid var(--line);margin-top:64px;padding:24px 0 42px}
+  .foot{display:flex;justify-content:space-between;gap:28px;align-items:flex-start}
+  .foot p{font-size:10px;line-height:1.9;color:var(--faint);max-width:64ch}
+  .foot .meta{font-family:var(--mono);font-size:8px;line-height:1.9;letter-spacing:.1em;color:var(--faint);text-align:right;white-space:nowrap}
+  .foot a{display:inline-flex;align-items:center;min-height:44px;color:var(--gold)}
+
+  .motion [data-blur]{opacity:0;filter:blur(12px);transform:translateY(34px);will-change:transform,opacity,filter}
+  .motion .chars .ch{opacity:0;transform:translateY(110%) rotateX(-70deg);will-change:transform,opacity}
+  .motion .rise{opacity:0;transform:translateY(16px)}
+  .motion .cap-row{opacity:0}
+  .motion .frame{opacity:0;transform:translateY(22px)}
+
+  @media (max-width:1100px){
+    .rail{display:none}
+    .stage-in{padding-right:clamp(26px,7vw,80px)}
+    .slide{grid-template-columns:1fr 1fr;gap:22px}
+    .result{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:18px;display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:start}
+    .artifact{grid-row:1/3;margin-bottom:0;height:100%;min-height:120px}
+    .slides{min-height:560px}
+    .screen{min-height:660px}
+  }
+  @media (max-width:840px){
+    .wrap{width:calc(100% - 36px)}
+    .sec{padding-top:78px}
+    .sec-head{grid-template-columns:1fr;gap:16px}
+    .sec-head p{max-width:46ch}
+    .player-shell{grid-template-columns:1fr}
+    .tabs{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:6px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{min-height:48px;border-left:0;border-bottom:2px solid transparent;padding:0 14px;white-space:nowrap}
+    .tab.on{border-left-color:transparent;border-bottom-color:var(--gold)}
+    .tabs-foot{display:none}
+    .slide{grid-template-columns:1fr;min-height:auto;gap:20px;padding:20px 18px}
+    .slides{min-height:650px}
+    .screen{min-height:720px}
+    .result{grid-template-columns:1fr;border-top:1px solid var(--line);padding-top:16px}
+    .artifact{height:150px;min-height:0}
+    .ask p{font-size:19px}
+    .stage{min-height:calc(100svh - 88px)}
+    .stage-in{padding:58px 24px 56px}
+    .hero-foot{margin-top:26px}
+    .hero-mark{display:none}
+    .boundaries{grid-template-columns:1fr}
+    .bcol{border-right:0;border-bottom:1px solid var(--line);padding:20px 0}
+    .bcol:last-child{border-bottom:0}
+    .close{padding-top:76px}
+    .close-in{grid-template-columns:1fr}
+    .foot{flex-direction:column}
+    .foot .meta{text-align:left}
+  }
+  @media (max-width:560px){
+    header.top .nav{display:none}
+    .hero{padding:10px 10px 0}
+    .stage{min-height:calc(100svh - 82px)}
+    .stage-in{padding:46px 20px 50px}
+    h1{font-size:clamp(38px,11.2vw,50px);line-height:1.1}
+    .slug{font-size:8px;margin-bottom:22px}
+    .lede{font-size:14px;line-height:1.9;margin-top:20px}
+    .hero-foot{gap:14px;align-items:flex-start}
+    .hero-note{width:100%}
+    .scrollline{display:flex;bottom:16px}
+    .sprocket{left:7px;top:22px;bottom:22px;width:7px}
+    .sprocket i{width:5px;height:9px}
+    .strip-wrap{grid-template-columns:minmax(0,1fr);gap:8px}
+    .arrowbtn{display:none}
+    .strip{margin-inline:-2px}
+    .frame{flex-basis:84vw;min-height:300px}
+    .player-shell{margin-top:20px}
+    .screen{min-height:720px}
+    .slides{min-height:650px}
+    .screen-top{font-size:7px;padding:11px 13px}
+    .slide{padding:18px 15px}
+    .ask p{font-size:18px}
+    .screen-foot{padding:10px 13px;gap:10px}
+    .playbtn{padding:0 10px}
+    .close-in{padding:24px 18px}
+    .foot p{font-size:10px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#top" aria-label="回到顶部">
+      <span class="mark" aria-hidden="true"></span>
+      GROK BOT <span>/ 能力放映室</span>
+    </a>
+    <nav class="nav" aria-label="页内导航">
+      <a href="#reel">片目</a>
+      <a href="#player">现场</a>
+      <a href="#bounds">边界</a>
+    </nav>
+    <a class="idx" href="./index.html">全部四站</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top" aria-labelledby="h1">
+    <div class="stage">
+      <div class="letterbox t" aria-hidden="true"></div>
+      <div class="letterbox b" aria-hidden="true"></div>
+      <div class="sprocket" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <div class="stage-in">
+        <div class="slug rise"><i aria-hidden="true"></i> REEL 01 / 06 &nbsp;·&nbsp; GROK BOT 能力放映室</div>
+        <h1 id="h1">
+          <span class="l1" data-blur>交给它的事，</span>
+          <span class="l2"><span class="mask"><span class="chars" data-assemble>中间少盯几眼。</span></span></span>
+        </h1>
+        <p class="lede" data-blur>技能、例程、记忆、连接器、委派、电脑。不是六个名词，是六件能交出去的活。下面按一场放映，逐段看它怎么接住一句话，又怎么把结果放回你手里。</p>
+        <div class="hero-foot">
+          <a class="cta rise" href="#player">看它做一遍 <span aria-hidden="true">↓</span></a>
+          <div class="hero-note rise">六个场景 / 每个都从一句人话开始<br>手机上也按这个顺序读</div>
+        </div>
+      </div>
+
+      <div class="hero-mark" aria-hidden="true">01</div>
+      <div class="rail" aria-label="场次">
+        <div class="r on" data-rail="0"><b>01</b><i></i>技能</div>
+        <div class="r" data-rail="1"><b>02</b><i></i>例程</div>
+        <div class="r" data-rail="2"><b>03</b><i></i>记忆</div>
+        <div class="r" data-rail="3"><b>04</b><i></i>连接器</div>
+        <div class="r" data-rail="4"><b>05</b><i></i>委派</div>
+        <div class="r" data-rail="5"><b>06</b><i></i>电脑</div>
+      </div>
+      <div class="scrollline" aria-hidden="true">SCROLL / 片目</div>
+    </div>
+  </section>
+
+  <section class="sec" id="reel" aria-labelledby="reel-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="kicker">片目 / 六格</div>
+          <h2 id="reel-h" data-blur>六件能交出去的活。</h2>
+        </div>
+        <p data-blur>每一格都是一句具体的话，不是功能清单。<b>点一格</b>，下面直接演给你看。</p>
+      </div>
+
+      <div class="strip-wrap">
+        <button class="arrowbtn" id="prev" aria-label="上一格" type="button">←</button>
+        <div class="strip" id="strip" tabindex="0" aria-label="六格片目，可横向滚动">
+          <button class="frame on" type="button" data-scene="0">
+            <span class="fno">01 <em>SKILLS</em></span>
+            <h3>技能</h3>
+            <p>把我们改稿的习惯写成文件，下次直接用。</p>
+            <span class="viz viz-doc" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="frame" type="button" data-scene="1">
+            <span class="fno">02 <em>ROUTINES</em></span>
+            <h3>例程</h3>
+            <p>每天十点，把昨天发出去的内容收一遍。</p>
+            <span class="viz viz-cal" aria-hidden="true"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></span>
+          </button>
+          <button class="frame" type="button" data-scene="2">
+            <span class="fno">03 <em>MEMORY</em></span>
+            <h3>记忆</h3>
+            <p>标题别用感叹号，封面别放小字。</p>
+            <span class="viz viz-chips" aria-hidden="true"><i>标题</i><i>封面</i><i>语气</i><i>禁区</i></span>
+          </button>
+          <button class="frame" type="button" data-scene="3">
+            <span class="fno">04 <em>CONNECTORS</em></span>
+            <h3>连接器</h3>
+            <p>读完这份文档，把结论写进我们那张表。</p>
+            <span class="viz viz-flow" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></span>
+          </button>
+          <button class="frame" type="button" data-scene="4">
+            <span class="fno">05 <em>DELEGATION</em></span>
+            <h3>委派</h3>
+            <p>这三页你来排，标准只有一条：手机先能读。</p>
+            <span class="viz viz-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+          </button>
+          <button class="frame" type="button" data-scene="5">
+            <span class="fno">06 <em>DESKTOP</em></span>
+            <h3>电脑</h3>
+            <p>把后台这五条数据导出来，按日期排好。</p>
+            <span class="viz viz-win" aria-hidden="true"><b><i></i><i></i><i></i></b><u></u><u></u><u></u></span>
+          </button>
+        </div>
+        <button class="arrowbtn" id="next" aria-label="下一格" type="button">→</button>
+      </div>
+      <div class="strip-hint">横向滑动 · 点一格跳到现场</div>
+    </div>
+  </section>
+
+  <section class="sec" id="player" aria-labelledby="player-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="kicker">现场 / 六个场景</div>
+          <h2 id="player-h" data-blur>一句话进去，一个结果出来。</h2>
+        </div>
+        <p data-blur>每 <b>3.4 秒</b>换一场。步骤亮完，结果停住；不转圈，不刷屏。点左边的场景条可以自己切。</p>
+      </div>
+
+      <div class="player-shell">
+        <div class="tabs" role="tablist" aria-label="六个能力场景">
+          <button class="tab on" role="tab" aria-selected="true" aria-controls="slide-0" id="tab-0" data-tab="0" type="button"><b>01</b><span>技能</span></button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="slide-1" id="tab-1" data-tab="1" type="button"><b>02</b><span>例程</span></button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="slide-2" id="tab-2" data-tab="2" type="button"><b>03</b><span>记忆</span></button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="slide-3" id="tab-3" data-tab="3" type="button"><b>04</b><span>连接器</span></button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="slide-4" id="tab-4" data-tab="4" type="button"><b>05</b><span>委派</span></button>
+          <button class="tab" role="tab" aria-selected="false" aria-controls="slide-5" id="tab-5" data-tab="5" type="button"><b>06</b><span>电脑</span></button>
+          <div class="tabs-foot" aria-hidden="true">6 SCENES<br>1 TAKE</div>
+        </div>
+
+        <div class="screen" aria-live="polite">
+          <div class="screen-top">
+            <span id="scene-label">SCENE 01 / SKILLS</span>
+            <span class="live"><i aria-hidden="true"></i> PLAYING</span>
+          </div>
+
+          <div class="slides" id="slides">
+            <article class="slide on" id="slide-0" role="tabpanel" aria-labelledby="tab-0">
+              <div class="ask"><div class="who"><i aria-hidden="true"></i>你说的</div><p>把我们改稿的习惯写成一份技能，下次开新会话直接用。</p><small>输入：三份改前 / 改后的稿</small></div>
+              <ol class="steps">
+                <li><b>01</b><div><strong>读你给的样例</strong><span>先看你改了什么，不先套模板。</span></div></li>
+                <li><b>02</b><div><strong>抽出步骤和禁区</strong><span>哪些必须做，哪些不能碰。</span></div></li>
+                <li><b>03</b><div><strong>写成可再读的文件</strong><span>下次开新会话，直接读这一份。</span></div></li>
+              </ol>
+              <div class="result"><span class="rtag">结果</span><div class="artifact"><div class="viz-doc" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div><h3>一份 SKILL 文件</h3><p>不用每次从头讲；做得对不对，还能回头看。</p></div>
+            </article>
+
+            <article class="slide" id="slide-1" role="tabpanel" aria-labelledby="tab-1">
+              <div class="ask"><div class="who"><i aria-hidden="true"></i>你说的</div><p>每天十点，把昨天发出去的内容收一遍。</p><small>输入：发布记录 / 评论 / 数据页</small></div>
+              <ol class="steps">
+                <li><b>01</b><div><strong>定触发时间</strong><span>十点，还是你改过的任意时间。</span></div></li>
+                <li><b>02</b><div><strong>定输入范围</strong><span>只看昨天，不翻旧账。</span></div></li>
+                <li><b>03</b><div><strong>定输出格式</strong><span>一页能扫完的复盘，不写长文。</span></div></li>
+              </ol>
+              <div class="result"><span class="rtag">结果</span><div class="artifact"><div class="viz-cal" aria-hidden="true"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div></div><h3>一页昨日复盘</h3><p>到点自己跑，跑完留一行记录；没跑成也留原因。</p></div>
+            </article>
+
+            <article class="slide" id="slide-2" role="tabpanel" aria-labelledby="tab-2">
+              <div class="ask"><div class="who"><i aria-hidden="true"></i>你说的</div><p>记住：标题不要用感叹号，封面不要放小字。</p><small>输入：两次改稿意见</small></div>
+              <ol class="steps">
+                <li><b>01</b><div><strong>记偏好</strong><span>喜欢的语气、长度、节奏。</span></div></li>
+                <li><b>02</b><div><strong>记禁区</strong><span>不用的词、不碰的版式。</span></div></li>
+                <li><b>03</b><div><strong>下次先读</strong><span>开新会话也不用再讲一遍。</span></div></li>
+              </ol>
+              <div class="result"><span class="rtag">结果</span><div class="artifact"><div class="viz-chips" aria-hidden="true"><i>标题</i><i>封面</i><i>语气</i><i>禁区</i></div></div><h3>一份偏好清单</h3><p>不是「猜你喜欢」，是你亲口说过的几条。</p></div>
+            </article>
+
+            <article class="slide" id="slide-3" role="tabpanel" aria-labelledby="tab-3">
+              <div class="ask"><div class="who"><i aria-hidden="true"></i>你说的</div><p>读完这份文档，把结论写进我们那张表。</p><small>输入：一份文档 + 一张表</small></div>
+              <ol class="steps">
+                <li><b>01</b><div><strong>接上文件来源</strong><span>先确认读的是哪一份。</span></div></li>
+                <li><b>02</b><div><strong>读内容</strong><span>把结论和依据分开。</span></div></li>
+                <li><b>03</b><div><strong>写到指定位置</strong><span>按你定的列，不乱加。</span></div></li>
+              </ol>
+              <div class="result"><span class="rtag">结果</span><div class="artifact"><div class="viz-flow" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></div></div><h3>表格里多一行结论</h3><p>少一道复制粘贴，也少一次贴错行。</p></div>
+            </article>
+
+            <article class="slide" id="slide-4" role="tabpanel" aria-labelledby="tab-4">
+              <div class="ask"><div class="who"><i aria-hidden="true"></i>你说的</div><p>这三页你来排。标准只有一条：手机先能读。</p><small>输入：三页文案 + 一条标准</small></div>
+              <ol class="steps">
+                <li><b>01</b><div><strong>拆成子任务</strong><span>一页一件事，不混着做。</span></div></li>
+                <li><b>02</b><div><strong>定验收标准</strong><span>手机宽度先过，再谈桌面。</span></div></li>
+                <li><b>03</b><div><strong>收回成品</strong><span>三页一起交，不交半页。</span></div></li>
+              </ol>
+              <div class="result"><span class="rtag">结果</span><div class="artifact"><div class="viz-stack" aria-hidden="true"><i></i><i></i><i></i></div></div><h3>三页可预览的稿</h3><p>你只做最后判断；发布、付款、登录仍然由你按。</p></div>
+            </article>
+
+            <article class="slide" id="slide-5" role="tabpanel" aria-labelledby="tab-5">
+              <div class="ask"><div class="who"><i aria-hidden="true"></i>你说的</div><p>把后台这五条数据导出来，按日期排好。</p><small>输入：一个后台页面 + 五条记录</small></div>
+              <ol class="steps">
+                <li><b>01</b><div><strong>打开页面</strong><span>它自己点，不用你接管鼠标。</span></div></li>
+                <li><b>02</b><div><strong>逐条读取</strong><span>读一条，记一条。</span></div></li>
+                <li><b>03</b><div><strong>导出表格</strong><span>按日期排，列名照你给的。</span></div></li>
+              </ol>
+              <div class="result"><span class="rtag">结果</span><div class="artifact"><div class="viz-win" aria-hidden="true"><b><i></i><i></i><i></i></b><u></u><u></u><u></u></div></div><h3>一份排好序的表</h3><p>需要授权的步骤，它会停下来问你；不自己往下按。</p></div>
+            </article>
+          </div>
+
+          <div class="screen-foot">
+            <div class="bar"><i id="prog" aria-hidden="true"></i></div>
+            <span class="take" id="take">TAKE 01 / 06</span>
+            <button class="playbtn" id="toggle" type="button" aria-pressed="false">暂停</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="bounds" aria-labelledby="bounds-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="kicker">边界 / 什么该交</div>
+          <h2 id="bounds-h" data-blur>能交的，和先别交的。</h2>
+        </div>
+        <p data-blur>把「能做什么」说清楚，也把「哪些仍要你按」说清楚。这不是能力缩水，是省掉后面的麻烦。</p>
+      </div>
+
+      <div class="boundaries">
+        <div class="bcol">
+          <span class="tag">可以交</span>
+          <h3>有明确输入和输出的活</h3>
+          <ul>
+            <li><b>整理</b> · 访谈、会议、素材归档</li>
+            <li><b>改写</b> · 一稿多版、语气统一</li>
+            <li><b>排版</b> · 页面、长图、简单表格</li>
+          </ul>
+        </div>
+        <div class="bcol">
+          <span class="tag">你定标准</span>
+          <h3>需要口味和判断的活</h3>
+          <ul>
+            <li><b>品牌语气</b> · 先给样例，再让它学</li>
+            <li><b>封面取舍</b> · 你选，它做备选</li>
+            <li><b>对外说法</b> · 你点头，它才往下走</li>
+          </ul>
+        </div>
+        <div class="bcol">
+          <span class="tag">先别交</span>
+          <h3>要授权、要付钱的活</h3>
+          <ul>
+            <li><b>账号操作</b> · 登录、改密码、绑卡</li>
+            <li><b>付款下单</b> · 任何扣款动作</li>
+            <li><b>公开发布</b> · 按发送键的仍应是人</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="wrap">
+      <div class="close-in">
+        <div>
+          <div class="kicker">散场 / 下一站</div>
+          <h2 data-blur>放映结束，换一块亮一点的板。</h2>
+          <p>01 把能力拍成一场戏；02 把它拆成一块块能点的 bento。两站不共用底色，也不共用同一套动法。</p>
+        </div>
+        <div class="next">
+          <a href="../02-bright-bento/index.html">去 02 明亮 bento →</a>
+          <a href="./index.html">回到四站索引</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <p>非 xAI / Grok 官方页面。页面为能力展示，不构成官方说明；能力描述以公开资料与实际使用为准，未核实的数字不写进页面。</p>
+    <div class="meta"><a href="./index.html">全部四站 ↑</a><br>REEL 01 · 2026-11-13</div>
+  </div>
+</footer>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var still = window.__still === true;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGSAP = typeof window.gsap !== 'undefined';
+  var root = document.documentElement;
+
+  function recordError(msg){
+    if(window.__errors) window.__errors.push(String(msg));
+  }
+  window.addEventListener('error', function(e){ recordError(e.message || 'error'); });
+
+  if(!hasGSAP){
+    root.classList.remove('motion');
+    return;
+  }
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.defaults({ease:'power3.out'});
+
+  var slides = gsap.utils.toArray('.slide');
+  var tabs = gsap.utils.toArray('.tab');
+  var rails = gsap.utils.toArray('[data-rail]');
+  var frames = gsap.utils.toArray('.frame');
+  var current = 0;
+  var playing = true;
+  var inView = true;
+  var nextCall = null;
+  var sceneTl = null;
+  var labels = ['SKILLS','ROUTINES','MEMORY','CONNECTORS','DELEGATION','DESKTOP'];
+  var names = ['技能','例程','记忆','连接器','委派','电脑'];
+
+  function splitChars(){
+    var el = document.querySelector('[data-assemble]');
+    if(!el) return [];
+    var text = el.textContent;
+    el.setAttribute('aria-label', text);
+    el.textContent = '';
+    for(var i=0;i<text.length;i++){
+      var span = document.createElement('span');
+      span.className = 'ch';
+      span.setAttribute('aria-hidden','true');
+      span.textContent = text[i];
+      el.appendChild(span);
+    }
+    return gsap.utils.toArray(el.querySelectorAll('.ch'));
+  }
+
+  var chars = splitChars();
+
+  function blurSlide(target, vars){
+    vars = vars || {};
+    return gsap.fromTo(target,
+      {opacity:0, y:vars.y || 34, filter:'blur(' + (vars.blur || 12) + 'px)'},
+      {opacity:1, y:0, filter:'blur(0px)', duration:vars.duration || 1.05, ease:'power3.out', delay:vars.delay || 0}
+    );
+  }
+
+  if(!still && !reduce){
+    gsap.set(chars, {yPercent:110, y:0, rotateX:-70, opacity:0});
+    var heroTl = gsap.timeline({defaults:{ease:'power3.out'}});
+    heroTl.to('.slug', {opacity:1, y:0, duration:.6}, 0)
+      .fromTo('.l1', {opacity:0, y:36, filter:'blur(14px)'}, {opacity:1, y:0, filter:'blur(0px)', duration:1.15}, .12)
+      .to(chars, {opacity:1, yPercent:0, y:0, rotateX:0, duration:.9, stagger:.036}, .55)
+      .fromTo('.sweep', {backgroundPosition:'120% 0'}, {backgroundPosition:'0% 0', duration:1.6, ease:'power2.inOut'}, .95)
+      .fromTo('.lede', {opacity:0, y:30, filter:'blur(11px)'}, {opacity:1, y:0, filter:'blur(0px)', duration:1.0}, .95)
+      .to('.hero-foot .rise', {opacity:1, y:0, duration:.7, stagger:.08}, 1.25)
+      .fromTo('.rail', {opacity:0, x:18}, {opacity:1, x:0, duration:.8}, 1.1)
+      .fromTo('.scrollline', {opacity:0}, {opacity:1, duration:.8}, 1.5);
+
+    gsap.utils.toArray('[data-blur]').forEach(function(el){
+      if(el.closest('.hero')) return;
+      gsap.set(el, {opacity:0, y:28, filter:'blur(10px)'});
+      gsap.to(el, {
+        opacity:1, y:0, filter:'blur(0px)', duration:.95,
+        scrollTrigger:{trigger:el, start:'top 86%', once:true}
+      });
+    });
+
+    gsap.to('.frame', {
+      opacity:1, y:0, duration:.7, stagger:.06,
+      scrollTrigger:{trigger:'#reel', start:'top 78%', once:true}
+    });
+  } else {
+    gsap.set('[data-blur], .rise, .cap-row, .frame, .slug, .rail, .scrollline', {clearProps:'all'});
+    gsap.set('.chars .ch', {clearProps:'all'});
+  }
+
+  function setActive(i){
+    current = i;
+    tabs.forEach(function(t,j){
+      t.classList.toggle('on', j===i);
+      t.setAttribute('aria-selected', j===i ? 'true' : 'false');
+    });
+    rails.forEach(function(r,j){ r.classList.toggle('on', j===i); });
+    frames.forEach(function(f,j){ f.classList.toggle('on', j===i); });
+    slides.forEach(function(s,j){ s.classList.toggle('on', j===i); });
+    document.getElementById('scene-label').textContent = 'SCENE 0' + (i+1) + ' / ' + labels[i];
+    document.getElementById('take').textContent = 'TAKE 0' + (i+1) + ' / 06';
+    gsap.set('#prog', {scaleX:0});
+  }
+
+  function playScene(i){
+    if(nextCall){ nextCall.kill(); nextCall = null; }
+    if(sceneTl){ sceneTl.kill(); }
+    setActive(i);
+    var slide = slides[i];
+    var ask = slide.querySelector('.ask');
+    var steps = gsap.utils.toArray(slide.querySelectorAll('.steps li'));
+    var result = slide.querySelector('.result');
+    var art = slide.querySelector('.artifact');
+    var artInner = slide.querySelector('.artifact > *');
+    var h3 = slide.querySelector('.result h3');
+    var p = slide.querySelector('.result p');
+    var prog = document.getElementById('prog');
+
+    if(still || reduce){
+      gsap.set([ask, steps, artInner, h3, p], {clearProps:'all'});
+      gsap.set(prog, {scaleX:1});
+      return;
+    }
+
+    gsap.set(ask, {opacity:0, y:16, filter:'blur(6px)'});
+    gsap.set(steps, {opacity:.16, y:12, filter:'blur(3px)'});
+    gsap.set(art, {opacity:1});
+    gsap.set(artInner, {opacity:0, y:10, scale:.98});
+    gsap.set([h3, p], {opacity:0, y:10});
+    gsap.set(prog, {scaleX:0});
+
+    sceneTl = gsap.timeline({
+      defaults:{ease:'power3.out'},
+      onComplete:function(){
+        if(playing && inView){
+          nextCall = gsap.delayedCall(.4, function(){ playScene((current+1) % slides.length); });
+        }
+      }
+    });
+    sceneTl.to(ask, {opacity:1, y:0, filter:'blur(0px)', duration:.5}, 0)
+      .to(steps, {opacity:1, y:0, filter:'blur(0px)', duration:.45, stagger:.4}, .32)
+      .to(artInner, {opacity:1, y:0, scale:1, duration:.5}, 1.32)
+      .to(h3, {opacity:1, y:0, duration:.4}, 1.48)
+      .to(p, {opacity:1, y:0, duration:.4}, 1.6)
+      .to(prog, {scaleX:1, duration:2.3, ease:'none'}, 0)
+      .to({}, {duration:1.1});
+  }
+
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ playScene(Number(t.getAttribute('data-tab'))); });
+  });
+  frames.forEach(function(f){
+    f.addEventListener('click', function(){
+      playScene(Number(f.getAttribute('data-scene')));
+      document.getElementById('player').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'start'});
+    });
+  });
+
+  document.getElementById('toggle').addEventListener('click', function(e){
+    playing = !playing;
+    e.currentTarget.textContent = playing ? '暂停' : '继续';
+    e.currentTarget.setAttribute('aria-pressed', playing ? 'false' : 'true');
+    if(playing){ playScene(current); }
+    else if(nextCall){ nextCall.kill(); nextCall = null; }
+    else if(sceneTl){ sceneTl.pause(); }
+  });
+
+  document.getElementById('prev').addEventListener('click', function(){
+    document.getElementById('strip').scrollBy({left:-340, behavior:'smooth'});
+  });
+  document.getElementById('next').addEventListener('click', function(){
+    document.getElementById('strip').scrollBy({left:340, behavior:'smooth'});
+  });
+
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        inView = en.isIntersecting;
+        if(!inView){
+          if(nextCall){ nextCall.kill(); nextCall = null; }
+          if(sceneTl) sceneTl.pause();
+        } else if(playing){
+          if(sceneTl && sceneTl.progress() < 1){ sceneTl.resume(); }
+          else { playScene(current); }
+        }
+      });
+    }, {threshold:.15});
+    io.observe(document.getElementById('player'));
+  }
+
+  playScene(still ? 0 : 0);
+
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      try{
+        var over = Math.max(0, document.documentElement.scrollWidth - window.innerWidth);
+        var small = [];
+        gsap.utils.toArray('a,button').forEach(function(el){
+          var r = el.getBoundingClientRect();
+          if(r.width > 0 && r.height > 0 && (r.width < 44 || r.height < 44)){
+            small.push((el.id || el.className || el.textContent || 'x').toString().trim().slice(0,18));
+          }
+        });
+        root.dataset.overflow = over > 1 ? String(over) : '0';
+        root.dataset.smallTargets = small.join('|') || 'none';
+        root.dataset.jsErrors = (window.__errors && window.__errors.length) ? window.__errors.join('|') : 'none';
+        root.dataset.ready = '1';
+      }catch(err){
+        recordError(err.message);
+        root.dataset.jsErrors = (window.__errors || []).join('|') || err.message;
+        root.dataset.ready = '1';
+      }
+    }, 900);
+  });
+})();
+</script>
+</body>
+</html>

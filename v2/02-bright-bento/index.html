@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F4F6F3">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23F4F6F3'/%3E%3Crect x='12' y='12' width='18' height='18' fill='%232447FF'/%3E%3Crect x='34' y='12' width='18' height='18' fill='%23FF5A2A'/%3E%3Crect x='12' y='34' width='18' height='18' fill='%238FE3C0'/%3E%3Crect x='34' y='34' width='18' height='18' fill='%230E1218'/%3E%3C/svg%3E">
+<title>把一句话，拆成能做完的事 · Grok Bot 明亮 bento</title>
+<meta name="description" content="Grok Bot 能力展示 02：明亮 bento。六块板，六件真事：技能、例程、记忆、连接器、委派、电脑与 Pages。可点开，可读完。">
+<script>
+(function(){
+  var q = location.search;
+  var still = /[?&]still=1/.test(q);
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.__still = still;
+  window.__errors = [];
+  window.addEventListener('error', function(e){ window.__errors.push(String(e.message || e.error || 'error')); });
+  if(!still && !reduce) document.documentElement.classList.add('motion');
+})();
+</script>
+<style>
+  :root{
+    --paper:#F4F6F3; --paper-2:#E9EDE6; --card:#FFFFFF;
+    --ink:#0E1218; --ink-2:#222933; --muted:#5B636D; --faint:#8A929B;
+    --cobalt:#2447FF; --cobalt-d:#1730C4; --orange:#FF5A2A; --mint:#8FE3C0; --sky:#BFD7FF;
+    --line:#CDD2CB; --line-2:#E1E5DE;
+    --sans:"Noto Sans CJK SC","Noto Sans SC","PingFang SC","Source Han Sans SC",sans-serif;
+    --mono:"Noto Sans Mono CJK SC",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.2,.75,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--paper);color:var(--ink);scroll-behavior:smooth;overflow-x:clip}
+  body{font-family:var(--sans);line-height:1.62;-webkit-font-smoothing:antialiased;overflow-x:clip;background:
+    linear-gradient(var(--line-2) 1px,transparent 1px) 0 0/100% 32px,
+    linear-gradient(90deg,var(--line-2) 1px,transparent 1px) 0 0/32px 100%,
+    var(--paper)}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  img,svg{max-width:100%;display:block}
+  :focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
+  ::selection{background:var(--cobalt);color:#fff}
+  .wrap{width:min(1320px,100% - 56px);margin-inline:auto}
+  .mono{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:#fff;padding:14px 18px;z-index:99}
+  .skip:focus{left:14px;top:14px}
+
+  header.top{position:sticky;top:0;z-index:40;background:rgba(244,246,243,.9);backdrop-filter:blur(12px);border-bottom:2px solid var(--ink)}
+  .top-in{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px}
+  .brand{display:flex;align-items:center;gap:10px;min-height:44px;font-size:12px;font-weight:900;letter-spacing:.1em}
+  .brand .mark{width:18px;height:18px;background:var(--cobalt);border:2px solid var(--ink);position:relative;flex:none}
+  .brand .mark::after{content:"";position:absolute;right:-5px;bottom:-5px;width:7px;height:7px;background:var(--orange);border:1px solid var(--ink)}
+  .brand span{font-weight:500;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.04em}
+  .nav{display:flex;align-items:center;gap:2px}
+  .nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:12px;color:var(--muted)}
+  .nav a:hover{color:var(--ink)}
+  .idx{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;background:var(--ink);color:#fff;border:2px solid var(--ink);border-radius:999px;font-family:var(--mono);font-size:10px;letter-spacing:.06em}
+  .idx:hover{background:var(--cobalt);border-color:var(--cobalt)}
+
+  .hero{padding:18px 0 0}
+  .board{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:minmax(0,1.55fr) minmax(0,1fr);gap:12px;min-height:calc(100svh - 96px)}
+  .tile{border:2px solid var(--ink);border-radius:18px;background:var(--card);min-width:0;position:relative;overflow:hidden}
+  .tile.t-title{grid-column:span 7;min-height:424px;padding:clamp(22px,2.6vw,34px);display:flex;flex-direction:column;background:var(--card)}
+  .tile.t-demo{grid-column:span 5;min-height:424px;padding:18px;display:flex;flex-direction:column;background:var(--paper-2)}
+  .tile.t-small{grid-column:span 3;min-height:188px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:10px;transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+  .tile.t-small:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+  .t-small .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .t-small .num{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink);opacity:.55}
+  .t-small .ico{width:26px;height:26px;flex:none}
+  .t-small h3{font-size:17px;line-height:1.25;letter-spacing:-.02em;font-weight:800;margin-top:auto}
+  .t-small p{font-size:11px;line-height:1.65;color:var(--ink);opacity:.68;max-width:22ch}
+  .t-small .mini{margin-top:2px;height:38px;display:flex;align-items:flex-end;gap:4px}
+  .t-small .mini i{display:block;background:var(--ink);opacity:.22}
+  .t-skill{background:var(--cobalt);color:#fff}
+  .t-skill .num,.t-skill p{color:#fff;opacity:.82}
+  .t-skill .mini i{background:#fff;opacity:.55}
+  .t-routine{background:var(--mint)}
+  .t-memory{background:var(--orange);color:#fff}
+  .t-memory .num,.t-memory p{color:#fff;opacity:.86}
+  .t-memory .mini i{background:#fff;opacity:.6}
+  .t-computer{background:var(--card)}
+
+  .eyebrow{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--cobalt);text-transform:uppercase;margin-bottom:18px}
+  .eyebrow i{width:7px;height:7px;background:var(--orange);display:block;border:1px solid var(--ink)}
+  h1{font-size:clamp(42px,5.2vw,72px);line-height:1.02;letter-spacing:-.06em;font-weight:900}
+  h1 .l1,h1 .l2{display:block}
+  h1 .l2{margin-top:4px}
+  .mask{display:block;overflow:hidden;padding-bottom:.08em}
+  .chars{display:inline-block;white-space:nowrap;perspective:800px}
+  .chars .ch{display:inline-block;transform-origin:50% 100%;will-change:transform,opacity}
+  .sweep{background:linear-gradient(100deg,#2447FF 0%,#5E7BFF 44%,#BFD7FF 58%,#2447FF 100%);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;background-position:0% 0;position:relative}
+  .sweep::after{content:"";position:absolute;left:0;right:0;bottom:.08em;height:6px;background:var(--mint);z-index:-1;transform:scaleX(.92);transform-origin:left}
+  .lede{margin-top:18px;font-size:clamp(14px,1.25vw,16px);line-height:1.9;color:var(--ink-2);max-width:58ch}
+  .lede b{font-weight:800;box-shadow:inset 0 -8px 0 var(--mint)}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:18px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:50px;padding:0 18px;border:2px solid var(--ink);border-radius:10px;font-size:12px;font-weight:800;background:var(--card);transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
+  .btn.fill{background:var(--cobalt);color:#fff;box-shadow:4px 4px 0 var(--ink)}
+  .btn.fill:hover{box-shadow:6px 6px 0 var(--ink)}
+  .slot-line{display:flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--muted)}
+  .slot{display:inline-block;height:1.55em;overflow:hidden;vertical-align:-.32em;color:var(--ink);font-weight:700}
+  .slot-track{display:block}
+  .slot-track span{display:block;height:1.55em;line-height:1.55em;white-space:nowrap;border-bottom:2px solid var(--orange)}
+  .demo-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .demo-top .t{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink)}
+  .demo-top .live{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--ink);opacity:.6}
+  .demo-top .live i{width:6px;height:6px;background:var(--cobalt);border-radius:50%;display:block;animation:blink 2.2s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  .demo-stage{position:relative;flex:1;min-height:300px;border:2px solid var(--ink);border-radius:12px;background:var(--card);padding:14px;overflow:hidden}
+  .d-ask{border:1.5px solid var(--ink);border-radius:9px;background:#fff;padding:10px 12px;font-size:12px;line-height:1.65;min-height:60px;position:relative;z-index:2}
+  .d-ask b{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--cobalt);margin-bottom:4px;font-weight:500}
+  .d-plan{display:grid;gap:6px;margin-top:10px;position:relative;z-index:2}
+  .d-step{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 9px;font-size:10px;line-height:1.4;color:var(--muted);transition:border-color .25s var(--ease),color .25s var(--ease),background .25s var(--ease)}
+  .d-step i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);display:block;flex:none}
+  .d-step.on{border-color:var(--cobalt);color:var(--ink);background:#F4F6FF}
+  .d-step.on i{background:var(--cobalt);border-color:var(--cobalt)}
+  .d-step b{font-family:var(--mono);font-size:8px;font-weight:400;color:var(--faint);margin-left:auto}
+  .d-result{position:absolute;left:14px;right:14px;bottom:12px;border:2px solid var(--ink);border-radius:10px;background:var(--ink);color:#fff;padding:11px 12px;z-index:3;transform-origin:50% 100%}
+  .d-result .rt{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--mint)}
+  .d-result h4{font-size:14px;line-height:1.3;margin-top:5px;letter-spacing:-.01em}
+  .d-result p{font-size:9px;line-height:1.5;color:#B9C1CB;margin-top:2px}
+  .d-pages{display:flex;gap:4px;margin-top:8px}
+  .d-pages i{display:block;height:24px;flex:1;background:#2A323D;border:1px solid #46505C;border-radius:3px}
+  .d-pages i:nth-child(2){background:var(--cobalt);border-color:var(--cobalt)}
+  .demo-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+  .demo-bar{height:4px;flex:1;background:#D8DDD6;border:1px solid var(--ink);overflow:hidden}
+  .demo-bar i{display:block;height:100%;background:var(--cobalt);transform-origin:left;transform:scaleX(0)}
+  .shuffle{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border:2px solid var(--ink);border-radius:8px;font-family:var(--mono);font-size:9px;letter-spacing:.04em;background:var(--card);white-space:nowrap}
+  .shuffle:hover{background:var(--ink);color:#fff}
+
+  .sec{padding:86px 0 0}
+  .sec-head{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:40px;align-items:end;border-top:2px solid var(--ink);padding-top:16px}
+  .kick{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--cobalt);text-transform:uppercase}
+  .kick::before{content:"";width:30px;height:2px;background:var(--cobalt)}
+  h2{font-size:clamp(28px,3.2vw,44px);line-height:1.14;letter-spacing:-.045em;font-weight:900}
+  .sec-head p{font-size:12px;line-height:1.9;color:var(--muted);max-width:34ch;padding-bottom:3px}
+  .sec-head p b{color:var(--ink)}
+
+  .grid6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
+  .cap{position:relative;text-align:left;border:2px solid var(--ink);border-radius:16px;background:var(--card);min-height:250px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .22s var(--ease),box-shadow .22s var(--ease)}
+  .cap:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+  .cap .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .cap .no{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)}
+  .cap .ico{width:30px;height:30px}
+  .cap h3{font-size:22px;letter-spacing:-.03em;line-height:1.2;font-weight:900;margin-top:auto}
+  .cap p{font-size:11px;line-height:1.7;color:var(--muted);max-width:30ch}
+  .cap .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:10px;border-top:1px solid var(--line-2);font-family:var(--mono);font-size:8px;letter-spacing:.06em;color:var(--faint)}
+  .cap .foot em{font-style:normal;color:var(--cobalt)}
+  .cap.c1{background:var(--cobalt);color:#fff}
+  .cap.c1 p,.cap.c1 .no,.cap.c1 .foot{color:rgba(255,255,255,.78)}
+  .cap.c1 .foot{border-top-color:rgba(255,255,255,.2)}
+  .cap.c1 .foot em{color:var(--mint)}
+  .cap.c2{background:var(--mint)}
+  .cap.c3{background:var(--orange);color:#fff}
+  .cap.c3 p,.cap.c3 .no,.cap.c3 .foot{color:rgba(255,255,255,.82)}
+  .cap.c3 .foot{border-top-color:rgba(255,255,255,.22)}
+  .cap.c3 .foot em{color:#fff}
+  .cap.c4{background:var(--sky)}
+  .cap.c5{background:var(--ink);color:#fff}
+  .cap.c5 p,.cap.c5 .no,.cap.c5 .foot{color:rgba(255,255,255,.7)}
+  .cap.c5 .foot{border-top-color:rgba(255,255,255,.18)}
+  .cap.c5 .foot em{color:var(--mint)}
+
+  .bounds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+  .bcol{border:2px solid var(--ink);border-radius:14px;background:var(--card);padding:18px;min-width:0}
+  .bcol:nth-child(1){border-top:10px solid var(--mint)}
+  .bcol:nth-child(2){border-top:10px solid var(--orange)}
+  .bcol:nth-child(3){border-top:10px solid var(--ink)}
+  .bcol .tag{display:inline-flex;font-family:var(--mono);font-size:8px;letter-spacing:.1em;border:1px solid var(--ink);border-radius:999px;padding:3px 8px;margin-bottom:12px}
+  .bcol h3{font-size:17px;line-height:1.3;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+  .bcol ul{list-style:none}
+  .bcol li{font-size:11px;line-height:1.7;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--line-2)}
+  .bcol li:last-child{border-bottom:0}
+  .bcol li b{color:var(--ink);font-weight:700}
+
+  .close{padding:86px 0 0}
+  .close-in{border:2px solid var(--ink);border-radius:18px;background:var(--ink);color:#fff;padding:clamp(26px,4vw,48px);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:26px;align-items:end}
+  .close .kick{color:var(--mint)}
+  .close .kick::before{background:var(--mint)}
+  .close h2{max-width:14ch}
+  .close p{font-size:12px;line-height:1.9;color:#AEB6C0;margin-top:12px;max-width:44ch}
+  .next{display:flex;gap:8px;flex-wrap:wrap}
+  .next a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 16px;border:2px solid #fff;border-radius:8px;font-size:11px;font-weight:700}
+  .next a:first-child{background:var(--mint);color:var(--ink);border-color:var(--mint)}
+  .next a:hover{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+
+  footer{border-top:2px solid var(--ink);margin-top:52px;padding:20px 0 38px}
+  .foot{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+  .foot p{font-size:10px;line-height:1.9;color:var(--muted);max-width:64ch}
+  .foot .meta{font-family:var(--mono);font-size:8px;line-height:1.9;letter-spacing:.08em;color:var(--muted);text-align:right;white-space:nowrap}
+  .foot a{display:inline-flex;align-items:center;min-height:44px;color:var(--cobalt);font-weight:700}
+
+  .drawer-backdrop{position:fixed;inset:0;z-index:80;background:rgba(14,18,24,.46);opacity:0}
+  .drawer{position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(520px,100%);background:var(--paper);border-left:2px solid var(--ink);overflow-y:auto;overscroll-behavior:contain;transform:translateX(100%);box-shadow:-12px 0 0 rgba(14,18,24,.12)}
+  .drawer-in{padding:20px 24px 34px;min-height:100%;display:flex;flex-direction:column}
+  .drawer-top{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px;position:sticky;top:0;background:var(--paper);z-index:2}
+  .drawer-top .no{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--cobalt)}
+  .closebtn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 14px;border:2px solid var(--ink);border-radius:8px;font-family:var(--mono);font-size:9px;background:var(--card)}
+  .closebtn:hover{background:var(--ink);color:#fff}
+  .drawer-kick{margin-top:24px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .drawer h2{font-size:clamp(34px,4vw,46px);margin-top:6px;line-height:1.08}
+  .drawer-lede{margin-top:12px;font-size:13px;line-height:1.9;color:var(--ink-2)}
+  .drawer-viz{margin-top:18px;border:2px solid var(--ink);border-radius:12px;background:var(--card);min-height:150px;display:flex;align-items:center;justify-content:center;padding:18px;overflow:hidden}
+  .drawer-viz .bigico{width:74px;height:74px;color:var(--cobalt)}
+  .drawer-viz .bars{display:flex;align-items:flex-end;gap:6px;height:92px;width:100%;max-width:280px}
+  .drawer-viz .bars i{flex:1;background:var(--cobalt);display:block}
+  .drawer-viz .bars i:nth-child(2){background:var(--orange)}
+  .drawer-viz .bars i:nth-child(3){background:var(--mint)}
+  .drawer-viz .bars i:nth-child(4){background:var(--sky)}
+  .drawer h3{font-size:15px;margin-top:22px;letter-spacing:-.01em}
+  .drawer ul{list-style:none;margin-top:8px}
+  .drawer li{font-size:12px;line-height:1.75;color:var(--muted);padding:7px 0;border-bottom:1px solid var(--line-2)}
+  .drawer li b{color:var(--ink)}
+  .drawer-bound{margin-top:auto;padding-top:18px;font-size:11px;line-height:1.8;color:var(--ink);border-top:2px solid var(--ink)}
+  .drawer-bound b{background:var(--mint);padding:1px 4px}
+  body.lock{overflow:hidden}
+
+  .motion [data-blur]{opacity:0;filter:blur(12px);transform:translateY(30px);will-change:transform,opacity,filter}
+  .motion .chars .ch{opacity:0;transform:translateY(110%) rotateX(-68deg);will-change:transform,opacity}
+  .motion .rise{opacity:0;transform:translateY(14px)}
+  .motion .t-small,.motion .cap{opacity:0;transform:translateY(18px)}
+  .motion .bcol{opacity:0;transform:translateY(14px)}
+
+  @media (max-width:1024px){
+    .board{min-height:0;grid-template-rows:auto}
+    .tile.t-title,.tile.t-demo{grid-column:span 12}
+    .tile.t-small{grid-column:span 6}
+    .tile.t-title{min-height:400px}
+    .grid6{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media (max-width:760px){
+    .wrap{width:calc(100% - 28px)}
+    .nav{display:none}
+    .hero{padding-top:12px}
+    .board{min-height:0;grid-template-rows:auto;gap:10px}
+    .tile.t-title{min-height:0;padding:24px 20px 26px}
+    .tile.t-demo{min-height:0;padding:14px}
+    .tile.t-small{grid-column:span 12;min-height:160px;padding:15px}
+    h1{font-size:clamp(38px,10.6vw,54px)}
+    .lede{font-size:14px;margin-top:18px}
+    .hero-actions{padding-top:20px}
+    .btn{min-height:48px;padding:0 14px;font-size:11px}
+    .demo-stage{min-height:310px}
+    .sec{padding-top:64px}
+    .sec-head{grid-template-columns:1fr;gap:12px}
+    .sec-head p{max-width:48ch}
+    .grid6{grid-template-columns:1fr;gap:10px}
+    .cap{min-height:210px}
+    .bounds{grid-template-columns:1fr}
+    .close{padding-top:64px}
+    .close-in{grid-template-columns:1fr;padding:24px 20px}
+    .foot{flex-direction:column}
+    .foot .meta{text-align:left}
+    .drawer{width:100%;border-left:0}
+    .drawer-in{padding:16px 18px 30px}
+  }
+  @media (max-width:420px){
+    .wrap{width:calc(100% - 24px)}
+    .brand span{display:none}
+    h1{font-size:clamp(36px,10.2vw,46px)}
+    .slot-line{font-size:8px;gap:5px}
+    .demo-stage{min-height:330px}
+    .d-ask{font-size:11px}
+    .d-result h4{font-size:13px}
+    .t-small h3{font-size:16px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#top" aria-label="回到顶部"><span class="mark" aria-hidden="true"></span> GROK BOT <span>/ 一块一件事</span></a>
+    <nav class="nav" aria-label="页内导航">
+      <a href="#board6">六块板</a>
+      <a href="#bounds">边界</a>
+      <a href="#close">下一站</a>
+    </nav>
+    <a class="idx" href="./index.html">全部四站</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top" aria-labelledby="h1">
+    <div class="wrap">
+      <div class="board">
+        <article class="tile t-title">
+          <div class="eyebrow rise"><i aria-hidden="true"></i> BENTO / 02 &nbsp;·&nbsp; GROK BOT 能力板</div>
+          <h1 id="h1">
+            <span class="mask"><span class="chars" data-assemble>把一句话，</span></span>
+            <span class="l2" data-blur>拆成<span class="sweep">能做完</span>的事。</span>
+          </h1>
+          <p class="lede" data-blur>技能、例程、记忆、连接器、委派、电脑与 Pages。六块板，六件真事；每块都能点开，看到它接住什么、交出什么。<b>先看它怎么做，再决定要不要交。</b></p>
+          <div class="hero-actions">
+            <a class="btn fill rise" href="#board6">看六块板 <span aria-hidden="true">↓</span></a>
+            <button class="btn rise" id="replayDemo" type="button">看它拆一遍</button>
+          </div>
+          <div class="slot-line rise">现在能接：<span class="slot" aria-label="写页面、跑例程、记住你、接工具"><span class="slot-track" id="slotTrack"><span>写页面</span><span>跑例程</span><span>记住你</span><span>接工具</span></span></span></div>
+        </article>
+
+        <article class="tile t-demo" id="demo" aria-label="一句话拆成三步的循环演示">
+          <div class="demo-top"><span class="t">今天让它做 / 循环演示</span><span class="live"><i aria-hidden="true"></i> 3.6s 一轮</span></div>
+          <div class="demo-stage">
+            <div class="d-ask"><b>你的一句话</b><span id="demoAsk">把这周的访谈，做成三页能点开的页面。</span></div>
+            <div class="d-plan" id="demoPlan">
+              <div class="d-step" data-step="0"><i aria-hidden="true"></i><span>读素材</span><b>01</b></div>
+              <div class="d-step" data-step="1"><i aria-hidden="true"></i><span>排结构</span><b>02</b></div>
+              <div class="d-step" data-step="2"><i aria-hidden="true"></i><span>出页面</span><b>03</b></div>
+            </div>
+            <div class="d-result" id="demoResult">
+              <div class="rt"><span>结果</span><span id="demoTag">PAGES</span></div>
+              <h4 id="demoTitle">三页可预览的页面</h4>
+              <p id="demoSub">手机先能读，再谈桌面。</p>
+              <div class="d-pages" aria-hidden="true"><i></i><i></i><i></i></div>
+            </div>
+          </div>
+          <div class="demo-foot">
+            <div class="demo-bar"><i id="demoBar" aria-hidden="true"></i></div>
+            <button class="shuffle" id="shuffle" type="button">换一件</button>
+          </div>
+        </article>
+
+        <button class="tile t-small t-skill" type="button" data-open="0">
+          <span class="top"><span class="num">01 / SKILLS</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 3.5h8l4 4V20.5H6z"/><path d="M14 3.5v4h4M9 12h6M9 15.5h6"/></svg></span>
+          <h3>技能</h3>
+          <p>把做法写成文件，下次照着做。</p>
+          <span class="mini" aria-hidden="true"><i style="width:38%;height:6px"></i><i style="width:24%;height:6px"></i><i style="width:30%;height:6px"></i></span>
+        </button>
+        <button class="tile t-small t-routine" type="button" data-open="1">
+          <span class="top"><span class="num">02 / ROUTINES</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span>
+          <h3>例程</h3>
+          <p>到点自己做，跑完留一行。</p>
+          <span class="mini" aria-hidden="true"><i style="width:22%;height:14px"></i><i style="width:22%;height:26px"></i><i style="width:22%;height:10px"></i><i style="width:22%;height:20px"></i></span>
+        </button>
+        <button class="tile t-small t-memory" type="button" data-open="2">
+          <span class="top"><span class="num">03 / MEMORY</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 4.5h10v16l-5-3.2-5 3.2z"/><path d="M9.5 9h5"/></svg></span>
+          <h3>记忆</h3>
+          <p>记住你的口味和禁区。</p>
+          <span class="mini" aria-hidden="true"><i style="width:30%;height:12px"></i><i style="width:22%;height:12px"></i><i style="width:26%;height:12px"></i></span>
+        </button>
+        <button class="tile t-small t-computer" type="button" data-open="5">
+          <span class="top"><span class="num">06 / DESKTOP</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="12" rx="1.5"/><path d="M8 20.5h8M12 16.5v4"/></svg></span>
+          <h3>电脑 · Pages</h3>
+          <p>自己点、自己导，结果变成能开的页。</p>
+          <span class="mini" aria-hidden="true"><i style="width:48%;height:8px"></i><i style="width:32%;height:8px"></i><i style="width:40%;height:8px"></i></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="board6" aria-labelledby="board6-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="kick">六块 / 六件真事</div>
+          <h2 id="board6-h" data-blur>一块一件事，点开看细节。</h2>
+        </div>
+        <p data-blur>不是六个名词解释。每块写清：<b>它接什么、交什么、哪里要你按。</b>手机上也按这个顺序读。</p>
+      </div>
+
+      <div class="grid6">
+        <button class="cap c1" type="button" data-open="0">
+          <span class="top"><span class="no">01 / SKILLS</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 3.5h8l4 4V20.5H6z"/><path d="M14 3.5v4h4M9 12h6M9 15.5h6"/></svg></span>
+          <h3>技能</h3>
+          <p>把你做事的方法写成一份可再读的文件。下次开新会话，不用从头讲。</p>
+          <span class="foot"><em>接：样例 / 步骤</em><span>交：SKILL 文件 →</span></span>
+        </button>
+        <button class="cap c2" type="button" data-open="1">
+          <span class="top"><span class="no">02 / ROUTINES</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span>
+          <h3>例程</h3>
+          <p>固定时间做固定的事。跑完留一行记录，没跑成也留原因。</p>
+          <span class="foot"><em>接：时间 / 范围</em><span>交：一页复盘 →</span></span>
+        </button>
+        <button class="cap c3" type="button" data-open="2">
+          <span class="top"><span class="no">03 / MEMORY</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M7 4.5h10v16l-5-3.2-5 3.2z"/><path d="M9.5 9h5"/></svg></span>
+          <h3>记忆</h3>
+          <p>记住你亲口说过的偏好和禁区，不是猜你喜欢。换会话也不用再讲。</p>
+          <span class="foot"><em>接：偏好 / 禁区</em><span>交：偏好清单 →</span></span>
+        </button>
+        <button class="cap c4" type="button" data-open="3">
+          <span class="top"><span class="no">04 / CONNECTORS</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M9.5 14.5l-2 2a3.5 3.5 0 004.95 4.95l2-2"/><path d="M14.5 9.5l2-2a3.5 3.5 0 00-4.95-4.95l-2 2"/><path d="M8 16l8-8"/></svg></span>
+          <h3>连接器</h3>
+          <p>接上你已经在用的文件和表格。读完就写进去，少一道复制粘贴。</p>
+          <span class="foot"><em>接：文件 / 表格</em><span>交：写好的行 →</span></span>
+        </button>
+        <button class="cap c5" type="button" data-open="4">
+          <span class="top"><span class="no">05 / DELEGATION</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 6h6M5 12h6M5 18h6"/><path d="M14 6h5M14 12h5M14 18h5"/><path d="M11 6l3-3M11 12l3-3M11 18l3-3"/></svg></span>
+          <h3>委派</h3>
+          <p>把一段活交出去，标准留下。你只做最后判断，不接中间过程。</p>
+          <span class="foot"><em>接：任务 / 标准</em><span>交：可预览的稿 →</span></span>
+        </button>
+        <button class="cap c6" type="button" data-open="5">
+          <span class="top"><span class="no">06 / DESKTOP · PAGES</span><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="12" rx="1.5"/><path d="M8 20.5h8M12 16.5v4"/><path d="M7.5 8.5h5M7.5 11.5h8"/></svg></span>
+          <h3>电脑 · Pages</h3>
+          <p>它自己开页面、点按钮、导出表格；需要授权的步骤会停下来问你。</p>
+          <span class="foot"><em>接：后台 / 五条数据</em><span>交：排好序的表 →</span></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="bounds" aria-labelledby="bounds-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="kick">边界 / 先讲清楚</div>
+          <h2 id="bounds-h" data-blur>能交的，和先别交的。</h2>
+        </div>
+        <p data-blur>把「能做什么」说清楚，也把「哪些仍要你按」说清楚。<b>这不是能力缩水，是省掉后面的麻烦。</b></p>
+      </div>
+      <div class="bounds">
+        <div class="bcol">
+          <span class="tag">可以交</span>
+          <h3>有明确输入和输出的活</h3>
+          <ul>
+            <li><b>整理</b> · 访谈、会议、素材归档</li>
+            <li><b>写初稿</b> · 一稿多版、语气统一</li>
+            <li><b>排版导出</b> · 页面、长图、简单表格</li>
+          </ul>
+        </div>
+        <div class="bcol">
+          <span class="tag">你定标准</span>
+          <h3>需要口味和判断的活</h3>
+          <ul>
+            <li><b>品牌语气</b> · 先给样例，再让它学</li>
+            <li><b>封面取舍</b> · 你选，它做备选</li>
+            <li><b>对外说法</b> · 你点头，它才往下走</li>
+          </ul>
+        </div>
+        <div class="bcol">
+          <span class="tag">先别交</span>
+          <h3>要授权、要付钱的活</h3>
+          <ul>
+            <li><b>账号操作</b> · 登录、改密码、绑卡</li>
+            <li><b>付款下单</b> · 任何扣款动作</li>
+            <li><b>公开发布</b> · 按发送键的仍应是人</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" id="close">
+    <div class="wrap">
+      <div class="close-in">
+        <div>
+          <div class="kick">下一站 / 暗场</div>
+          <h2 data-blur>板看完了，去暗场坐一会儿。</h2>
+          <p>02 把能力拆成一块块能点的板；01 把它拍成一场有头有尾的放映。两站不共用底色，也不共用同一套动法。</p>
+        </div>
+        <div class="next">
+          <a href="../01-cinematic-gold/index.html">去 01 深金放映室 →</a>
+          <a href="./index.html">回到四站索引</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <p>非 xAI / Grok 官方页面。页面为能力展示，不构成官方说明；能力描述以公开资料与实际使用为准，未核实的数字不写进页面。</p>
+    <div class="meta"><a href="./index.html">全部四站 ↑</a><br>BENTO 02 · 2026-11-13</div>
+  </div>
+</footer>
+
+<div class="drawer-backdrop" id="backdrop" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <div class="drawer-in">
+    <div class="drawer-top"><span class="no" id="drawerNo">01 / SKILLS</span><button class="closebtn" id="closeDrawer" type="button">关闭 ✕</button></div>
+    <div class="drawer-kick" id="drawerKick">一块一件事</div>
+    <h2 id="drawerTitle">技能</h2>
+    <p class="drawer-lede" id="drawerLede"></p>
+    <div class="drawer-viz" id="drawerViz"></div>
+    <h3>你可以这样用</h3>
+    <ul id="drawerUses"></ul>
+    <div class="drawer-bound" id="drawerBound"></div>
+  </div>
+</aside>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var still = window.__still === true;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGSAP = typeof window.gsap !== 'undefined';
+  var root = document.documentElement;
+
+  function recordError(msg){ if(window.__errors) window.__errors.push(String(msg)); }
+  window.addEventListener('error', function(e){ recordError(e.message || 'error'); });
+
+  if(!hasGSAP){
+    root.classList.remove('motion');
+    return;
+  }
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.defaults({ease:'power3.out'});
+
+  function splitChars(){
+    var el = document.querySelector('[data-assemble]');
+    if(!el) return [];
+    var text = el.textContent;
+    el.setAttribute('aria-label', text);
+    el.textContent = '';
+    for(var i=0;i<text.length;i++){
+      var span = document.createElement('span');
+      span.className = 'ch';
+      span.setAttribute('aria-hidden','true');
+      span.textContent = text[i];
+      el.appendChild(span);
+    }
+    return gsap.utils.toArray(el.querySelectorAll('.ch'));
+  }
+  var chars = splitChars();
+
+  if(!still && !reduce){
+    gsap.set(chars, {yPercent:110, y:0, rotateX:-68, opacity:0});
+    var heroTl = gsap.timeline({defaults:{ease:'power3.out'}});
+    heroTl.to('.eyebrow', {opacity:1, y:0, duration:.55}, 0)
+      .to(chars, {opacity:1, yPercent:0, y:0, rotateX:0, duration:.85, stagger:.035}, .12)
+      .fromTo('.l2', {opacity:0, y:30, filter:'blur(12px)'}, {opacity:1, y:0, filter:'blur(0px)', duration:1.0}, .42)
+      .fromTo('.sweep', {backgroundPosition:'120% 0'}, {backgroundPosition:'0% 0', duration:1.5, ease:'power2.inOut'}, .75)
+      .fromTo('.lede', {opacity:0, y:24, filter:'blur(10px)'}, {opacity:1, y:0, filter:'blur(0px)', duration:.95}, .75)
+      .to('.hero-actions .rise', {opacity:1, y:0, duration:.6, stagger:.07}, 1.05)
+      .to('.slot-line', {opacity:1, y:0, duration:.6}, 1.2);
+
+    gsap.utils.toArray('[data-blur]').forEach(function(el){
+      if(el.closest('.hero')) return;
+      gsap.set(el, {opacity:0, y:26, filter:'blur(10px)'});
+      gsap.to(el, {opacity:1, y:0, filter:'blur(0px)', duration:.95,
+        scrollTrigger:{trigger:el, start:'top 86%', once:true}});
+    });
+
+    gsap.to('.t-small', {opacity:1, y:0, duration:.65, stagger:.06,
+      scrollTrigger:{trigger:'.board', start:'top 78%', once:true}});
+
+    gsap.to('.cap', {opacity:1, y:0, duration:.65, stagger:.06,
+      scrollTrigger:{trigger:'#board6', start:'top 78%', once:true}});
+
+    gsap.to('.bcol', {opacity:1, y:0, duration:.6, stagger:.07,
+      scrollTrigger:{trigger:'#bounds', start:'top 80%', once:true}});
+  } else {
+    gsap.set('[data-blur], .rise, .t-small, .cap, .bcol, .eyebrow, .hero-actions .rise, .slot-line', {clearProps:'all'});
+    gsap.set('.chars .ch', {clearProps:'all'});
+  }
+
+  var DEMOS = [
+    {ask:'把这周的访谈，做成三页能点开的页面。', steps:['读素材','排结构','出页面'], tag:'PAGES', title:'三页可预览的页面', sub:'手机先能读，再谈桌面。'},
+    {ask:'每天十点，把昨天发出去的内容收一遍。', steps:['定时','抓昨天','写复盘'], tag:'ROUTINE', title:'一页昨日复盘', sub:'跑完留一行记录，没跑成也留原因。'},
+    {ask:'记住：标题别用感叹号，封面别放小字。', steps:['记偏好','记禁区','下次先读'], tag:'MEMORY', title:'一份偏好清单', sub:'换会话也不用再讲一遍。'}
+  ];
+  var demoIndex = 0;
+  var demoTl = null;
+  var demoCall = null;
+  var demoInView = true;
+  var demoAsk = document.getElementById('demoAsk');
+  var demoSteps = gsap.utils.toArray('#demoPlan .d-step');
+  var demoResult = document.getElementById('demoResult');
+  var demoTag = document.getElementById('demoTag');
+  var demoTitle = document.getElementById('demoTitle');
+  var demoSub = document.getElementById('demoSub');
+  var demoBar = document.getElementById('demoBar');
+
+  function paintDemo(i){
+    var d = DEMOS[i];
+    demoAsk.textContent = d.ask;
+    demoSteps.forEach(function(s,j){ s.querySelector('span').textContent = d.steps[j]; });
+    demoTag.textContent = d.tag;
+    demoTitle.textContent = d.title;
+    demoSub.textContent = d.sub;
+  }
+
+  function runDemo(i, instant){
+    if(demoCall){ demoCall.kill(); demoCall = null; }
+    if(demoTl){ demoTl.kill(); }
+    demoIndex = i;
+    paintDemo(i);
+    demoSteps.forEach(function(s){ s.classList.remove('on'); });
+    if(instant || still || reduce){
+      demoSteps.forEach(function(s){ s.classList.add('on'); });
+      gsap.set([demoAsk, demoResult], {clearProps:'all'});
+      demoBar.style.transform = 'scaleX(1)';
+      return;
+    }
+    gsap.set(demoAsk, {opacity:0, y:12, filter:'blur(6px)'});
+    gsap.set(demoSteps, {opacity:0, x:-10});
+    gsap.set(demoResult, {opacity:0, y:22, scale:.96});
+    demoTl = gsap.timeline({
+      defaults:{ease:'power3.out'},
+      onComplete:function(){
+        if(demoInView){ demoCall = gsap.delayedCall(.3, function(){ runDemo((demoIndex+1)%DEMOS.length, false); }); }
+      }
+    });
+    demoTl.to(demoAsk, {opacity:1, y:0, filter:'blur(0px)', duration:.45}, 0)
+      .to(demoSteps, {opacity:1, x:0, duration:.32, stagger:.4}, .28)
+      .call(function(){ demoSteps[0].classList.add('on'); }, null, .3)
+      .call(function(){ demoSteps[1].classList.add('on'); }, null, .7)
+      .call(function(){ demoSteps[2].classList.add('on'); }, null, 1.1)
+      .to(demoResult, {opacity:1, y:0, scale:1, duration:.5}, 1.55)
+      .fromTo(demoBar, {scaleX:0}, {scaleX:1, duration:2.2, ease:'none'}, 0)
+      .to({}, {duration:1.1});
+  }
+
+  document.getElementById('shuffle').addEventListener('click', function(){
+    runDemo((demoIndex+1)%DEMOS.length, false);
+  });
+  document.getElementById('replayDemo').addEventListener('click', function(){
+    runDemo(demoIndex, false);
+    document.getElementById('demo').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'center'});
+  });
+
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        demoInView = en.isIntersecting;
+        if(!demoInView){
+          if(demoCall){ demoCall.kill(); demoCall = null; }
+          if(demoTl) demoTl.pause();
+        } else if(demoTl && demoTl.progress() < 1){
+          demoTl.resume();
+        }
+      });
+    }, {threshold:.2});
+    io.observe(document.getElementById('demo'));
+  }
+
+  runDemo(0, still || reduce);
+
+  if(!still && !reduce){
+    var track = document.getElementById('slotTrack');
+    var slotTl = gsap.timeline({repeat:-1, defaults:{duration:.5, ease:'power3.inOut'}});
+    for(var s=1;s<4;s++){
+      slotTl.to(track, {yPercent:-25*s}, '+=1.9');
+    }
+    slotTl.set(track, {yPercent:0});
+  }
+
+  var CAPS = [
+    {no:'01 / SKILLS', kick:'能力 / 技能', title:'技能', lede:'把你做事的方法写成一份文件：先做什么、后做什么、哪些不能碰。下次开新会话，它先读这一份，再动手。', uses:['把改稿习惯写成 SKILL.md','把一类页面的结构写成步骤','把「不要用什么词」写进禁区'], bound:'技能是<strong>你的做法</strong>，不是官方模板；写之前先给它看样例。', bars:[38,66,52,80]},
+    {no:'02 / ROUTINES', kick:'能力 / 例程', title:'例程', lede:'固定时间做固定的事。你定触发时间、输入范围和输出格式；它到点自己跑，跑完留一行记录。', uses:['每天十点收一遍昨日发布','每周一整理上周素材','每月初把数据导成一张表'], bound:'例程只做<strong>你写清楚的动作</strong>；范围外的事，它应该停下来问。', bars:[24,52,40,72]},
+    {no:'03 / MEMORY', kick:'能力 / 记忆', title:'记忆', lede:'记住你亲口说过的偏好和禁区：标题语气、封面规矩、哪些词不用。换会话也不用再讲一遍。', uses:['标题不用感叹号','封面不放小字','对外文案不写「最强」'], bound:'记忆不是<strong>猜你喜欢</strong>；没说过的事，不替你做主。', bars:[62,34,74,48]},
+    {no:'04 / CONNECTORS', kick:'能力 / 连接器', title:'连接器', lede:'接上你已经在用的文件和表格。读完内容，把结论写到指定位置，少一道复制粘贴，也少一次贴错行。', uses:['读完文档，写进表格','把会议记录整理成待办','把多个来源的结论并到一页'], bound:'连接器只碰<strong>你授权的范围</strong>；账号、付款、对外发送仍由你按。', bars:[46,78,36,58]},
+    {no:'05 / DELEGATION', kick:'能力 / 委派', title:'委派', lede:'把一段活交出去，标准留下。拆成子任务、定验收标准、收回成品；你只做最后判断，不接中间过程。', uses:['三页排版，手机先能读','一稿多版，语气统一','把长文拆成一组卡片'], bound:'委派不是<strong>甩手</strong>；验收标准要你先写，成品仍要你看。', bars:[30,58,82,44]},
+    {no:'06 / DESKTOP · PAGES', kick:'能力 / 电脑与 Pages', title:'电脑 · Pages', lede:'它自己开页面、点按钮、读数据、导出表格；需要登录或授权的步骤会停下来问你。结果可以是一份表，也可以是一个能点开的页面。', uses:['后台五条数据导出并排序','把一份文档变成可预览的页','把表格结果整理成一页说明'], bound:'涉及<strong>登录、付款、发布</strong>的动作，它不自己按；这条不放开。', bars:[54,42,68,86]}
+  ];
+
+  var drawer = document.getElementById('drawer');
+  var backdrop = document.getElementById('backdrop');
+  var lastTrigger = null;
+  var drawerOpen = false;
+
+  function fillDrawer(i){
+    var c = CAPS[i];
+    document.getElementById('drawerNo').textContent = c.no;
+    document.getElementById('drawerKick').textContent = c.kick;
+    document.getElementById('drawerTitle').textContent = c.title;
+    document.getElementById('drawerLede').textContent = c.lede;
+    document.getElementById('drawerBound').innerHTML = c.bound;
+    var uses = document.getElementById('drawerUses');
+    uses.innerHTML = '';
+    c.uses.forEach(function(u){ var li=document.createElement('li'); li.innerHTML = '<b>·</b> ' + u; uses.appendChild(li); });
+    var viz = document.getElementById('drawerViz');
+    viz.innerHTML = '<div class="bars" aria-hidden="true">' + c.bars.map(function(h){ return '<i style="height:'+h+'%"></i>'; }).join('') + '</div>';
+  }
+
+  function openDrawer(i, trigger){
+    lastTrigger = trigger || null;
+    fillDrawer(i);
+    drawer.hidden = false;
+    backdrop.hidden = false;
+    drawerOpen = true;
+    document.body.classList.add('lock');
+    if(still || reduce){
+      gsap.set(drawer, {x:'0%'});
+      gsap.set(backdrop, {opacity:1});
+    } else {
+      gsap.fromTo(backdrop, {opacity:0}, {opacity:1, duration:.35});
+      gsap.fromTo(drawer, {x:'100%'}, {x:'0%', duration:.62, ease:'power4.out'});
+      gsap.fromTo('#drawerTitle, #drawerLede, #drawerViz, #drawerUses, #drawerBound', {opacity:0, y:16}, {opacity:1, y:0, duration:.5, stagger:.07, delay:.18});
+    }
+    document.getElementById('closeDrawer').focus();
+  }
+
+  function closeDrawer(){
+    if(!drawerOpen) return;
+    drawerOpen = false;
+    if(still || reduce){
+      drawer.hidden = true; backdrop.hidden = true; document.body.classList.remove('lock');
+    } else {
+      gsap.to(drawer, {x:'100%', duration:.45, ease:'power3.in'});
+      gsap.to(backdrop, {opacity:0, duration:.35, onComplete:function(){
+        drawer.hidden = true; backdrop.hidden = true; document.body.classList.remove('lock');
+      }});
+    }
+    if(lastTrigger) lastTrigger.focus();
+  }
+
+  gsap.utils.toArray('[data-open]').forEach(function(el){
+    el.addEventListener('click', function(){ openDrawer(Number(el.getAttribute('data-open')), el); });
+  });
+  document.getElementById('closeDrawer').addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function(e){
+    if(!drawerOpen) return;
+    if(e.key === 'Escape'){ closeDrawer(); return; }
+    if(e.key !== 'Tab') return;
+    var f = drawer.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if(!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  });
+
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      try{
+        var over = Math.max(0, document.documentElement.scrollWidth - window.innerWidth);
+        var small = [];
+        gsap.utils.toArray('a,button').forEach(function(el){
+          var r = el.getBoundingClientRect();
+          if(r.width > 0 && r.height > 0 && (r.width < 44 || r.height < 44)){
+            small.push((el.id || el.className || el.textContent || 'x').toString().trim().slice(0,18));
+          }
+        });
+        root.dataset.overflow = over > 1 ? String(over) : '0';
+        root.dataset.smallTargets = small.join('|') || 'none';
+        root.dataset.jsErrors = (window.__errors && window.__errors.length) ? window.__errors.join('|') : 'none';
+        root.dataset.geo = [
+          'hero:' + Math.round(document.querySelector('.hero').getBoundingClientRect().height),
+          'board:' + Math.round(document.querySelector('.board').getBoundingClientRect().height),
+          'next:' + Math.round(document.querySelector('#board6').getBoundingClientRect().top)
+        ].join(',');
+        root.dataset.ready = '1';
+      }catch(err){
+        recordError(err.message);
+        root.dataset.jsErrors = (window.__errors || []).join('|') || err.message;
+        root.dataset.ready = '1';
+      }
+    }, 900);
+  });
+})();
+</script>
+</body>
+</html>
