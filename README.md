@@ -16,3 +16,12 @@ New pages live under [`/v2/`](https://gycbot.github.io/grokbot-showcase/v2/) and
 - [02 明亮 bento](https://gycbot.github.io/grokbot-showcase/v2/02-bright-bento/)
 - [03 纸感编辑台](https://gycbot.github.io/grokbot-showcase/v2/03-paper-editorial/)
 - [04 抖动实验室](https://gycbot.github.io/grokbot-showcase/v2/04-dither-lab/)
+
+## Grokko · 三件桌面物件
+
+Pages live under [`/grokko/`](https://gycbot.github.io/grokbot-showcase/grokko/). The original 16 pages and `/v2/` were not changed.
+
+- [Grokko 入口](https://gycbot.github.io/grokbot-showcase/grokko/)
+- [全息档案](https://gycbot.github.io/grokbot-showcase/grokko/hologram/)
+- [能力光碟盒](https://gycbot.github.io/grokbot-showcase/grokko/cd/)
+- [六道折光](https://gycbot.github.io/grokbot-showcase/grokko/gems/)

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Grokko · 桌面物件合集</title>
+<meta name="description" content="Grokko 的三件桌面物件：全息档案、能力光碟盒、六道折光宝石页。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%230b0910'/%3E%3Ccircle cx='20' cy='21' r='10' fill='none' stroke='%23f2ede4' stroke-width='1.5'/%3E%3Ccircle cx='16.5' cy='20' r='1.4' fill='%23f2ede4'/%3E%3Ccircle cx='23.5' cy='20' r='1.4' fill='%23f2ede4'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"DM Sans";src:url("vendor/dmsans.woff2") format("woff2");font-weight:100 900;font-display:swap}
+:root{--ink:#09080d;--cream:#f2ede4;--muted:#9c95a6;--dim:#696271;--line:rgba(242,237,228,.14);--purple:#a970ff;--sans:"DM Sans","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",sans-serif;--mono:"DM Mono","IBM Plex Mono",monospace}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--ink);color:var(--cream);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(90% 80% at 72% 0%,rgba(108,64,170,.18),transparent 58%),var(--ink);min-height:100svh}
+a{color:inherit;text-decoration:none}
+.grain{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.18;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E")}
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 30px;border-bottom:1px solid var(--line);position:relative;z-index:5}
+.brand{display:flex;align-items:center;gap:11px;min-height:44px}
+.brand svg{width:27px;height:27px}
+.brand b{font-size:21px;letter-spacing:-.02em}
+.brand span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.meta{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+main{max-width:1240px;margin:0 auto;padding:64px 30px 40px;position:relative;z-index:4}
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;display:flex;gap:12px;align-items:center}
+.eyebrow i{width:28px;height:1px;background:var(--line);display:block}
+h1{font-size:clamp(42px,6vw,86px);line-height:.98;letter-spacing:-.05em;margin:24px 0 18px;font-weight:600}
+.lede{font-size:14px;line-height:1.75;color:#b8b0c0;max-width:48ch;margin:0 0 54px}
+.list{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:64px minmax(0,1.1fr) minmax(0,1fr) 120px;gap:22px;align-items:center;padding:24px 0;border-bottom:1px solid var(--line);position:relative;transition:padding .3s ease,background .3s}
+.row .no{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.row h2{font-size:clamp(22px,2.6vw,34px);line-height:1.1;margin:0;font-weight:600;letter-spacing:-.02em}
+.row p{margin:0;font-size:12px;line-height:1.7;color:var(--muted)}
+.row .state{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);text-align:right}
+.row.live:hover{padding-left:14px;background:rgba(242,237,228,.025)}
+.row.live .state{color:var(--cream)}
+.row.live .arrow{display:inline-block;margin-left:8px;transform:translateX(-3px);transition:transform .3s}
+.row.live:hover .arrow{transform:translateX(2px)}
+.row.pending{opacity:.52}
+.row.pending .state{color:var(--dim)}
+.foot{display:flex;justify-content:space-between;gap:20px;padding-top:26px;margin-top:8px}
+.foot p{margin:0;font-size:10px;line-height:1.65;color:var(--dim);max-width:54ch}
+.tag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);border:1px solid var(--line);padding:5px 8px}
+@media(max-width:800px){
+  header{padding:16px}
+  main{padding:40px 18px 30px}
+  h1{font-size:34px;line-height:1.04;margin:18px 0 14px}
+  .lede{font-size:13px;margin-bottom:34px}
+  .row{grid-template-columns:38px minmax(0,1fr) 54px;gap:12px;padding:18px 0}
+  .row p{display:none}
+  .row h2{font-size:23px}
+  .row .state{font-size:8px}
+  .foot{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<header>
+  <a class="brand" href="./index.html">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="12.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="16" cy="19" r="1.7" fill="currentColor"/><circle cx="24" cy="19" r="1.7" fill="currentColor"/><path d="M8 8l7 7M15 8l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <b>Grokko</b><span>/ desk objects</span>
+  </a>
+  <div class="meta">GKK–3D / 2026</div>
+</header>
+<main>
+  <div class="eyebrow"><i></i> Three desk objects · one character</div>
+  <h1>三件桌面物件，<br>三种看能力的方式。</h1>
+  <p class="lede">Grokko 是 Grok Bot 的二次元桌面化身。这里把她的工作拆成能看、能转、能读的三件东西：一份全息档案、一盒能力光碟、一页六道折光。</p>
+  <div class="list">
+    <a class="row live" href="./hologram/index.html">
+      <span class="no">01</span>
+      <h2>全息档案</h2>
+      <p>投影、档案轨、粒子尘散。Grokko 的能力以全息档案呈现。</p>
+      <span class="state">进入<span class="arrow">→</span></span>
+    </a>
+    <a class="row live" href="./cd/index.html">
+      <span class="no">02</span>
+      <h2>能力光碟盒</h2>
+      <p>自动开盒、抬盘、翻面、旋转。三张专辑对应三组能力。</p>
+      <span class="state">进入<span class="arrow">→</span></span>
+    </a>
+    <a class="row live" href="./gems/index.html">
+      <span class="no">03</span>
+      <h2>六道折光</h2>
+      <p>六种能力切成六颗刻面。不是许愿石，是六个能交结果的动作。</p>
+      <span class="state">进入<span class="arrow">→</span></span>
+    </a>
+  </div>
+  <div class="foot">
+    <p>本页是 Grokko 三件桌面物件的入口：全息档案、能力光碟盒、六道折光。不是 xAI 或 Grok 官方页面。</p>
+    <span class="tag">NOT OFFICIAL</span>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Grokko · 六道折光</title>
+<meta name="description" content="Grokko 把 Grok Bot 的六种日常能力切成六颗刻面：速写、动效、核源、例程、转译、视觉。不是许愿石，是六个能交结果的动作。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%230b0910'/%3E%3Cpath d='M20 7l11 13-11 13L9 20z' fill='none' stroke='%23f2ede4' stroke-width='1.4'/%3E%3Cpath d='M9 20h22M20 7v26' stroke='%23a970ff' stroke-width='.8' opacity='.6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="app">
+  <header class="masthead">
+    <a class="brand" href="../index.html" aria-label="返回 Grokko 合集">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="12.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="16" cy="19" r="1.7" fill="currentColor"/>
+        <circle cx="24" cy="19" r="1.7" fill="currentColor"/>
+        <path d="M8 8l7 7M15 8l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-word">Grokko</span>
+      <span class="brand-sub">/ six facets</span>
+    </a>
+    <div class="mast-right">
+      <span class="live"><i></i> auto index</span>
+      <span class="mast-code">GKK–GM / 2026</span>
+    </div>
+  </header>
+
+  <main class="hero">
+    <canvas id="scene" aria-hidden="true"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="warm" id="warm"><span class="warm-ring"></span><span class="warm-text">正在磨刻面</span></div>
+
+    <div class="hero-ui">
+      <div class="topline">
+        <span>SIX FACETS / CAPABILITY INDEX</span>
+        <span class="topline-right">不是许愿石 · 是六个动作</span>
+      </div>
+
+      <nav class="rail" id="rail" aria-label="六种能力"></nav>
+
+      <section class="focus-title" aria-live="polite">
+        <span class="big-index" id="bigIndex">01</span>
+        <h1 id="gemName">速写</h1>
+        <p class="gem-en" id="gemEn">DRAFT</p>
+      </section>
+
+      <aside class="dossier" id="dossier">
+        <div class="dossier-top">
+          <span id="dossierNo">FACET 01 / 06</span>
+          <span class="accent-dot" id="accentDot"></span>
+        </div>
+        <p class="dossier-line" id="gemLine">把散在聊天里的要点，收成一页能发的稿。</p>
+        <div class="prompt">
+          <span class="prompt-label">你可以这样问</span>
+          <p id="gemPrompt">把这份访谈整理成 600 字，保留原话，不要总结腔。</p>
+        </div>
+        <p class="fit" id="gemFit">适合：访谈、会议记录、长文初稿</p>
+        <div class="controls">
+          <button class="ctrl" id="prev" type="button" aria-label="上一颗">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="ctrl ctrl-play" id="play" type="button" aria-label="暂停自动轮播" aria-pressed="false">
+            <svg class="ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7V5z" fill="currentColor"/></svg>
+          </button>
+          <button class="ctrl" id="next" type="button" aria-label="下一颗">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="progress" id="progress" aria-hidden="true"></div>
+          <span class="ctrl-note" id="ctrlNote">自动 6s</span>
+        </div>
+      </aside>
+
+      <div class="bottom-line">
+        <span>DRAG / SWIPE / ← →</span>
+        <span>GROKKO · GROK BOT'S ANIME DESK</span>
+      </div>
+    </div>
+  </main>
+
+  <section class="notes" id="notes">
+    <div class="notes-head">
+      <span class="micro">HOW TO READ THIS</span>
+      <h2>六颗只是切面，<br>不是能力排行榜。</h2>
+      <img class="grokko-chip" src="../assets/grokko/avatar.webp" alt="Grokko 头像" width="64" height="64">
+    </div>
+    <div class="note-list">
+      <article class="note">
+        <span class="note-no">01</span>
+        <h3>一次只做一件事</h3>
+        <p>每颗只对应一个动作。写稿就是写稿，不改图；核源就是核源，不顺手编故事。把任务收窄，结果才稳。</p>
+      </article>
+      <article class="note">
+        <span class="note-no">02</span>
+        <h3>先要结果，再要形式</h3>
+        <p>先说清要交什么：一页稿、一张表、三张关键帧。形式是后面的事，别一上来就“做个大片”。</p>
+      </article>
+      <article class="note">
+        <span class="note-no">03</span>
+        <h3>查不到就说查不到</h3>
+        <p>数字、来源、时间点，能核就核；核不到就标出来。页面不写未核实的星标、排行和用户评价。</p>
+      </article>
+    </div>
+    <footer class="notes-foot">
+      <p>Grokko 是 Grok Bot 的二次元化身，不是 xAI / Grok 官方账号。</p>
+      <p>六种能力是日常用法，不是模型能力上限；页面不构成任何收益或效果承诺。</p>
+    </footer>
+  </section>
+</div>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

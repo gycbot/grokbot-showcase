@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-CN" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07060a">
+<meta name="color-scheme" content="dark">
+<title>GROKKO / 全息档案 · 能力投影</title>
+<meta name="description" content="Grokko 的全息能力档案：写、搭、查、跑、读、做图。六种模式共用一束光。角色页，非官方。">
+<meta property="og:title" content="GROKKO / 全息档案">
+<meta property="og:description" content="可爱是外壳。活是干完的。六种能力模式，一份会自己转的档案。">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="stylesheet" href="css/main.css">
+<script>
+  document.documentElement.classList.remove('no-js');
+  document.documentElement.classList.add('js');
+  window.__ERRORS__ = [];
+  window.addEventListener('error', function (e) {
+    window.__ERRORS__.push(String((e && (e.message || e.error)) || 'error'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e && e.reason;
+    window.__ERRORS__.push(String((r && (r.message || r)) || 'rejection'));
+  });
+</script>
+</head>
+<body>
+<a class="skip" href="#records">跳到能力档案</a>
+
+<div class="boot" id="boot" aria-label="投影加载">
+  <div class="boot-inner">
+    <div class="boot-brand">GROKKO <span>/ HOLO ARCHIVE</span></div>
+    <ul id="boot-log">
+      <li data-i="0"><span>LINK</span><b>GROKKO / ARCHIVE</b></li>
+      <li data-i="1"><span>SIGNAL</span><b>STABLE</b></li>
+      <li data-i="2"><span>LAYERS</span><b>PORTRAIT / SIGIL / DUST</b></li>
+      <li data-i="3"><span>STATUS</span><b>READY</b></li>
+    </ul>
+    <div class="boot-bar"><i id="boot-bar"></i></div>
+  </div>
+  <button class="boot-skip" id="boot-skip" type="button">跳过</button>
+</div>
+
+<header class="topbar">
+  <a class="brand" href="../index.html" aria-label="回到档案索引">
+    <span class="brand-mark" aria-hidden="true">G</span>
+    <span>GROKKO</span><span class="brand-sub">/ HOLO ARCHIVE</span>
+  </a>
+  <div class="topbar-meta">
+    <span class="dot" aria-hidden="true"></span>
+    <span>档案 03</span><span class="sep">/</span><span>能力投影</span>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-bg" aria-hidden="true">
+      <img src="assets/desk-bg.webp" alt="" width="1280" height="720" decoding="async">
+    </div>
+    <div class="hero-inner">
+      <p class="eyebrow rv"><span>ARCHIVE 03</span> GROKKO / PERSONA FILE</p>
+      <h1 id="hero-title">
+        <span class="line rv">可爱是外壳。</span>
+        <span class="line dim rv">活是<span class="accent">干完</span>的。</span>
+      </h1>
+      <p class="lede rv">Grokko 是 Grok Bot 的二次元桌面化身。<b>这个页面不聊“全能”</b>，只摊开六件她真能接的事：写、搭、查、跑、读、做图。</p>
+      <div class="hero-actions rv">
+        <a class="btn primary" href="#stage">看投影 <span class="ar" aria-hidden="true">↘</span></a>
+        <a class="btn ghost" href="#records">读档案</a>
+      </div>
+      <div class="hero-id rv">
+        <img src="assets/grokko-avatar.webp" alt="Grokko 头像" width="46" height="46" decoding="async">
+        <div class="who">
+          <b>GROKKO</b>
+          <small>Grok Bot 的二次元桌面化身</small>
+        </div>
+        <span class="sig"><i aria-hidden="true"></i>SIGNAL / STABLE</span>
+      </div>
+    </div>
+    <aside class="hero-card" aria-label="Grokko 角色档案速览">
+      <div class="hc-top"><span>SUBJECT / 03</span><span class="hc-live"><i aria-hidden="true"></i>LIVE</span></div>
+      <div class="hc-face"><img src="assets/grokko-avatar.webp" alt="Grokko 头像" width="480" height="480" decoding="async"></div>
+      <div class="hc-name">GROKKO <span>档案体</span></div>
+      <dl>
+        <div><dt>瞳</dt><dd>异色 / 白色 X 高光</dd></div>
+        <div><dt>发</dt><dd>短 bob / 霓虹紫发梢</dd></div>
+        <div><dt>饰</dt><dd>X 发卡 / 小火箭 / 球头</dd></div>
+      </dl>
+      <div class="hc-foot"><span>HOLO PASS / 03</span><span>STABLE</span></div>
+    </aside>
+    <div class="hero-foot" aria-hidden="true">
+      <span>SCROLL TO PROJECT</span><span class="line"></span><span>390 / 1440</span>
+    </div>
+  </section>
+
+  <section class="section stage-section" id="stage" aria-labelledby="stage-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">01 / PROJECTION</p>
+          <h2 id="stage-title">一束光，六种干法。</h2>
+        </div>
+        <p class="section-note">点条目切投影。<b>自动轮播会在你动手后停 20 秒</b>；页面切走就停，不空转。</p>
+      </div>
+
+      <div class="stage-shell reveal">
+        <div class="stage-main">
+          <div class="stage-canvas-wrap" id="stage-wrap">
+            <canvas id="holo" aria-hidden="true"></canvas>
+            <div class="stage-rail" aria-hidden="true"><span>PROJECTION / 03</span><i></i><span>SUBJECT — GROKKO</span></div>
+            <div class="stage-hud top" aria-hidden="true">
+              <span class="hud-dot"></span><span>LINK / STABLE</span>
+              <span class="hud-right">HOLO-PASS 03</span>
+            </div>
+            <div class="stage-hud bottom" aria-hidden="true">
+              <span>PORTRAIT / REALTIME</span><span>SCAN / 30</span>
+            </div>
+            <div class="stage-face" aria-hidden="true"><img src="assets/grokko-avatar.webp" alt="" width="480" height="480" decoding="async"><span>SUBJECT</span></div>
+            <div class="stage-float" aria-hidden="true">
+              <span class="float-idx" id="float-idx">01</span>
+              <div><b id="float-title">写清楚</b><span id="float-tag">WRITE</span></div>
+            </div>
+            <div class="stage-fallback" id="stage-fallback" hidden>
+              <div>
+                <img src="assets/grokko-holo.webp" alt="Grokko 全息立绘" width="864" height="1152">
+                <p>这台设备没有可用的 WebGL，先给你看静态投影。档案内容不受影响。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mode-tabs" role="tablist" aria-label="能力模式">
+            <button class="mode" type="button" role="tab" aria-selected="true" aria-controls="stage-info" data-mode="0"><i>01</i><span>写清楚</span><em>WRITE</em></button>
+            <button class="mode" type="button" role="tab" aria-selected="false" aria-controls="stage-info" data-mode="1"><i>02</i><span>搭页面</span><em>BUILD</em></button>
+            <button class="mode" type="button" role="tab" aria-selected="false" aria-controls="stage-info" data-mode="2"><i>03</i><span>查资料</span><em>RESEARCH</em></button>
+            <button class="mode" type="button" role="tab" aria-selected="false" aria-controls="stage-info" data-mode="3"><i>04</i><span>跑工作流</span><em>FLOW</em></button>
+            <button class="mode" type="button" role="tab" aria-selected="false" aria-controls="stage-info" data-mode="4"><i>05</i><span>读图表</span><em>READ</em></button>
+            <button class="mode" type="button" role="tab" aria-selected="false" aria-controls="stage-info" data-mode="5"><i>06</i><span>做视觉</span><em>MAKE</em></button>
+          </div>
+        </div>
+
+        <aside class="stage-info" id="stage-info" role="tabpanel" aria-live="polite" aria-label="当前能力档案">
+          <div class="si-head"><span id="si-index">01 / 06</span><span id="si-tag">WRITE</span></div>
+          <h3 id="si-title">写清楚</h3>
+          <p class="si-line" id="si-line">把散点、会议记录、一堆链接，压成能直接发的稿。</p>
+          <dl>
+            <div><dt>产出</dt><dd id="si-out">一篇有标题、有开头、有结尾的成稿；不是“要点罗列”。</dd></div>
+            <div><dt>先问</dt><dd id="si-ask">给谁看、发在哪、要多长、哪句必须保留。</dd></div>
+            <div><dt>不做</dt><dd id="si-not">不编引语，不把没核过的数字写进正文。</dd></div>
+          </dl>
+          <div class="si-cycle" aria-hidden="true"><span id="cycle-bar"></span></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section records" id="records" aria-labelledby="records-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">02 / CAPABILITY FILES</p>
+          <h2 id="records-title">六份档案，按“能交付”排。</h2>
+        </div>
+        <p class="section-note">不按热度排，也不写“全能”。<b>每份都带产出、先问、不做。</b></p>
+      </div>
+
+      <div class="record-list">
+        <article class="record" id="rec-write">
+          <div class="rec-no">01</div>
+          <div class="rec-body">
+            <div class="rec-top"><h3>写清楚</h3><span class="rec-tag">WRITE / 定稿</span></div>
+            <p>把散点、会议记录、一堆链接，压成能直接发的稿。不是帮你“润色”，是先把结构立住。</p>
+            <dl class="rec-meta">
+              <div><dt>产出</dt><dd>标题、开头、正文、结尾；段落长短有变化。</dd></div>
+              <div><dt>先问</dt><dd>给谁看、发在哪、要多长、哪句必须保留。</dd></div>
+              <div><dt>不做</dt><dd>不编引语，不把没核过的数字写进正文。</dd></div>
+            </dl>
+            <button class="rec-cta" type="button" data-jump="0">在投影里看 <span class="ar" aria-hidden="true">↗</span></button>
+          </div>
+        </article>
+
+        <article class="record" id="rec-build">
+          <div class="rec-no">02</div>
+          <div class="rec-body">
+            <div class="rec-top"><h3>搭页面</h3><span class="rec-tag">BUILD / 可跑</span></div>
+            <p>从参考到能跑的响应式页面，手机先过。不是“给你一段代码”，是把第一屏、状态、空页都想到。</p>
+            <dl class="rec-meta">
+              <div><dt>产出</dt><dd>可打开的 HTML/CSS/JS；桌面和 390 宽都不横溢。</dd></div>
+              <div><dt>先问</dt><dd>给谁用、第一屏要看到什么、有没有必须用的素材。</dd></div>
+              <div><dt>不做</dt><dd>不套模板充原创，不把“能打开”说成“已上线”。</dd></div>
+            </dl>
+            <button class="rec-cta" type="button" data-jump="1">在投影里看 <span class="ar" aria-hidden="true">↗</span></button>
+          </div>
+        </article>
+
+        <article class="record" id="rec-research">
+          <div class="rec-no">03</div>
+          <div class="rec-body">
+            <div class="rec-top"><h3>查资料</h3><span class="rec-tag">RESEARCH / 可核</span></div>
+            <p>先找源，再下结论；找不到就写找不到。标题卡不算证据，截图也不等于原文。</p>
+            <dl class="rec-meta">
+              <div><dt>产出</dt><dd>一条能点回去的证据链，和一段说人话的结论。</dd></div>
+              <div><dt>先问</dt><dd>要几手源、时间范围、哪些说法必须核。</dd></div>
+              <div><dt>不做</dt><dd>不拿标题卡当证据，不把推断写成事实。</dd></div>
+            </dl>
+            <button class="rec-cta" type="button" data-jump="2">在投影里看 <span class="ar" aria-hidden="true">↗</span></button>
+          </div>
+        </article>
+
+        <article class="record" id="rec-flow">
+          <div class="rec-no">04</div>
+          <div class="rec-body">
+            <div class="rec-top"><h3>跑工作流</h3><span class="rec-tag">FLOW / 可复用</span></div>
+            <p>把每周重复的步骤，串成一条能复用的线。每一步都知道输入是什么、失败停在哪。</p>
+            <dl class="rec-meta">
+              <div><dt>产出</dt><dd>一套步骤、每步的输入输出、失败时的停点。</dd></div>
+              <div><dt>先问</dt><dd>哪一步最烦、哪一步绝不能自动、谁来按最后一下。</dd></div>
+              <div><dt>不做</dt><dd>不在没有确认的情况下替你发、替你删、替你登录。</dd></div>
+            </dl>
+            <button class="rec-cta" type="button" data-jump="3">在投影里看 <span class="ar" aria-hidden="true">↗</span></button>
+          </div>
+        </article>
+
+        <article class="record" id="rec-read">
+          <div class="rec-no">05</div>
+          <div class="rec-body">
+            <div class="rec-top"><h3>读图表</h3><span class="rec-tag">READ / 能转述</span></div>
+            <p>把财报、表格、长图，读成几句能转述的话。每个数字都能回到原表，口径先对齐。</p>
+            <dl class="rec-meta">
+              <div><dt>产出</dt><dd>三到五句结论；关键数字带出处，不堆术语。</dd></div>
+              <div><dt>先问</dt><dd>看的是哪一期、口径是什么、跟谁比。</dd></div>
+              <div><dt>不做</dt><dd>不把“同比”说成“增长”，不给你买卖建议。</dd></div>
+            </dl>
+            <button class="rec-cta" type="button" data-jump="4">在投影里看 <span class="ar" aria-hidden="true">↗</span></button>
+          </div>
+        </article>
+
+        <article class="record" id="rec-make">
+          <div class="rec-no">06</div>
+          <div class="rec-body">
+            <div class="rec-top"><h3>做视觉</h3><span class="rec-tag">MAKE / 可复用</span></div>
+            <p>把一种风格锁成一套能复用的资产，而不是一张好看的图。色板、字号、组件状态都要能交接。</p>
+            <dl class="rec-meta">
+              <div><dt>产出</dt><dd>色板、字号层级、组件状态、能交付的源文件。</dd></div>
+              <div><dt>先问</dt><dd>给哪个平台、要不要动、有没有不能动的角色设定。</dd></div>
+              <div><dt>不做</dt><dd>不混用两套画风，不拿别人的角色图当自己的。</dd></div>
+            </dl>
+            <button class="rec-cta" type="button" data-jump="5">在投影里看 <span class="ar" aria-hidden="true">↗</span></button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="flow" aria-labelledby="flow-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">03 / HANDOFF</p>
+          <h2 id="flow-title">她怎么接活。</h2>
+        </div>
+        <p class="section-note">先问清楚，再动手。<b>能交付的，才算做完。</b></p>
+      </div>
+
+      <div class="flow-grid">
+        <div class="steps reveal">
+          <div class="step">
+            <div class="step-n">01</div>
+            <div><h3>给目标</h3><p>一句话说清“做完是什么样”，附上不能动的约束。越具体，返工越少。</p></div>
+          </div>
+          <div class="step">
+            <div class="step-n">02</div>
+            <div><h3>拆小步</h3><p>每步都有可检查的产出；不确定的地方先标出来，不硬编一个答案。</p></div>
+          </div>
+          <div class="step">
+            <div class="step-n">03</div>
+            <div><h3>端回来</h3><p>能直接用的文件，加一份“哪里还没做”的清单。不把半成品说成完成。</p></div>
+          </div>
+        </div>
+
+        <div class="ticket reveal">
+          <div class="ticket-head"><span>工单 03 / 示意</span><b>示意 · 非实时</b></div>
+          <span class="tk-label">你丢过来的</span>
+          <p class="tk-q">把这周的 AI 新闻压成 5 条能发的短帖，标好源。别写我没核过的数。</p>
+          <div class="tk-arrow" aria-hidden="true">↓</div>
+          <span class="tk-label">我端回去的</span>
+          <p class="tk-a">5 条短帖，每条 2–3 句；每条后面跟一个原始链接；第 3 条有两个说法对不上，标了<em>“待核”</em>，没有硬写。</p>
+          <figure class="sticker">
+            <img src="assets/q-laptop.webp" alt="Q 版 Grokko 在笔记本电脑前工作" width="384" height="384" loading="lazy" decoding="async">
+            <figcaption>DESK MODE</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section boundary" id="boundary" aria-labelledby="boundary-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="kicker">04 / LIMITS</p>
+          <h2 id="boundary-title">不接的活，也写进档案。</h2>
+        </div>
+        <p class="section-note">把不能做的写清楚，<b>比把能做的吹大更有用。</b></p>
+      </div>
+
+      <div class="rules reveal">
+        <div class="rule"><div class="rule-n">01</div><div><h3>不编来源</h3><p>找不到原文就写“没找到”。不拿截图、标题卡、二手转述冒充一手证据。</p></div></div>
+        <div class="rule"><div class="rule-n">02</div><div><h3>不装官方</h3><p>Grokko 是角色，不是 xAI / Grok 的官方账号。页面里不出现伪官方徽记或口吻。</p></div></div>
+        <div class="rule"><div class="rule-n">03</div><div><h3>不荐股</h3><p>读财报是读事实，不是给买卖建议。不承诺收益，不写“稳赚”。</p></div></div>
+        <div class="rule"><div class="rule-n">04</div><div><h3>不替你发</h3><p>可以写到能发的程度；按下发布键的人，必须是你。</p></div></div>
+      </div>
+
+      <div class="boundary-foot reveal">
+        <img class="sticker" src="assets/q-sideeye.webp" alt="Q 版 Grokko 侧目表情" width="384" height="384" loading="lazy" decoding="async">
+        <p><b>“可爱是外壳”不是免死金牌。</b>该核的源、该标的待核、该停的手，一样不少。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-in">
+    <div>
+      <div class="f-brand">GROKKO <span>/ HOLO ARCHIVE</span></div>
+      <p class="f-note">Grokko 是 Grok Bot 的二次元化身；这是角色页，不是 xAI / Grok 官方页面。</p>
+    </div>
+    <nav class="f-links" aria-label="页脚导航">
+      <a href="../index.html">档案索引</a>
+      <a href="#stage">回到投影</a>
+      <a href="#records">能力档案</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

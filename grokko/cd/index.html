@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Grokko · 能力碟架</title>
+<meta name="description" content="Grokko 的三张能力专辑：写稿与拆解、动效网页、研究与例程。打开盒盖，抬起唱片，看看 Grok Bot 平时怎么干活。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%230b0910'/%3E%3Ccircle cx='20' cy='21' r='10' fill='none' stroke='%23f2ede4' stroke-width='1.5'/%3E%3Ccircle cx='16.5' cy='20' r='1.4' fill='%23f2ede4'/%3E%3Ccircle cx='23.5' cy='20' r='1.4' fill='%23f2ede4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="preload" href="assets/cover-01.webp" as="image">
+<link rel="preload" href="assets/disc-01.webp" as="image">
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="app">
+  <header class="masthead">
+    <a class="brand" href="../index.html" aria-label="返回 Grokko 合集">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="12.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="16" cy="19" r="1.7" fill="currentColor"/>
+        <circle cx="24" cy="19" r="1.7" fill="currentColor"/>
+        <path d="M8 8l7 7M15 8l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-word">Grokko</span>
+      <span class="brand-sub">/ capability archive</span>
+    </a>
+    <div class="mast-right">
+      <span class="live"><i></i> auto loop</span>
+      <span class="mast-code">GKK–CD / 2026</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" id="stage" aria-label="Grokko 光碟盒三维演示">
+      <canvas id="scene" aria-hidden="true"></canvas>
+
+      <div class="stage-ui stage-top">
+        <div>
+          <span class="micro">SERIES / DESK OBJECTS</span>
+          <span class="stage-title">CAPABILITY DISC</span>
+        </div>
+        <div class="stage-count"><span id="volNow">01</span><span class="dim">/ 03</span></div>
+      </div>
+
+      <div class="stage-ui stage-bottom">
+        <div class="phase">
+          <span class="phase-dot"></span>
+          <span id="phaseText">开盒</span>
+        </div>
+        <div class="side">
+          <span id="sideA" class="on">LABEL</span>
+          <span class="side-line"></span>
+          <span id="sideB">DATA</span>
+        </div>
+      </div>
+
+      <p class="hint">自动播放 · 空格暂停 · 拖动可微调视角</p>
+      <div class="warm" id="warm">
+        <span class="warm-ring"></span>
+        <span class="warm-text">正在装碟</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-inner">
+        <div class="eyebrow"><span id="volLabel">VOL. 01</span> <span class="eyebrow-line"></span> <span>GROK BOT / DESK SERIES</span></div>
+        <h1>把能力<br>压成一张碟</h1>
+        <p class="lede">Grokko 是 Grok Bot 的桌面化身。这里没有演示视频，只有三张能放的能力专辑；盒盖会自己打开，唱片会自己翻面。</p>
+
+        <div class="album" id="albumInfo" aria-live="polite">
+          <div class="album-head">
+            <span class="album-no" id="albumNo">01</span>
+            <div>
+              <h2 id="albumTitle">写稿与拆解</h2>
+              <p class="album-en" id="albumEn">DRAFT / STRUCTURE</p>
+            </div>
+          </div>
+          <p class="album-line" id="albumLine">把散在聊天里的要点，收成一页能发的稿。</p>
+          <ol class="tracks" id="tracks">
+            <li><span>01</span><p>起稿：把散点收成一页</p></li>
+            <li><span>02</span><p>拆解：长文拆成三步</p></li>
+            <li><span>03</span><p>改写：同一件事三种说法</p></li>
+          </ol>
+        </div>
+
+        <div class="controls">
+          <button class="ctrl" id="prev" type="button" aria-label="上一张专辑">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="ctrl ctrl-play" id="play" type="button" aria-label="暂停自动播放" aria-pressed="false">
+            <svg class="ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7V5z" fill="currentColor"/></svg>
+          </button>
+          <button class="ctrl" id="next" type="button" aria-label="下一张专辑">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="progress" id="progress" aria-hidden="true">
+            <span class="seg on"></span><span class="seg"></span><span class="seg"></span>
+          </div>
+          <span class="ctrl-note" id="ctrlNote">自动循环</span>
+        </div>
+
+        <footer class="panel-foot">
+          <p>三张碟，三种日常动作。不是能力排行榜，也不代表官方。</p>
+          <p class="fine">Grokko 是 Grok Bot 的二次元化身，不是 xAI / Grok 官方账号。</p>
+        </footer>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script src="../vendor/gsap.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
